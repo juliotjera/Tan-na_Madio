@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# base PGlite locale et photos envoyées
+backend/.donnees/
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# compilation
+frontend/dist/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
