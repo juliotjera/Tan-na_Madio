@@ -82,10 +82,10 @@ export default function Zones() {
           <Carte className="h-[420px] xl:h-[600px]" zoom={14}>
             <CalqueZones zones={zones.donnees?.filter((z) => z.id !== enEdition?.id || points.length < 3)} surbrillance={survol ?? enEdition?.id} />
             {trace && <AuClic onClic={(p) => setPoints((pts) => [...pts, p])} />}
-            {points.length >= 3 && <Polygon positions={points} pathOptions={{ color: '#F59E0B', weight: 2.5, fillOpacity: 0.15 }} />}
-            {points.length === 2 && <Polyline positions={points} pathOptions={{ color: '#F59E0B', weight: 2.5 }} />}
+            {points.length >= 3 && <Polygon positions={points} pathOptions={{ color: '#E8A317', weight: 2.5, fillOpacity: 0.15 }} />}
+            {points.length === 2 && <Polyline positions={points} pathOptions={{ color: '#E8A317', weight: 2.5 }} />}
             {points.map((p, i) => (
-              <CircleMarker key={i} center={p} radius={5} pathOptions={{ color: '#FFFFFF', weight: 2, fillColor: '#B45309', fillOpacity: 1 }} />
+              <CircleMarker key={i} center={p} radius={5} pathOptions={{ color: '#FFFFFF', weight: 2, fillColor: '#9A6200', fillOpacity: 1 }} />
             ))}
             {enEdition && <Cadrer points={[[enEdition.centre_lat, enEdition.centre_lng]]} max={15} />}
           </Carte>
@@ -118,7 +118,7 @@ export default function Zones() {
             </Champ>
             {edition.id && (
               <label className="flex items-center gap-3 text-sm">
-                <input type="checkbox" className="h-4 w-4 accent-foret-700" checked={f.actif} onChange={(e) => setF({ ...f, actif: e.target.checked })} />
+                <input type="checkbox" className="h-4 w-4 accent-bleu" checked={f.actif} onChange={(e) => setF({ ...f, actif: e.target.checked })} />
                 Zone active (les nouveaux signalements y sont rattachés)
               </label>
             )}
@@ -139,7 +139,7 @@ export default function Zones() {
               <li key={z.id} className={`carte p-4 transition ${z.actif ? '' : 'opacity-60'}`} onMouseEnter={() => setSurvol(z.id)} onMouseLeave={() => setSurvol(null)}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-titre text-lg font-semibold text-foret">
+                    <p className="font-titre text-lg font-semibold text-nuit">
                       {z.nom}
                       {!z.actif && <span className="ml-2 text-xs font-normal text-encre-pale">inactive</span>}
                     </p>

@@ -1,4 +1,5 @@
 // Chauffeur : la prochaine tournée en grand, puis l'historique
+import { Plaque } from '../../components/layout/Logo'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock, MapPin, Route, Truck } from 'lucide-react'
@@ -38,7 +39,7 @@ export default function MesTournees() {
         <p className="mt-1 text-encre-doux">
           {moi.donnees?.camion_immatriculation ? (
             <>
-              Votre camion : <span className="font-semibold text-foret">{moi.donnees.camion_immatriculation}</span>
+              Votre camion : <Plaque numero={moi.donnees.camion_immatriculation} className="ml-1 align-middle" />
             </>
           ) : (
             'Aucun camion ne vous est affecté pour le moment.'
@@ -54,36 +55,36 @@ export default function MesTournees() {
         </div>
       )}
       {prochaine && (
-        <Link to={`/chauffeur/tournees/${prochaine.id}`} className="block overflow-hidden rounded-carte bg-foret text-white shadow-flotte transition hover:bg-foret-800">
+        <Link to={`/chauffeur/tournees/${prochaine.id}`} className="block overflow-hidden rounded-carte bg-nuit text-white shadow-flotte transition hover:bg-nuit-800">
           <div className="p-6 sm:p-7">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm text-feuille-100/75">{prochaine.statut === 'en_cours' ? 'Tournée en cours' : 'Prochaine tournée'}</span>
+              <span className="text-sm text-bleu-100/75">{prochaine.statut === 'en_cours' ? 'Tournée en cours' : 'Prochaine tournée'}</span>
               <StatutBadge statut={prochaine.statut} type="collecte" />
             </div>
             <p className="mt-2 font-titre text-[30px] font-semibold leading-tight sm:text-[36px]">{jourHeure(prochaine.date_planifiee)}</p>
             <div className="mt-5 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
               <span className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-feuille" /> {pluriel(prochaine.nb_points, 'arrêt')}
+                <MapPin className="h-4 w-4 text-ciel" /> {pluriel(prochaine.nb_points, 'arrêt')}
               </span>
               <span className="flex items-center gap-2">
-                <Route className="h-4 w-4 text-feuille" /> {km(prochaine.distance_km)}
+                <Route className="h-4 w-4 text-ciel" /> {km(prochaine.distance_km)}
               </span>
               <span className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-feuille" /> {duree(prochaine.itineraire?.duree_estimee_min)}
+                <Clock className="h-4 w-4 text-ciel" /> {duree(prochaine.itineraire?.duree_estimee_min)}
               </span>
               <span className="flex items-center gap-2">
-                <Truck className="h-4 w-4 text-feuille" /> {prochaine.zone_nom ?? 'Plusieurs zones'}
+                <Truck className="h-4 w-4 text-ciel" /> {prochaine.zone_nom ?? 'Plusieurs zones'}
               </span>
             </div>
             {prochaine.statut === 'en_cours' && (
               <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-feuille" style={{ width: `${(prochaine.nb_faits / Math.max(1, prochaine.nb_points)) * 100}%` }} />
+                <div className="h-full rounded-full bg-ciel" style={{ width: `${(prochaine.nb_faits / Math.max(1, prochaine.nb_points)) * 100}%` }} />
               </div>
             )}
           </div>
           <div className="flex items-center justify-between bg-white/5 px-6 py-4 font-semibold sm:px-7">
             {prochaine.statut === 'en_cours' ? `Reprendre la tournée (${prochaine.nb_faits}/${prochaine.nb_points})` : 'Voir l’itinéraire'}
-            <ArrowRight className="h-5 w-5 text-feuille" />
+            <ArrowRight className="h-5 w-5 text-ciel" />
           </div>
         </Link>
       )}
@@ -105,7 +106,7 @@ export default function MesTournees() {
         <ul className="space-y-3">
           {liste.donnees?.collectes.map((c) => (
             <li key={c.id}>
-              <Link to={`/chauffeur/tournees/${c.id}`} className="carte flex items-center justify-between gap-4 p-4 transition hover:border-foret-700/30">
+              <Link to={`/chauffeur/tournees/${c.id}`} className="carte flex items-center justify-between gap-4 p-4 transition hover:border-bleu/30">
                 <div className="min-w-0">
                   <p className="font-medium">{jourHeure(c.date_planifiee)}</p>
                   <p className="text-sm text-encre-pale">

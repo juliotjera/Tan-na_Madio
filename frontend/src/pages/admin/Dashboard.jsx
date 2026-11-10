@@ -29,7 +29,7 @@ export default function AdminDashboard() {
       {s && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           <Chiffre icone={Inbox} valeur={nombre(s.signalements)} libelle="Signalements" detail={`${s.en_attente} en attente de validation`} />
-          <Chiffre icone={Percent} ton="foret" valeur={`${s.taux_reussite.toLocaleString('fr-FR')} %`} libelle="Taux de ramassage" detail="Signalements retenus déjà collectés" />
+          <Chiffre icone={Percent} ton="nuit" valeur={`${s.taux_reussite.toLocaleString('fr-FR')} %`} libelle="Taux de ramassage" detail="Signalements retenus déjà collectés" />
           <Chiffre icone={Clock} ton="ambre" valeur={s.delai_moyen_heures != null ? `${s.delai_moyen_heures.toLocaleString('fr-FR')} h` : '—'} libelle="Délai de validation" detail="En moyenne" />
           <Chiffre icone={Scale} valeur={kg(s.poids_total_kg)} libelle="Déchets collectés" detail={`${km(s.distance_totale_km)} parcourus`} />
           <Chiffre icone={Users} valeur={nombre(s.utilisateurs)} libelle="Utilisateurs" detail={`${s.camions} camions, ${s.collectes} tournées`} />

@@ -1,4 +1,5 @@
 // Agent : état de la flotte (la gestion est réservée à l'administrateur)
+import { Plaque } from '../../components/layout/Logo'
 import { Truck, UserRound, Wrench } from 'lucide-react'
 import { listerCamions } from '../../api'
 import { useDonnees } from '../../hooks/useDonnees'
@@ -23,8 +24,8 @@ export default function Camions() {
           <li key={c.id} className="carte p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-titre text-xl font-semibold text-foret">{c.immatriculation}</p>
-                <p className="text-sm text-encre-doux">{c.modele ?? 'Modèle non renseigné'}</p>
+                <Plaque numero={c.immatriculation} />
+                <p className="mt-2 text-sm text-encre-doux">{c.modele ?? 'Modèle non renseigné'}</p>
               </div>
               <StatutBadge statut={c.statut} type="camion" />
             </div>

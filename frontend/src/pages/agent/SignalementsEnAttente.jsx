@@ -96,10 +96,10 @@ export default function SignalementsEnAttente() {
             {signalements.map((s) => (
               <li key={s.id}>
                 <div
-                  className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-feuille-600' : 'hover:border-foret-700/30'}`}
+                  className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-bleu-500' : 'hover:border-bleu/30'}`}
                   onClick={() => setChoisi(s)}
                 >
-                  <div className="h-44 shrink-0 bg-feuille-50 sm:h-auto sm:w-44">
+                  <div className="h-44 shrink-0 bg-bleu-50 sm:h-auto sm:w-44">
                     {s.photo_url ? (
                       <img src={s.photo_url} alt="Photo du dépôt" className="h-full w-full object-cover" loading="lazy" />
                     ) : (
@@ -123,7 +123,7 @@ export default function SignalementsEnAttente() {
                     <div className="mt-auto flex flex-wrap gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
                       {s.statut === 'en_attente' && (
                         <>
-                          <button type="button" className="btn-vert min-h-[38px]" disabled={action === s.id} onClick={() => decider(s, 'valide')}>
+                          <button type="button" className="btn-accent min-h-[38px]" disabled={action === s.id} onClick={() => decider(s, 'valide')}>
                             {action === s.id ? <Spinner className="h-4 w-4 text-current" /> : <Check className="h-4 w-4" />}
                             Valider
                           </button>

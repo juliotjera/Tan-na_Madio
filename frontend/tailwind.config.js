@@ -1,26 +1,36 @@
 /** @type {import('tailwindcss').Config} */
+// Identité « signalisation urbaine » :
+// - couleurs froides (nuit, bleu signalisation) = l'action de la commune (validation, tournées, collecte) ;
+// - couleurs chaudes (ambre, orange, rouge) = le problème (déchets, urgences). Le rouge est réservé au critique.
 export default {
   content: { relative: true, files: ['./index.html', './src/**/*.{js,jsx}'] },
   theme: {
     extend: {
       colors: {
-        // Palette du rapport : forêt profonde, vert d'action, ambre d'attention, voile menthe
-        foret: { DEFAULT: '#052E16', 900: '#052E16', 800: '#0A3D20', 700: '#14532D', 600: '#1B6B3A' },
-        feuille: { DEFAULT: '#22C55E', 600: '#16A34A', 700: '#15803D', 100: '#DCFCE7', 50: '#F0FDF4' },
-        ambre: { DEFAULT: '#F59E0B', 700: '#B45309', 100: '#FEF3C7', 50: '#FFFBEB' },
-        menthe: '#F0FDF4',
-        encre: { DEFAULT: '#14231A', doux: '#4B5E52', pale: '#7D8F83' },
-        trait: '#D9E6DD',
-        alerte: { DEFAULT: '#DC2626', 50: '#FEF2F2', 100: '#FEE2E2', 700: '#B91C1C' },
+        nuit: { DEFAULT: '#0C1A2B', 800: '#13263D', 700: '#1B3452' },
+        bleu: {
+          DEFAULT: '#0E518D', // bleu signalisation (proche RAL 5017)
+          50: '#EEF4FA',
+          100: '#DCE8F4',
+          300: '#8DB5DE',
+          500: '#2A6DB0',
+          700: '#0A3D6B',
+        },
+        ciel: '#8EC5FF', // repère clair sur fond sombre
+        papier: '#F3F5F8',
+        encre: { DEFAULT: '#16212E', doux: '#4F5D6E', pale: '#8592A3' },
+        trait: '#DCE2EA',
+        ambre: { DEFAULT: '#E8A317', 700: '#9A6200', 100: '#FCEFC9', 50: '#FFF8E6' },
+        alerte: { DEFAULT: '#D92D20', 50: '#FEF3F2', 100: '#FEE4E2', 700: '#B42318' },
       },
       fontFamily: {
-        titre: ['"Bricolage Grotesque Variable"', 'system-ui', 'sans-serif'],
-        sans: ['"Public Sans Variable"', 'system-ui', 'sans-serif'],
+        titre: ['"Archivo Variable"', 'system-ui', 'sans-serif'],
+        sans: ['"Archivo Variable"', 'system-ui', 'sans-serif'],
       },
-      borderRadius: { carte: '14px' },
+      borderRadius: { carte: '10px' },
       boxShadow: {
-        carte: '0 1px 2px rgba(5, 46, 22, 0.06), 0 1px 1px rgba(5, 46, 22, 0.04)',
-        flotte: '0 12px 32px -12px rgba(5, 46, 22, 0.35)',
+        carte: '0 1px 0 rgba(12, 26, 43, 0.04)',
+        flotte: '0 16px 40px -16px rgba(12, 26, 43, 0.45)',
       },
     },
   },

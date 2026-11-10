@@ -23,22 +23,22 @@ export function CartePoints({ points }) {
   const { actuel, suivant, progression } = palier(points)
   return (
     <div className="carte overflow-hidden">
-      <div className="bg-foret p-5 text-white">
+      <div className="bg-nuit p-5 text-white">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-feuille-100/75">Vos points éco</p>
-          <Leaf className="h-5 w-5 text-feuille" />
+          <p className="text-sm text-bleu-100/75">Vos points éco</p>
+          <Leaf className="h-5 w-5 text-ciel" />
         </div>
         <p className="chiffre mt-1 text-[44px] leading-none text-white">{points}</p>
-        <p className="mt-2 font-titre font-semibold text-feuille">{actuel.nom}</p>
+        <p className="mt-2 font-titre font-semibold text-ciel">{actuel.nom}</p>
       </div>
       <div className="p-5">
         {suivant ? (
           <>
-            <div className="h-2 overflow-hidden rounded-full bg-feuille-100" role="progressbar" aria-valuenow={Math.round(progression * 100)} aria-valuemin={0} aria-valuemax={100}>
-              <div className="h-full rounded-full bg-feuille-600 transition-all" style={{ width: `${Math.round(progression * 100)}%` }} />
+            <div className="h-2 overflow-hidden rounded-full bg-bleu-100" role="progressbar" aria-valuenow={Math.round(progression * 100)} aria-valuemin={0} aria-valuemax={100}>
+              <div className="h-full rounded-full bg-bleu-500 transition-all" style={{ width: `${Math.round(progression * 100)}%` }} />
             </div>
             <p className="mt-2 text-sm text-encre-doux">
-              Encore {pluriel(suivant.seuil - points, 'point')} pour devenir <span className="font-semibold text-foret">{suivant.nom}</span>
+              Encore {pluriel(suivant.seuil - points, 'point')} pour devenir <span className="font-semibold text-nuit">{suivant.nom}</span>
             </p>
           </>
         ) : (
@@ -112,7 +112,7 @@ export default function CitoyenDashboard() {
           <div className="carte p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Mes derniers envois</h2>
-              <Link to="/citoyen/signalements" className="text-sm font-semibold text-foret-700 hover:underline">
+              <Link to="/citoyen/signalements" className="text-sm font-semibold text-bleu hover:underline">
                 Tout voir
               </Link>
             </div>

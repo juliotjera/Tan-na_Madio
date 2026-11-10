@@ -1,4 +1,5 @@
 // Exécution d'une tournée par le chauffeur : itinéraire, arrêts numérotés, « Marquer collecté », fin de tournée
+import { Plaque } from '../../components/layout/Logo'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -60,7 +61,7 @@ export default function DetailTournee() {
         <div>
           <div className="flex items-center gap-2">
             <StatutBadge statut={c.statut} type="collecte" />
-            <span className="text-sm text-encre-pale">{c.camion_immatriculation}</span>
+            <Plaque numero={c.camion_immatriculation} />
           </div>
           <h1 className="mt-2 text-[26px] font-semibold sm:text-[30px]">{jourHeure(c.date_planifiee)}</h1>
           <p className="text-encre-doux">
@@ -81,12 +82,12 @@ export default function DetailTournee() {
       <div className="carte p-4">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">Points collectés</span>
-          <span className="chiffre text-lg text-foret">
+          <span className="chiffre text-lg text-nuit">
             {faits}/{total}
           </span>
         </div>
-        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-feuille-100" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
-          <div className="h-full rounded-full bg-feuille-600 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
+        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-bleu-100" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
+          <div className="h-full rounded-full bg-bleu-500 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
         </div>
       </div>
 
@@ -102,9 +103,9 @@ export default function DetailTournee() {
             {c.signalements.map((s) => {
               const actif = c.statut === 'en_cours' && s.id === prochain?.id
               return (
-                <li key={s.id} className={`rounded-xl border p-3 transition ${actif ? 'border-ambre bg-ambre-50/60' : s.collecte_fait ? 'border-trait bg-feuille-50/50' : 'border-trait'}`}>
+                <li key={s.id} className={`rounded-xl border p-3 transition ${actif ? 'border-ambre bg-ambre-50/60' : s.collecte_fait ? 'border-trait bg-bleu-50/50' : 'border-trait'}`}>
                   <div className="flex items-start gap-3">
-                    <button type="button" onClick={() => setCible(s)} className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-feuille text-foret' : actif ? 'bg-ambre text-foret' : 'bg-foret text-white'}`} aria-label={`Voir l’arrêt ${s.ordre} sur la carte`}>
+                    <button type="button" onClick={() => setCible(s)} className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-ciel text-nuit' : actif ? 'bg-ambre text-nuit' : 'bg-nuit text-white'}`} aria-label={`Voir l’arrêt ${s.ordre} sur la carte`}>
                       {s.collecte_fait ? <Check className="h-4 w-4" /> : s.ordre}
                     </button>
                     <div className="min-w-0 flex-1">
@@ -123,7 +124,7 @@ export default function DetailTournee() {
                       </a>
                       <button
                         type="button"
-                        className={`${actif ? 'btn-vert' : 'btn-secondaire'} min-h-[44px] flex-[1.4]`}
+                        className={`${actif ? 'btn-accent' : 'btn-secondaire'} min-h-[44px] flex-[1.4]`}
                         disabled={occupe === s.id}
                         onClick={() => agir(s.id, () => marquerPoint(c.id, s.id), `Arrêt ${s.ordre} collecté`)}
                       >
@@ -146,7 +147,7 @@ export default function DetailTournee() {
             </div>
           )}
           {c.statut === 'terminee' && (
-            <p className="mt-4 rounded-xl bg-feuille-50 px-4 py-3 text-sm text-foret">
+            <p className="mt-4 rounded-xl bg-bleu-50 px-4 py-3 text-sm text-nuit">
               Tournée terminée : {faits}/{total} arrêts{c.poids_collecte_kg != null && `, ${kg(c.poids_collecte_kg)} collectés`}.
             </p>
           )}

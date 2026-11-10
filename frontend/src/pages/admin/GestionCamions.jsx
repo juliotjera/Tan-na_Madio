@@ -1,4 +1,5 @@
 // Gestion de la flotte : ajout, modification, affectation du chauffeur, suppression
+import { Plaque } from '../../components/layout/Logo'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Pencil, Plus, Trash2, Truck } from 'lucide-react'
@@ -170,8 +171,8 @@ export default function GestionCamions() {
               {camions.donnees.map((c) => (
                 <tr key={c.id}>
                   <td>
-                    <p className="font-titre font-semibold text-foret">{c.immatriculation}</p>
-                    <p className="text-xs text-encre-pale">{c.modele}</p>
+                    <Plaque numero={c.immatriculation} />
+                    <p className="mt-1 text-xs text-encre-pale">{c.modele}</p>
                   </td>
                   <td className="tabular-nums">{kg(c.capacite_kg)}</td>
                   <td>{c.chauffeur_nom ?? <span className="text-ambre-700">Non affecté</span>}</td>

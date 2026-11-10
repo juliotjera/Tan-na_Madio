@@ -75,8 +75,9 @@ export function MarqueurSignalement({ signalement, children, estompe, onClick })
 
 // Étape numérotée d'une tournée (verte une fois collectée)
 export function iconeEtape(numero, { fait = false, active = false } = {}) {
-  const fond = fait ? '#22C55E' : active ? '#F59E0B' : '#052E16'
-  const texte = fait || active ? '#052E16' : '#F0FDF4'
+  // à faire : plaque sombre ; prochain arrêt : ambre ; collecté : bleu pâle coché
+  const fond = fait ? '#DCE8F4' : active ? '#E8A317' : '#0C1A2B'
+  const texte = fait ? '#0A3D6B' : active ? '#0C1A2B' : '#FFFFFF'
   return L.divIcon({
     className: '',
     html: `<div class="etape" style="background:${fond};color:${texte}">${fait ? '✓' : numero}</div>`,
@@ -87,7 +88,7 @@ export function iconeEtape(numero, { fait = false, active = false } = {}) {
 
 const iconeDepot = L.divIcon({
   className: '',
-  html: '<div class="etape" style="background:#F0FDF4;color:#052E16;border-color:#052E16">D</div>',
+  html: '<div class="etape" style="background:#FFFFFF;color:#0C1A2B;border-color:#0C1A2B">D</div>',
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 })
@@ -96,11 +97,11 @@ const iconeDepot = L.divIcon({
 export function Itineraire({ trace, traceNaive, etapes = [], depart, anime = true, onEtape }) {
   return (
     <>
-      {traceNaive?.length > 1 && <Polyline positions={traceNaive} pathOptions={{ color: '#7D8F83', weight: 3, opacity: 0.7, dashArray: '2 8', lineCap: 'round' }} />}
+      {traceNaive?.length > 1 && <Polyline positions={traceNaive} pathOptions={{ color: '#8592A3', weight: 3, opacity: 0.8, dashArray: '2 8', lineCap: 'round' }} />}
       {trace?.length > 1 && (
         <>
           <Polyline positions={trace} pathOptions={{ color: '#FFFFFF', weight: 9, opacity: 0.9, lineJoin: 'round' }} />
-          <Polyline key={trace.length} positions={trace} pathOptions={{ color: '#15803D', weight: 5, lineJoin: 'round', lineCap: 'round', className: anime ? 'trace-anime' : '' }} />
+          <Polyline key={trace.length} positions={trace} pathOptions={{ color: '#0E518D', weight: 5, lineJoin: 'round', lineCap: 'round', className: anime ? 'trace-anime' : '' }} />
         </>
       )}
       {depart && (
@@ -123,7 +124,7 @@ export function Itineraire({ trace, traceNaive, etapes = [], depart, anime = tru
   )
 }
 
-const styleZone = { color: '#14532D', weight: 1.5, opacity: 0.6, fillColor: '#22C55E', fillOpacity: 0.06, dashArray: '4 4' }
+const styleZone = { color: '#0E518D', weight: 1.5, opacity: 0.55, fillColor: '#0E518D', fillOpacity: 0.05, dashArray: '4 4' }
 
 export function Zones({ zones, surbrillance }) {
   return zones

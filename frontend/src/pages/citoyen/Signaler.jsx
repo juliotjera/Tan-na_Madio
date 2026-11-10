@@ -23,7 +23,7 @@ function Bloc({ numero, titre, fait, children }) {
   return (
     <section className="carte p-5 sm:p-6">
       <div className="mb-4 flex items-center gap-3">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full font-titre text-sm font-bold ${fait ? 'bg-feuille text-foret' : 'bg-foret text-white'}`}>
+        <span className={`flex h-7 w-7 items-center justify-center rounded-full font-titre text-sm font-bold ${fait ? 'bg-ciel text-nuit' : 'bg-nuit text-white'}`}>
           {fait ? <CheckCircle2 className="h-4 w-4" /> : numero}
         </span>
         <h2 className="text-lg font-semibold">{titre}</h2>
@@ -79,14 +79,14 @@ export default function Signaler() {
   if (resultat) {
     return (
       <div className="mx-auto max-w-lg py-10 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-feuille text-foret">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-ciel text-nuit">
           <CheckCircle2 className="h-8 w-8" />
         </span>
         <h1 className="mt-6 text-[28px] font-semibold">Signalement envoyé</h1>
         <p className="mt-2 text-encre-doux">
           {resultat.zone_nom ? `Il a été rattaché à la zone ${resultat.zone_nom}. ` : ''}Un agent municipal va le vérifier. Vous serez crédité de 5 points à la validation.
         </p>
-        <p className="chiffre mt-6 text-[40px] text-feuille-700">+{resultat.points_gagnes} points</p>
+        <p className="chiffre mt-6 text-[40px] text-bleu-700">+{resultat.points_gagnes} points</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/citoyen/signalements" className="btn-principal">
             Suivre mon signalement
@@ -143,7 +143,7 @@ export default function Signaler() {
         </Carte>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <p className="flex items-center gap-2 text-sm text-encre-doux">
-            <MapPin className="h-4 w-4 text-foret-700" />
+            <MapPin className="h-4 w-4 text-bleu" />
             {gps.recherche
               ? 'Recherche de votre position…'
               : gps.position
@@ -166,7 +166,7 @@ export default function Signaler() {
             <img src={apercu} alt="Aperçu de la photo" className="max-h-[360px] w-full object-cover" />
             <button
               type="button"
-              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-foret/80 text-white backdrop-blur hover:bg-foret"
+              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-nuit/80 text-white backdrop-blur hover:bg-nuit"
               onClick={() => {
                 setPhoto(null)
                 setApercu(null)
@@ -181,12 +181,12 @@ export default function Signaler() {
           <button
             type="button"
             onClick={() => entree.current.click()}
-            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-trait bg-feuille-50/50 px-6 py-10 text-encre-doux transition hover:border-feuille-600 hover:bg-feuille-50"
+            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-trait bg-bleu-50/50 px-6 py-10 text-encre-doux transition hover:border-bleu-500 hover:bg-bleu-50"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-foret-700 shadow-carte">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-bleu shadow-carte">
               <Camera className="h-6 w-6" />
             </span>
-            <span className="font-semibold text-foret">Prendre ou choisir une photo</span>
+            <span className="font-semibold text-nuit">Prendre ou choisir une photo</span>
             <span className="text-xs">JPEG, PNG ou WebP · réduite automatiquement avant l’envoi</span>
           </button>
         )}
@@ -206,11 +206,11 @@ export default function Signaler() {
               role="radio"
               aria-checked={urgence === cle}
               onClick={() => setUrgence(cle)}
-              className={`flex items-start gap-3 rounded-xl border-2 p-3.5 text-left transition ${urgence === cle ? 'border-foret-700 bg-feuille-50' : 'border-trait hover:border-foret-700/30'}`}
+              className={`flex items-start gap-3 rounded-xl border-2 p-3.5 text-left transition ${urgence === cle ? 'border-bleu bg-bleu-50' : 'border-trait hover:border-bleu/30'}`}
             >
               <span className="mt-1 h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: u.couleur }} />
               <span>
-                <span className="block font-semibold text-foret">{u.libelle}</span>
+                <span className="block font-semibold text-nuit">{u.libelle}</span>
                 <span className="block text-sm text-encre-doux">{AIDES_URGENCE[cle]}</span>
               </span>
             </button>
@@ -231,7 +231,7 @@ export default function Signaler() {
         </div>
       </Bloc>
 
-      <div className="sticky bottom-[84px] z-30 flex flex-col gap-2 rounded-2xl border border-trait bg-white/95 p-3 shadow-flotte backdrop-blur sm:flex-row sm:items-center sm:justify-between lg:bottom-4">
+      <div className="sticky bottom-[84px] z-30 flex flex-col gap-2 rounded-xl border border-trait bg-white/95 p-3 shadow-flotte backdrop-blur sm:flex-row sm:items-center sm:justify-between lg:bottom-4">
         <p className="px-2 text-sm text-encre-doux">{!gps.position ? 'Placez d’abord le point sur la carte' : !pret ? 'Ajoutez une photo ou une description' : 'Prêt à envoyer'}</p>
         <div className="flex gap-2">
           <button type="button" className="btn-discret" onClick={() => navigate(-1)}>

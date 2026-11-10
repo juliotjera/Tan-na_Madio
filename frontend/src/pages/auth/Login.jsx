@@ -56,7 +56,7 @@ export default function Login() {
           {(id) => (
             <div className="relative">
               <input id={id} type={voir ? 'text' : 'password'} className="champ pr-12" autoComplete="current-password" value={mdp} onChange={(e) => setMdp(e.target.value)} required />
-              <button type="button" onClick={() => setVoir(!voir)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-encre-pale hover:text-foret" aria-label={voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>
+              <button type="button" onClick={() => setVoir(!voir)} className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-encre-pale hover:text-nuit" aria-label={voir ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}>
                 {voir ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
@@ -74,14 +74,14 @@ export default function Login() {
       </form>
       <p className="mt-6 text-center text-sm text-encre-doux">
         Pas encore de compte ?{' '}
-        <Link to="/register" className="font-semibold text-foret-700 underline-offset-4 hover:underline">
+        <Link to="/register" className="font-semibold text-bleu underline-offset-4 hover:underline">
           Créer un compte citoyen
         </Link>
       </p>
 
       {DEMO && (
-        <div className="mt-8 rounded-2xl border border-dashed border-trait p-4">
-          <p className="text-sm font-semibold text-foret">Comptes de démonstration</p>
+        <div className="mt-8 rounded-xl border border-dashed border-trait p-4">
+          <p className="text-sm font-semibold text-nuit">Comptes de démonstration</p>
           <p className="mt-0.5 text-xs text-encre-pale">Mot de passe : Admin2025!</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
             {COMPTES.map(([adresse, role]) => (
@@ -92,9 +92,9 @@ export default function Login() {
                   setEmail(adresse)
                   setMdp('Admin2025!')
                 }}
-                className="rounded-xl border border-trait bg-white px-3 py-2 text-left text-sm transition hover:border-feuille-600 hover:bg-feuille-50"
+                className="rounded-xl border border-trait bg-white px-3 py-2 text-left text-sm transition hover:border-bleu-500 hover:bg-bleu-50"
               >
-                <span className="block font-medium text-foret">{ROLES[role]}</span>
+                <span className="block font-medium text-nuit">{ROLES[role]}</span>
                 <span className="block truncate text-xs text-encre-pale">{adresse}</span>
               </button>
             ))}

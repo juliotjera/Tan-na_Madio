@@ -236,7 +236,7 @@ export default function Utilisateurs() {
                         aria-label={`${u.actif ? 'Désactiver' : 'Activer'} le compte de ${u.prenom} ${u.nom}`}
                         disabled={bascule === u.id}
                         onClick={() => activer(u)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.actif ? 'bg-feuille-600' : 'bg-slate-300'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.actif ? 'bg-bleu-500' : 'bg-slate-300'}`}
                       >
                         <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${u.actif ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                       </button>

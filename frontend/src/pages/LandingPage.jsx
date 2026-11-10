@@ -26,7 +26,7 @@ export default function LandingPage() {
   const cadre = tournee?.trace?.length ? tournee.trace : points.map((p) => [p.latitude, p.longitude])
 
   return (
-    <div className="min-h-screen bg-menthe">
+    <div className="min-h-screen bg-papier">
       <header className="mx-auto flex max-w-[1240px] items-center justify-between px-4 pb-4 pt-[max(20px,env(safe-area-inset-top))] sm:px-8">
         <Logo />
         <nav className="flex items-center gap-2">
@@ -59,15 +59,15 @@ export default function LandingPage() {
             <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-trait pt-6">
               <div>
                 <dt className="text-sm text-encre-doux">Signalements</dt>
-                <dd className="chiffre mt-1 text-3xl text-foret">{nombre(donnees.signalements)}</dd>
+                <dd className="chiffre mt-1 text-3xl text-nuit">{nombre(donnees.signalements)}</dd>
               </div>
               <div>
                 <dt className="text-sm text-encre-doux">Dépôts ramassés</dt>
-                <dd className="chiffre mt-1 text-3xl text-foret">{nombre(donnees.collectes)}</dd>
+                <dd className="chiffre mt-1 text-3xl text-nuit">{nombre(donnees.collectes)}</dd>
               </div>
               <div>
                 <dt className="text-sm text-encre-doux">Déchets collectés</dt>
-                <dd className="chiffre mt-1 text-3xl text-foret">{kg(donnees.poids_total_kg)}</dd>
+                <dd className="chiffre mt-1 text-3xl text-nuit">{kg(donnees.poids_total_kg)}</dd>
               </div>
             </dl>
           )}
@@ -84,18 +84,18 @@ export default function LandingPage() {
             {cadre.length > 0 && <Cadrer points={cadre} marge={60} max={15} />}
           </Carte>
           {tournee && (
-            <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-2xl bg-foret p-4 text-white shadow-flotte sm:left-auto sm:right-5 sm:w-[300px] sm:p-5">
-              <p className="chiffre text-[40px] leading-none text-feuille">−{Math.round(tournee.gain_pourcent)} %</p>
-              <p className="mt-2 text-sm text-feuille-100/85">
+            <div className="absolute bottom-4 left-4 right-4 z-[500] rounded-xl bg-nuit p-4 text-white shadow-flotte sm:left-auto sm:right-5 sm:w-[300px] sm:p-5">
+              <p className="chiffre text-[40px] leading-none text-ciel">−{Math.round(tournee.gain_pourcent)} %</p>
+              <p className="mt-2 text-sm text-bleu-100/85">
                 de route sur cette tournée : {tournee.distance_km.toLocaleString('fr-FR')} km au lieu de {tournee.distance_naive_km.toLocaleString('fr-FR')} km
                 dans l’ordre des signalements.
               </p>
-              <div className="mt-3 flex items-center gap-4 text-xs text-feuille-100/70">
+              <div className="mt-3 flex items-center gap-4 text-xs text-bleu-100/70">
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-1 w-5 rounded bg-feuille" /> optimisée
+                  <span className="h-1 w-5 rounded bg-ciel" /> optimisée
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-0 w-5 border-t-2 border-dotted border-feuille-100/60" /> ordre d’arrivée
+                  <span className="h-0 w-5 border-t-2 border-dotted border-bleu-100/60" /> ordre d’arrivée
                 </span>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function LandingPage() {
               return (
                 <li key={e.titre} className="relative">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-feuille-100 text-foret-700">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-bleu-100 text-bleu">
                       <Icone className="h-5 w-5" />
                     </span>
                     <span className="font-titre text-sm font-semibold text-encre-pale">Étape {i + 1}</span>
@@ -139,8 +139,8 @@ export default function LandingPage() {
         <div className="carte flex flex-col gap-3 p-6">
           {[
             ['Envoyé', '+2 points', 'bg-ambre-100 text-ambre-700'],
-            ['Validé par la commune', '+5 points', 'bg-feuille-100 text-foret-700'],
-            ['Ramassé', '+10 points', 'bg-foret-700 text-white'],
+            ['Validé par la commune', '+5 points', 'bg-bleu-100 text-bleu'],
+            ['Ramassé', '+10 points', 'bg-bleu text-white'],
           ].map(([etape, points, couleur]) => (
             <div key={etape} className="flex items-center justify-between gap-4 rounded-xl border border-trait px-4 py-3">
               <span className="font-medium">{etape}</span>
@@ -150,8 +150,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="bg-foret">
-        <div className="mx-auto flex max-w-[1240px] flex-col gap-4 px-4 py-10 text-sm text-feuille-100/70 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+      <footer className="bg-nuit">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-4 px-4 py-10 text-sm text-bleu-100/70 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <Logo clair />
           <p>Commune urbaine d’Antananarivo · Projet de fin d’études, ESMIA Innovation</p>
         </div>

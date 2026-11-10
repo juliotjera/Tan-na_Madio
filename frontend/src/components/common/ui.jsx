@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle, Loader2, X } from 'lucide-react'
 
 export function Spinner({ className = 'h-5 w-5' }) {
-  return <Loader2 className={`animate-spin text-feuille-600 ${className}`} aria-label="Chargement" />
+  return <Loader2 className={`animate-spin text-bleu-500 ${className}`} aria-label="Chargement" />
 }
 
 export function Chargement({ texte = 'Chargement…' }) {
@@ -36,11 +36,11 @@ export function Vide({ icone: Icone, titre, texte, action }) {
   return (
     <div className="flex flex-col items-center px-6 py-14 text-center">
       {Icone && (
-        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-feuille-100 text-foret-700">
+        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-bleu-100 text-bleu">
           <Icone className="h-6 w-6" />
         </span>
       )}
-      <p className="font-titre text-lg font-semibold text-foret">{titre}</p>
+      <p className="font-titre text-lg font-semibold text-nuit">{titre}</p>
       {texte && <p className="mt-1 max-w-sm text-sm text-encre-doux">{texte}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -62,10 +62,10 @@ export function EnTete({ titre, texte, actions }) {
 // Chiffre clé : le nombre d'abord, l'étiquette ensuite
 export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'neutre' }) {
   const tons = {
-    neutre: 'bg-feuille-100 text-foret-700',
+    neutre: 'bg-bleu-100 text-bleu',
     ambre: 'bg-ambre-100 text-ambre-700',
     alerte: 'bg-alerte-100 text-alerte-700',
-    foret: 'bg-foret text-feuille',
+    nuit: 'bg-nuit text-ciel',
   }
   return (
     <div className="carte flex items-start gap-4 p-5">
@@ -75,7 +75,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'neutre' 
         </span>
       )}
       <div className="min-w-0">
-        <p className="chiffre text-[28px] leading-none text-foret">{valeur}</p>
+        <p className="chiffre text-[28px] leading-none text-nuit">{valeur}</p>
         <p className="mt-1.5 text-sm font-medium text-encre">{libelle}</p>
         {detail && <p className="mt-0.5 text-xs text-encre-pale">{detail}</p>}
       </div>
@@ -108,12 +108,12 @@ export function Segments({ options, valeur, onChange, libelle }) {
           role="radio"
           aria-checked={valeur === o.valeur}
           onClick={() => onChange(o.valeur)}
-          className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-            valeur === o.valeur ? 'bg-foret-700 text-white' : 'text-encre-doux hover:bg-feuille-50 hover:text-foret'
+          className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${
+            valeur === o.valeur ? 'bg-bleu text-white' : 'text-encre-doux hover:bg-bleu-50 hover:text-nuit'
           }`}
         >
           {o.libelle}
-          {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-feuille' : 'text-encre-pale'}`}>{o.nombre}</span>}
+          {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-ciel' : 'text-encre-pale'}`}>{o.nombre}</span>}
         </button>
       ))}
     </div>
@@ -138,7 +138,7 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
     <AnimatePresence>
       {ouvert && (
         <motion.div className="fixed inset-0 z-[1000] flex items-end justify-center sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="absolute inset-0 bg-foret/50 backdrop-blur-[2px]" onClick={onFermer} aria-hidden />
+          <div className="absolute inset-0 bg-nuit/50 backdrop-blur-[2px]" onClick={onFermer} aria-hidden />
           <motion.div
             ref={boite}
             role="dialog"

@@ -39,7 +39,7 @@ export default function Stats() {
           ].map(([k, v]) => (
             <div key={k} className="carte p-5">
               <dt className="text-sm text-encre-doux">{k}</dt>
-              <dd className="chiffre mt-1 text-[30px] text-foret">{v}</dd>
+              <dd className="chiffre mt-1 text-[30px] text-nuit">{v}</dd>
             </div>
           ))}
         </dl>
@@ -91,7 +91,7 @@ export default function Stats() {
                   <span className="font-medium">{URGENCES[u.cle].libelle}</span>
                   <span className="tabular-nums text-encre-doux">{u.total}</span>
                 </div>
-                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-feuille-50">
+                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-bleu-50">
                   <div className="h-full rounded-full" style={{ width: `${(u.total / maxUrgence) * 100}%`, background: URGENCES[u.cle].couleur }} />
                 </div>
               </li>

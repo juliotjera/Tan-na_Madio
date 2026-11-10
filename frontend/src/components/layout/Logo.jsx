@@ -1,12 +1,12 @@
-// Marque : un itinéraire à trois arrêts (le cœur du service), et le nom
+// Marque : un itinéraire à angles droits (les rues) et trois arrêts carrés, comme la signalétique
 export function Marque({ className = 'h-8 w-8' }) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden>
-      <rect width="64" height="64" rx="16" fill="#052E16" />
-      <path d="M14 44 C 22 44, 22 30, 32 30 S 42 18, 50 18" fill="none" stroke="#22C55E" strokeWidth="5" strokeLinecap="round" />
-      <circle cx="14" cy="44" r="5.5" fill="#F0FDF4" />
-      <circle cx="32" cy="30" r="5.5" fill="#F59E0B" />
-      <circle cx="50" cy="18" r="5.5" fill="#F0FDF4" />
+      <rect width="64" height="64" rx="13" fill="#0E518D" />
+      <path d="M15 47 H30 V31 H47 V16" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinejoin="round" strokeLinecap="round" />
+      <rect x="9.5" y="41.5" width="11" height="11" rx="2.5" fill="#FFFFFF" />
+      <rect x="24.5" y="25.5" width="11" height="11" rx="2.5" fill="#E8A317" stroke="#0E518D" strokeWidth="2" />
+      <rect x="41.5" y="10.5" width="11" height="11" rx="2.5" fill="#FFFFFF" />
     </svg>
   )
 }
@@ -15,7 +15,17 @@ export function Logo({ clair = false, className = '' }) {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
       <Marque className="h-8 w-8 shrink-0" />
-      <span className={`font-titre text-[19px] font-bold tracking-tight ${clair ? 'text-white' : 'text-foret'}`}>Tanàna Madio</span>
+      <span className={`font-titre text-[21px] font-bold leading-none ${clair ? 'text-white' : 'text-nuit'}`}>Tanàna Madio</span>
+    </span>
+  )
+}
+
+// Plaque d'immatriculation d'un camion
+export function Plaque({ numero, className = '' }) {
+  return (
+    <span className={`plaque ${className}`} title={`Camion ${numero}`}>
+      <span aria-hidden>MG</span>
+      <span>{numero}</span>
     </span>
   )
 }

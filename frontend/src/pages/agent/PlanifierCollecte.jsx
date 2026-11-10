@@ -1,5 +1,6 @@
 // Planifier une tournée en 4 étapes :
 // 1. camion, zone, date — 2. signalements validés — 3. itinéraire optimisé (Dijkstra + glouton 2-opt) — 4. confirmation
+import { Plaque } from '../../components/layout/Logo'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -30,8 +31,8 @@ function Etapes({ actuelle }) {
     <ol className="mb-6 grid grid-cols-4 gap-2" aria-label="Étapes">
       {ETAPES.map((nom, i) => (
         <li key={nom} aria-current={i === actuelle ? 'step' : undefined}>
-          <span className={`block h-1.5 rounded-full ${i <= actuelle ? 'bg-feuille-600' : 'bg-feuille-100'}`} />
-          <span className={`mt-2 hidden text-sm font-medium sm:block ${i === actuelle ? 'text-foret' : i < actuelle ? 'text-encre-doux' : 'text-encre-pale'}`}>
+          <span className={`block h-1.5 rounded-full ${i <= actuelle ? 'bg-bleu-500' : 'bg-bleu-100'}`} />
+          <span className={`mt-2 hidden text-sm font-medium sm:block ${i === actuelle ? 'text-nuit' : i < actuelle ? 'text-encre-doux' : 'text-encre-pale'}`}>
             {i + 1}. {nom}
           </span>
         </li>
@@ -143,13 +144,13 @@ export default function PlanifierCollecte() {
                       role="radio"
                       aria-checked={camionId === c.id}
                       onClick={() => setCamionId(c.id)}
-                      className={`rounded-xl border-2 p-4 text-left transition ${camionId === c.id ? 'border-foret-700 bg-feuille-50' : 'border-trait hover:border-foret-700/30'}`}
+                      className={`rounded-xl border-2 p-4 text-left transition ${camionId === c.id ? 'border-bleu bg-bleu-50' : 'border-trait hover:border-bleu/30'}`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-titre text-lg font-semibold text-foret">{c.immatriculation}</span>
-                        <Truck className={`h-5 w-5 ${camionId === c.id ? 'text-feuille-700' : 'text-encre-pale'}`} />
+                        <Plaque numero={c.immatriculation} />
+                        <Truck className={`h-5 w-5 ${camionId === c.id ? 'text-bleu-700' : 'text-encre-pale'}`} />
                       </div>
-                      <p className="text-sm text-encre-doux">{c.modele}</p>
+                      <p className="mt-2 text-sm text-encre-doux">{c.modele}</p>
                       <p className="mt-2 text-sm">
                         <span className="font-semibold">{kg(c.capacite_kg)}</span> · {c.chauffeur_nom ?? <span className="text-ambre-700">sans chauffeur</span>}
                       </p>
@@ -216,12 +217,12 @@ export default function PlanifierCollecte() {
                   <div className="mt-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-encre-doux">Charge estimée</span>
-                      <span className={`font-semibold tabular-nums ${depassement ? 'text-alerte-700' : 'text-foret'}`}>
+                      <span className={`font-semibold tabular-nums ${depassement ? 'text-alerte-700' : 'text-nuit'}`}>
                         {kg(charge)} / {kg(camion.capacite_kg)}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-feuille-100">
-                      <div className={`h-full rounded-full transition-all ${depassement ? 'bg-alerte' : 'bg-feuille-600'}`} style={{ width: `${Math.min(100, (charge / camion.capacite_kg) * 100)}%` }} />
+                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-bleu-100">
+                      <div className={`h-full rounded-full transition-all ${depassement ? 'bg-alerte' : 'bg-bleu-500'}`} style={{ width: `${Math.min(100, (charge / camion.capacite_kg) * 100)}%` }} />
                     </div>
                     {depassement && <p className="mt-1 text-xs text-alerte-700">La charge dépasse la capacité : retirez des signalements ou choisissez un plus gros camion.</p>}
                   </div>
@@ -234,8 +235,8 @@ export default function PlanifierCollecte() {
                 <ul className="-mx-2 mt-4 max-h-[340px] flex-1 space-y-1 overflow-y-auto px-2">
                   {signalements.map((s) => (
                     <li key={s.id}>
-                      <label className={`flex cursor-pointer items-start gap-3 rounded-xl p-2.5 transition ${selection.includes(s.id) ? 'bg-feuille-50' : 'hover:bg-feuille-50/50'}`}>
-                        <input type="checkbox" className="mt-1 h-4 w-4 accent-foret-700" checked={selection.includes(s.id)} onChange={() => basculer(s.id)} />
+                      <label className={`flex cursor-pointer items-start gap-3 rounded-xl p-2.5 transition ${selection.includes(s.id) ? 'bg-bleu-50' : 'hover:bg-bleu-50/50'}`}>
+                        <input type="checkbox" className="mt-1 h-4 w-4 accent-bleu" checked={selection.includes(s.id)} onChange={() => basculer(s.id)} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium">{s.description ?? 'Sans description'}</span>
                           <span className="block text-xs text-encre-pale">
@@ -271,33 +272,33 @@ export default function PlanifierCollecte() {
                 </Carte>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-encre-doux">
                   <span className="inline-flex items-center gap-2">
-                    <span className="h-1.5 w-6 rounded bg-feuille-700" /> Itinéraire optimisé
+                    <span className="h-1.5 w-6 rounded bg-bleu-700" /> Itinéraire optimisé
                   </span>
                   <span className="inline-flex items-center gap-2">
                     <span className="w-6 border-t-2 border-dotted border-encre-pale" /> Ordre de sélection, pour comparer
                   </span>
                   {plan.depart && (
                     <span className="inline-flex items-center gap-2">
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-foret text-[8px] font-bold">D</span> Départ du camion
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-nuit text-[8px] font-bold">D</span> Départ du camion
                     </span>
                   )}
                 </div>
               </div>
 
               <section className="space-y-4">
-                <div className="rounded-carte bg-foret p-5 text-white">
-                  <p className="text-sm text-feuille-100/75">Distance économisée</p>
-                  <p className="chiffre mt-1 text-[48px] leading-none text-feuille">−{Math.round(plan.gain_pourcent)} %</p>
-                  <p className="mt-2 text-sm text-feuille-100/85">
+                <div className="rounded-carte bg-nuit p-5 text-white">
+                  <p className="text-sm text-bleu-100/75">Distance économisée</p>
+                  <p className="chiffre mt-1 text-[48px] leading-none text-ciel">−{Math.round(plan.gain_pourcent)} %</p>
+                  <p className="mt-2 text-sm text-bleu-100/85">
                     {km(plan.distance_km)} au lieu de {km(plan.distance_naive_km)} dans l’ordre de sélection.
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-sm">
                     <span className="flex items-center gap-2" title="Durée estimée">
-                      <Clock className="h-4 w-4 shrink-0 text-feuille" />
+                      <Clock className="h-4 w-4 shrink-0 text-ciel" />
                       {duree(plan.duree_estimee_min)} environ
                     </span>
                     <span className="flex items-center gap-2" title="Méthode de calcul des distances">
-                      <Gauge className="h-4 w-4 shrink-0 text-feuille" />
+                      <Gauge className="h-4 w-4 shrink-0 text-ciel" />
                       {plan.methode === 'dijkstra' ? 'Par les rues (Dijkstra)' : 'À vol d’oiseau'}
                     </span>
                   </div>
@@ -310,7 +311,7 @@ export default function PlanifierCollecte() {
                       const s = parId.get(p.signalement_id)
                       return (
                         <li key={p.signalement_id} className="flex items-center gap-3">
-                          <span className="etape shrink-0 border-0 bg-foret text-white shadow-none">{p.ordre}</span>
+                          <span className="etape shrink-0 border-0 bg-nuit text-white shadow-none">{p.ordre}</span>
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-medium">{s?.description ?? 'Signalement'}</span>
                             <span className="block text-xs text-encre-pale">{s?.zone_nom ?? 'Hors zone'}</span>
@@ -347,9 +348,9 @@ export default function PlanifierCollecte() {
                     ['Arrêts', pluriel(plan.itineraire.length, 'signalement')],
                     ['Distance', `${km(plan.distance_km)} · ${duree(plan.duree_estimee_min)} environ`],
                   ].map(([cle, valeur]) => (
-                    <div key={cle} className="rounded-xl bg-feuille-50 px-4 py-3">
+                    <div key={cle} className="rounded-xl bg-bleu-50 px-4 py-3">
                       <dt className="text-xs text-encre-pale">{cle}</dt>
-                      <dd className="mt-0.5 font-medium text-foret">{valeur}</dd>
+                      <dd className="mt-0.5 font-medium text-nuit">{valeur}</dd>
                     </div>
                   ))}
                 </dl>

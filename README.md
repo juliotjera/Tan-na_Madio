@@ -31,6 +31,7 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 - **Backend** : Node.js, Express 4, PostgreSQL + **PostGIS** (géométries, trigger d’affectation de zone, vues), JWT (accès 15 min + renouvellement 7 j), bcrypt, Multer, Helmet, limitation de débit.
 - **Base de développement** : **PGlite** (PostgreSQL 18 + PostGIS 3.6 compilés en WebAssembly) : le projet démarre **sans installer PostgreSQL**. En production, la même base SQL tourne sur un vrai serveur PostgreSQL/PostGIS.
 - **Frontend** : React 18, Vite 5, Tailwind CSS 3, Leaflet / React-Leaflet (fond OpenStreetMap), Recharts, Axios, React Router 6, Framer Motion.
+- **Identité visuelle « signalisation urbaine »** : bleu signalisation (#0E518D) et bleu nuit (#0C1A2B) pour l’action de la commune, couleurs chaudes réservées aux déchets et aux urgences (rouge = critique), police Archivo (étroite pour les titres et les chiffres, comme les panneaux), arrêts en plaques numérotées et camions en plaques d’immatriculation.
 - **Tests** : Jest + Supertest (55 tests : algorithmes, authentification, signalements, collectes, base de données).
 
 ## Démarrage rapide
