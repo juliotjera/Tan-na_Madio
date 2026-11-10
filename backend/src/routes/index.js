@@ -8,5 +8,7 @@ router.use('/camions', require('./camion.routes'))
 router.use('/zones', require('./zone.routes'))
 router.use('/stats', require('./stats.routes'))
 router.use('/utilisateurs', require('./utilisateur.routes'))
+router.use('/notifications', require('./notification.routes'))
+router.use('/exports', require('./export.routes'))
 
 module.exports = router

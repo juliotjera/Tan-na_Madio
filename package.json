@@ -15,6 +15,7 @@
     "build": "npm ci --include=dev --prefix backend && npm ci --include=dev --prefix frontend && npm run build --prefix frontend",
     "start": "npm start --prefix backend",
     "test": "npm test --prefix backend",
-    "db:reset": "npm run db:reset --prefix backend"
+    "db:reset": "npm run db:reset --prefix backend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend"
   }
 }

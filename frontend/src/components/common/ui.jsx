@@ -8,11 +8,20 @@ export function Spinner({ className = 'h-5 w-5' }) {
   return <Loader2 className={`animate-spin text-bleu-500 ${className}`} aria-label="Chargement" />
 }
 
-export function Chargement({ texte = 'Chargement…' }) {
+// Chargement : la forme du contenu à venir (squelette) plutôt qu'une roue qui tourne
+export function Chargement({ texte = 'Chargement…', lignes = 3 }) {
   return (
-    <div className="flex items-center justify-center gap-3 py-16 text-encre-doux" role="status">
-      <Spinner />
-      <span>{texte}</span>
+    <div className="space-y-3 py-4" role="status" aria-live="polite">
+      <span className="sr-only">{texte}</span>
+      {Array.from({ length: lignes }, (_, i) => (
+        <div key={i} className="flex animate-pulse items-center gap-4 rounded-carte border border-trait bg-white p-4" aria-hidden>
+          <div className="h-10 w-10 shrink-0 rounded-lg bg-papier" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 rounded bg-papier" style={{ width: `${70 - i * 12}%` }} />
+            <div className="h-3 w-2/5 rounded bg-papier" />
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

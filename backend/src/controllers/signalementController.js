@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const config = require('../config/env')
 const db = require('../config/db')
-const { Signalement, User, journaliser } = require('../models')
+const { Signalement, User, Notification, journaliser } = require('../models')
 const { urlPhoto } = require('../middleware/upload')
 const { ErreurApi, asyncHandler, pagination, POINTS_ECO } = require('../utils/helpers')
 const { latitudeValide, longitudeValide } = require('../utils/geoUtils')
@@ -78,7 +78,17 @@ const creer = asyncHandler(async (req, res) => {
       return nouvel
     })
     await journaliser(req, 'creation', 'signalement', id, { urgence })
-    res.status(201).json({ ...(await Signalement.parId(id)), points_gagnes: POINTS_ECO.soumis })
+    const cree = await Signalement.parId(id)
+    // urgence critique : tous les agents et administrateurs sont prévenus
+    if (urgence === 'critique') {
+      await Notification.notifier(await Notification.idsParRole('agent_municipal', 'administrateur'), {
+        type: 'urgence_critique',
+        titre: `Urgence critique signalée${cree.zone_nom ? ` à ${cree.zone_nom}` : ''}`,
+        message: description ?? cree.adresse ?? 'Nouveau dépôt signalé avec une photo',
+        lien: '/agent/signalements',
+      })
+    }
+    res.status(201).json({ ...cree, points_gagnes: POINTS_ECO.soumis })
   } catch (erreur) {
     if (req.file) supprimerPhoto(urlPhoto(req.file)) // pas de photo orpheline si l'enregistrement échoue
     throw erreur
@@ -101,6 +111,22 @@ const changerStatut = asyncHandler(async (req, res) => {
     if (statut === 'valide' && !actuel.date_validation) await User.ajouterPointsEco(actuel.citoyen_id, POINTS_ECO.valide, tx)
   })
   await journaliser(req, 'changement_statut', 'signalement', actuel.id, { de: actuel.statut, vers: statut })
+  const objet = actuel.description ?? actuel.adresse ?? 'Votre signalement'
+  if (statut === 'valide') {
+    await Notification.notifier(actuel.citoyen_id, {
+      type: 'signalement_valide',
+      titre: actuel.date_validation ? 'Signalement de nouveau validé' : `Signalement validé : +${POINTS_ECO.valide} points`,
+      message: `${objet}. Il sera ajouté à une prochaine tournée.`,
+      lien: '/citoyen/signalements',
+    })
+  } else if (statut === 'rejete') {
+    await Notification.notifier(actuel.citoyen_id, {
+      type: 'signalement_rejete',
+      titre: 'Signalement non retenu',
+      message: `${objet}. Doublon ou dépôt déjà ramassé.`,
+      lien: '/citoyen/signalements',
+    })
+  }
   res.json(await Signalement.parId(actuel.id))
 })
 

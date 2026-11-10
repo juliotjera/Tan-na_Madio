@@ -19,5 +19,6 @@ module.exports = {
   Collecte: require('./Collecte'),
   Camion: require('./Camion'),
   Zone: require('./Zone'),
+  Notification: require('./Notification'),
   journaliser,
 }

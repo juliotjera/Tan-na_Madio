@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { statsPeriode, statsZones } from '../../api'
 import { useDonnees } from '../../hooks/useDonnees'
+import BoutonExport from '../../components/common/BoutonExport'
 import { BarresZones, CourbeActivite } from '../../components/common/Graphiques'
 import { Chargement, EnTete, Erreur, Segments } from '../../components/common/ui'
 import { kg, nombre, URGENCES } from '../../utils/format'
@@ -28,6 +29,10 @@ export default function Stats() {
   return (
     <div className="space-y-6">
       <EnTete titre="Statistiques" texte="L’activité sur la période choisie." actions={<Segments options={PERIODES} valeur={jours} onChange={setJours} libelle="Période" />} />
+      <div className="-mt-2 flex flex-wrap gap-2">
+        <BoutonExport ressource="signalements" params={{ debut: p?.debut, fin: p?.fin }} libelle="Signalements de la période (CSV)" />
+        <BoutonExport ressource="collectes" params={{ debut: p?.debut, fin: p?.fin }} libelle="Tournées de la période (CSV)" />
+      </div>
       {periode.erreur && <Erreur message={periode.erreur} onReessayer={periode.recharger} />}
 
       {totaux && (

@@ -8,6 +8,7 @@ import { envoyerSignalement } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { usePosition } from '../../hooks/usePosition'
 import { AuClic, Cadrer, Carte, CENTRE_TANA, iconeUrgence } from '../../components/map/Carte'
+import RechercheAdresse from '../../components/map/RechercheAdresse'
 import { Champ, Spinner } from '../../components/common/ui'
 import { compresserPhoto } from '../../utils/image'
 import { URGENCES } from '../../utils/format'
@@ -118,6 +119,13 @@ export default function Signaler() {
       </div>
 
       <Bloc numero={1} titre="Où se trouve le dépôt ?" fait={Boolean(gps.position)}>
+        <RechercheAdresse
+          onChoix={(position, nom) => {
+            gps.setPosition(position)
+            gps.setPrecision(null)
+            if (!adresse) setAdresse(nom.slice(0, 255))
+          }}
+        />
         <Carte className="h-[300px] sm:h-[340px]" centre={gps.position ?? CENTRE_TANA} zoom={16}>
           <AuClic
             onClic={(p) => {

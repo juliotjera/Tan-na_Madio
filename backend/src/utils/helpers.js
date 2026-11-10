@@ -23,4 +23,8 @@ const estUuid = (v) => typeof v === 'string' && UUID.test(v)
 // Points écologiques attribués au citoyen à chaque étape de son signalement
 const POINTS_ECO = { soumis: 2, valide: 5, collecte: 10 }
 
-module.exports = { ErreurApi, asyncHandler, pagination, estUuid, POINTS_ECO }
+// Date lisible à l'heure d'Antananarivo, pour les messages (« mercredi 11 novembre à 07:30 »)
+const dateLocale = (d) =>
+  new Date(d).toLocaleString('fr-FR', { timeZone: 'Indian/Antananarivo', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+
+module.exports = { dateLocale, ErreurApi, asyncHandler, pagination, estUuid, POINTS_ECO }

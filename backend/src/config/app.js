@@ -4,6 +4,7 @@ const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
+const compression = require('compression')
 const { rateLimit } = require('express-rate-limit')
 const config = require('./env')
 const db = require('./db')
@@ -24,11 +25,25 @@ function creerApp() {
       contentSecurityPolicy: {
         directives: {
           'img-src': ["'self'", 'data:', 'blob:', 'https://tile.openstreetmap.org'],
+          'connect-src': ["'self'", 'https://nominatim.openstreetmap.org'], // recherche d'adresse
         },
       },
     }),
   )
+  app.use(compression()) // réponses compressées : pages et données plus rapides sur réseau mobile
   app.use(cors({ origin: config.corsOrigins, credentials: true }))
+
+  // journal des requêtes de l'API (hors tests) : méthode, adresse, statut, durée
+  if (!test) {
+    app.use('/api', (req, res, next) => {
+      const debut = process.hrtime.bigint()
+      res.on('finish', () => {
+        const ms = Number(process.hrtime.bigint() - debut) / 1e6
+        console.log(`${req.method} ${req.originalUrl.split('?')[0]} ${res.statusCode} ${ms.toFixed(0)} ms`)
+      })
+      next()
+    })
+  }
   app.use(express.json({ limit: '1mb' }))
 
   // contre les essais de mots de passe en série : 20 tentatives par quart d'heure et par adresse
@@ -56,8 +71,10 @@ function creerApp() {
 
   // une seule adresse en production : le frontend React est servi par l'API
   if (fs.existsSync(FRONTEND)) {
-    app.use(express.static(FRONTEND, { index: false, maxAge: '1h' }))
-    app.get('*', (req, res) => res.sendFile(path.join(FRONTEND, 'index.html')))
+    // fichiers versionnés (nom avec empreinte) : cache d'un an ; page et service worker : toujours revérifiés
+    app.use('/assets', express.static(path.join(FRONTEND, 'assets'), { immutable: true, maxAge: '1y', index: false }))
+    app.use(express.static(FRONTEND, { index: false, maxAge: 0, setHeaders: (res) => res.set('Cache-Control', 'no-cache') }))
+    app.get('*', (req, res) => res.set('Cache-Control', 'no-cache').sendFile(path.join(FRONTEND, 'index.html')))
   }
 
   app.use(routeIntrouvable)

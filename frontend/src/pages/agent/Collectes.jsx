@@ -7,6 +7,7 @@ import { ListChecks, Route } from 'lucide-react'
 import { annulerCollecte, collecte as chargerCollecte, listerCollectes } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
+import BoutonExport from '../../components/common/BoutonExport'
 import { Cadrer, Carte, Itineraire } from '../../components/map/Carte'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, Confirmation, EnTete, Erreur, Modal, Pagination, Segments, Vide } from '../../components/common/ui'
@@ -66,9 +67,12 @@ export default function Collectes() {
         titre="Collectes"
         texte="Les tournées planifiées, en cours et passées."
         actions={
-          <Link to="/agent/planifier" className="btn-principal">
-            <Route className="h-4 w-4" /> Planifier une tournée
-          </Link>
+          <>
+            <BoutonExport ressource="collectes" params={{ statut: statut || undefined }} />
+            <Link to="/agent/planifier" className="btn-principal">
+              <Route className="h-4 w-4" /> Planifier une tournée
+            </Link>
+          </>
         }
       />
       <div className="mb-5 overflow-x-auto">

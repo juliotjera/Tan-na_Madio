@@ -65,3 +65,20 @@ export const creerUtilisateur = (champs) => api.post('/utilisateurs', champs).th
 export const modifierUtilisateur = (id, champs) => api.put(`/utilisateurs/${id}`, champs).then(donnees)
 export const activerUtilisateur = (id, actif) => api.patch(`/utilisateurs/${id}/activer`, { actif }).then(donnees)
 export const journal = (params) => api.get('/utilisateurs/journal', { params }).then(donnees)
+
+// ── Notifications
+export const listerNotifications = (params) => api.get('/notifications', { params }).then(donnees)
+export const lireNotification = (id) => api.patch(`/notifications/${id}/lu`)
+export const toutLire = () => api.patch('/notifications/tout-lu')
+
+// ── Exports CSV (téléchargement avec le jeton : le fichier est reçu puis enregistré par le navigateur)
+export async function telechargerCsv(ressource, params) {
+  const r = await api.get(`/exports/${ressource}.csv`, { params, responseType: 'blob', timeout: 120000 })
+  const nom = /filename="([^"]+)"/.exec(r.headers['content-disposition'] ?? '')?.[1] ?? `${ressource}.csv`
+  const lien = document.createElement('a')
+  lien.href = URL.createObjectURL(r.data)
+  lien.download = nom
+  lien.click()
+  setTimeout(() => URL.revokeObjectURL(lien.href), 1000)
+  return nom
+}

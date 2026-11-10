@@ -4,7 +4,6 @@ const { ErreurApi } = require('../utils/helpers')
 
 const routeIntrouvable = (req, res) => res.status(404).json({ message: 'Route introuvable', code: 'NOT_FOUND' })
 
-// eslint-disable-next-line no-unused-vars
 function gestionErreurs(erreur, req, res, next) {
   if (erreur instanceof ErreurApi) return res.status(erreur.statut).json({ message: erreur.message, code: erreur.code })
   if (erreur instanceof multer.MulterError) {

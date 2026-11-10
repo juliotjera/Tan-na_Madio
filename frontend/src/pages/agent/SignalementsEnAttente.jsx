@@ -1,13 +1,13 @@
 // Validation des signalements : photo, lieu, urgence — valider ou rejeter
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Check, ImageOff, Inbox, RotateCcw, X } from 'lucide-react'
-import { changerStatut, listerSignalements, listerZones } from '../../api'
+import { Check, Download, ImageOff, Inbox, Maximize2, RotateCcw, X } from 'lucide-react'
+import { changerStatut, listerSignalements, listerZones, telechargerCsv } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Cadrer, Carte, MarqueurSignalement, Zones } from '../../components/map/Carte'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
-import { Chargement, EnTete, Erreur, Pagination, Segments, Spinner, Vide } from '../../components/common/ui'
+import { Chargement, EnTete, Erreur, Modal, Pagination, Segments, Spinner, Vide } from '../../components/common/ui'
 import { dateHeure, ilYa, pluriel, URGENCES } from '../../utils/format'
 
 const ONGLETS = [
@@ -23,6 +23,8 @@ export default function SignalementsEnAttente() {
   const [page, setPage] = useState(1)
   const [choisi, setChoisi] = useState(null)
   const [action, setAction] = useState(null) // id en cours de traitement
+  const [agrandie, setAgrandie] = useState(null) // signalement dont la photo est affichée en grand
+  const [exportEnCours, setExportEnCours] = useState(false)
   const zones = useDonnees(listerZones, [])
   const liste = useDonnees(
     () => listerSignalements({ statut, urgence: urgence || undefined, zone_id: zone || undefined, page, limit: 12 }),
@@ -51,7 +53,31 @@ export default function SignalementsEnAttente() {
 
   return (
     <div>
-      <EnTete titre="Signalements à valider" texte="Vérifiez la photo et le lieu. Un signalement validé peut être ajouté à une tournée." />
+      <EnTete
+        titre="Signalements à valider"
+        texte="Vérifiez la photo et le lieu. Un signalement validé peut être ajouté à une tournée."
+        actions={
+          <button
+            type="button"
+            className="btn-secondaire"
+            disabled={exportEnCours}
+            onClick={async () => {
+              setExportEnCours(true)
+              try {
+                const nom = await telechargerCsv('signalements', { statut, urgence: urgence || undefined, zone_id: zone || undefined })
+                toast.success(`Export enregistré : ${nom}`)
+              } catch (err) {
+                toast.error(messageErreur(err))
+              } finally {
+                setExportEnCours(false)
+              }
+            }}
+          >
+            {exportEnCours ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+            Exporter en CSV
+          </button>
+        }
+      />
 
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <Segments
@@ -101,7 +127,20 @@ export default function SignalementsEnAttente() {
                 >
                   <div className="h-44 shrink-0 bg-bleu-50 sm:h-auto sm:w-44">
                     {s.photo_url ? (
-                      <img src={s.photo_url} alt="Photo du dépôt" className="h-full w-full object-cover" loading="lazy" />
+                      <button
+                        type="button"
+                        className="group relative block h-full w-full"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setAgrandie(s)
+                        }}
+                        aria-label="Agrandir la photo"
+                      >
+                        <img src={s.photo_url} alt="Photo du dépôt" className="h-full w-full object-cover" loading="lazy" />
+                        <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-nuit/70 text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                          <Maximize2 className="h-4 w-4" />
+                        </span>
+                      </button>
                     ) : (
                       <div className="flex h-full items-center justify-center text-encre-pale">
                         <ImageOff className="h-6 w-6" />
@@ -159,6 +198,18 @@ export default function SignalementsEnAttente() {
           </aside>
         </div>
       )}
+      <Modal ouvert={Boolean(agrandie)} onFermer={() => setAgrandie(null)} titre={agrandie?.description ?? 'Photo du dépôt'} large>
+        {agrandie && (
+          <div className="space-y-3">
+            <img src={agrandie.photo_url} alt="Photo du dépôt" className="max-h-[70vh] w-full rounded-lg bg-papier object-contain" />
+            <div className="flex flex-wrap items-center gap-2 text-sm text-encre-doux">
+              <UrgenceBadge urgence={agrandie.urgence} />
+              <span>{[agrandie.adresse, agrandie.zone_nom ?? 'Hors zone'].filter(Boolean).join(', ')}</span>
+              <span className="text-encre-pale">{dateHeure(agrandie.created_at)}</span>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

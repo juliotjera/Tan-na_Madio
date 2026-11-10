@@ -58,7 +58,7 @@ export default function PlanifierCollecte() {
 
   const camion = camions.donnees?.find((c) => c.id === camionId)
   const zone = zones.donnees?.find((z) => z.id === zoneId)
-  const signalements = valides.donnees?.signalements ?? []
+  const signalements = useMemo(() => valides.donnees?.signalements ?? [], [valides.donnees])
   const choisis = useMemo(() => signalements.filter((s) => selection.includes(s.id)), [signalements, selection])
   const charge = choisis.reduce((t, s) => t + (POIDS_KG[s.urgence] ?? 120), 0)
   const depassement = camion && charge > camion.capacite_kg

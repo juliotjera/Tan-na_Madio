@@ -11,7 +11,8 @@
     "db:seed": "node scripts/seedDb.js",
     "db:reset": "node scripts/resetDb.js",
     "admin:create": "node scripts/createAdmin.js",
-    "admin:password": "node scripts/updateAdminPassword.js"
+    "admin:password": "node scripts/updateAdminPassword.js",
+    "lint": "eslint ."
   },
   "author": "JERA Bevala Juliot",
   "license": "MIT",
@@ -20,6 +21,7 @@
     "@electric-sql/pglite": "^0.5.16",
     "@electric-sql/pglite-postgis": "^0.2.16",
     "bcryptjs": "^3.0.3",
+    "compression": "^1.8.2",
     "cors": "^2.8.6",
     "dotenv": "^18.0.10",
     "express": "^4.22.3",
@@ -30,7 +32,10 @@
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "cross-env": "^10.1.0",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.14",
     "supertest": "^7.3.2"

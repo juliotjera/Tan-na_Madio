@@ -7,11 +7,14 @@ const path = require('path')
 const config = require('./env')
 
 const SCHEMA = path.join(__dirname, 'schema.sql')
+const MIGRATIONS = path.join(__dirname, 'migrations.sql')
 
-// Le schéma n'est appliqué qu'une fois (CREATE TYPE ne peut pas être rejoué)
+// Le schéma n'est appliqué qu'une fois (CREATE TYPE ne peut pas être rejoué) ;
+// les migrations, idempotentes, le sont à chaque démarrage.
 async function appliquerSchemaSiAbsent(executer) {
   const { rows } = await executer(`SELECT to_regclass('public.utilisateurs') AS t`)
   if (!rows[0].t) await executer(fs.readFileSync(SCHEMA, 'utf8'))
+  await executer(fs.readFileSync(MIGRATIONS, 'utf8'))
 }
 
 async function connecterPglite() {

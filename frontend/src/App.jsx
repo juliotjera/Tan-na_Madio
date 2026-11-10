@@ -1,9 +1,10 @@
 // Routes de l'application, par rôle (les pages sont chargées à la demande)
 import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import { Chargement } from './components/common/ui'
+import { GardeErreur, TitreDePage } from './components/layout/Garde'
 
 const page = (charger) => lazy(charger)
 
@@ -35,8 +36,11 @@ const Stats = page(() => import('./pages/admin/Stats'))
 const AGENTS = ['agent_municipal', 'administrateur']
 
 export default function App() {
+  const { pathname } = useLocation()
   return (
-    <Suspense fallback={<Chargement />}>
+    <GardeErreur cle={pathname}>
+      <TitreDePage />
+      <Suspense fallback={<Chargement />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -78,6 +82,7 @@ export default function App() {
         <Route path="/accueil" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Introuvable />} />
       </Routes>
-    </Suspense>
+      </Suspense>
+    </GardeErreur>
   )
 }

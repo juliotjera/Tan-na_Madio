@@ -1,9 +1,9 @@
 // Collectes : optimisation (Dijkstra + glouton), planification, déroulement de la tournée
 const db = require('../config/db')
-const { Collecte, User, journaliser } = require('../models')
+const { Collecte, User, Notification, journaliser } = require('../models')
 const collecteService = require('../services/collecteService')
 const { selectionnerPourCamion, POIDS_ESTIME_KG } = require('../algorithms/glouton')
-const { ErreurApi, asyncHandler, pagination, estUuid, POINTS_ECO } = require('../utils/helpers')
+const { ErreurApi, asyncHandler, pagination, estUuid, POINTS_ECO, dateLocale } = require('../utils/helpers')
 
 const STATUTS = ['planifiee', 'en_cours', 'terminee', 'annulee']
 
@@ -100,7 +100,19 @@ const creer = asyncHandler(async (req, res) => {
     return collecteId
   })
   await journaliser(req, 'creation', 'collecte', id, { camion_id, nb_points: plan.ordre_optimal.length, distance_km: plan.distance_km })
-  res.status(201).json(await charger(id))
+  const cree = await charger(id)
+  const quand = dateLocale(cree.date_planifiee)
+  await Notification.notifier(cree.chauffeur_id, {
+    type: 'tournee_affectee',
+    titre: `Nouvelle tournée ${quand}`,
+    message: `${cree.nb_points} arrêts, ${cree.distance_km} km avec le camion ${cree.camion_immatriculation}.`,
+    lien: `/chauffeur/tournees/${id}`,
+  })
+  await Notification.notifier(
+    cree.signalements.map((s) => s.citoyen_id),
+    { type: 'signalement_planifie', titre: 'Votre signalement est programmé', message: `Passage du camion prévu ${quand}.`, lien: '/citoyen/signalements' },
+  )
+  res.status(201).json(cree)
 })
 
 const demarrer = asyncHandler(async (req, res) => {
@@ -128,6 +140,12 @@ const marquerPoint = asyncHandler(async (req, res) => {
     await User.ajouterPointsEco(point.citoyen_id, POINTS_ECO.collecte, tx)
   })
   await journaliser(req, 'point_collecte', 'collecte', c.id, { signalement_id: point.id })
+  await Notification.notifier(point.citoyen_id, {
+    type: 'signalement_collecte',
+    titre: `Dépôt ramassé : +${POINTS_ECO.collecte} points`,
+    message: `${point.description ?? point.adresse ?? 'Le dépôt que vous avez signalé'}. Merci pour votre signalement.`,
+    lien: '/citoyen/signalements',
+  })
   res.json(await charger(c.id))
 })
 
@@ -153,6 +171,12 @@ const terminer = asyncHandler(async (req, res) => {
     await tx.query(`UPDATE camions SET statut = 'disponible' WHERE id = $1 AND statut = 'en_tournee'`, [c.camion_id])
   })
   await journaliser(req, 'fin', 'collecte', c.id, { poids_collecte_kg: poids, points_collectes: c.nb_faits })
+  await Notification.notifier(c.agent_id, {
+    type: 'tournee_terminee',
+    titre: `Tournée terminée : ${c.nb_faits}/${c.nb_points} arrêts`,
+    message: `Camion ${c.camion_immatriculation}${poids != null ? `, ${poids} kg collectés` : ''}.`,
+    lien: '/agent/collectes',
+  })
   res.json(await charger(c.id))
 })
 
@@ -169,6 +193,12 @@ const annuler = asyncHandler(async (req, res) => {
     await tx.query(`UPDATE camions SET statut = 'disponible' WHERE id = $1 AND statut = 'en_tournee'`, [c.camion_id])
   })
   await journaliser(req, 'annulation', 'collecte', c.id)
+  await Notification.notifier(c.chauffeur_id, {
+    type: 'tournee_annulee',
+    titre: 'Tournée annulée',
+    message: `La tournée prévue ${dateLocale(c.date_planifiee)} est annulée.`,
+    lien: '/chauffeur',
+  })
   res.json(await charger(c.id))
 })
 

@@ -83,6 +83,25 @@ Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 | PUT | `/:id` | admin, ou l’utilisateur lui-même | `nom`, `prenom`, `telephone`, `quartier` ; `zone_id` (admin) |
 | PATCH | `/:id/activer` | admin | `{ actif }` : un compte désactivé est déconnecté immédiatement |
 
+## Notifications — `/api/notifications`
+
+| Méthode | Route | Accès | Description |
+| --- | --- | --- | --- |
+| GET | `/` | connecté | `limit` (≤ 50), `non_lues=true` → `{ notifications, non_lues }` |
+| PATCH | `/:id/lu` | connecté | Marque une notification comme lue (seulement les siennes) |
+| PATCH | `/tout-lu` | connecté | Marque tout comme lu |
+
+Envoyées automatiquement : urgence critique (agents et admins), signalement validé / rejeté / programmé / ramassé (citoyen), tournée confiée / annulée (chauffeur), tournée terminée (agent qui l’a planifiée).
+
+## Exports CSV — `/api/exports`
+
+Réservés aux agents et administrateurs. Fichiers UTF-8 avec séparateur « ; » (ouverture directe dans Excel).
+
+| Méthode | Route | Filtres |
+| --- | --- | --- |
+| GET | `/signalements.csv` | `statut`, `urgence`, `zone_id`, `debut`, `fin` |
+| GET | `/collectes.csv` | `statut`, `debut`, `fin` (distances, gain, poids, horaires) |
+
 ## Divers
 
 - `GET /api/sante` : état de l’API et de la base.

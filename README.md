@@ -1,5 +1,7 @@
 # Tanàna Madio
 
+[![CI](https://github.com/juliotjera/Tan-na_Madio/actions/workflows/ci.yml/badge.svg)](https://github.com/juliotjera/Tan-na_Madio/actions/workflows/ci.yml)
+
 Application web de **signalement des dépôts d’ordures** et de **collecte optimisée** pour la Commune urbaine d’Antananarivo.
 
 Les citoyens signalent un dépôt (photo, position GPS, urgence) ; les agents municipaux valident les signalements et planifient des tournées dont l’itinéraire est calculé **par les rues** avec l’algorithme de **Dijkstra**, puis ordonné par un **algorithme glouton amélioré par 2-opt** ; les chauffeurs suivent la tournée et cochent chaque arrêt ; l’administrateur gère comptes, camions et zones, et suit les statistiques.
@@ -13,7 +15,9 @@ Les citoyens signalent un dépôt (photo, position GPS, urgence) ; les agents mu
 | **Citoyen** | Carte des signalements (filtres, rafraîchissement automatique, « Me localiser ») · signaler un dépôt (GPS automatique ou point placé sur la carte, photo réduite avant l’envoi, urgence) · suivre ses signalements étape par étape · points éco et paliers (+2 envoi, +5 validation, +10 ramassage) |
 | **Agent municipal** | Tableau de bord · valider / rejeter les signalements · **planifier une tournée en 4 étapes** (camion et date → signalements, avec sélection automatique selon la capacité → itinéraire optimisé sur la carte, gain affiché → confirmation) · suivre et annuler les collectes · état de la flotte |
 | **Chauffeur** | Prochaine tournée · **exécution de la tournée** : carte avec tracé et arrêts numérotés, prochain arrêt mis en évidence, guidage GPS, « Marquer collecté », progression X/N, fin de tournée avec poids |
-| **Administrateur** | 5 indicateurs et graphiques · comptes (création du personnel, activation) · camions (CRUD, affectation des chauffeurs) · zones (tracé du contour sur la carte) · statistiques par période · journal d’activité |
+| **Administrateur** | 5 indicateurs et graphiques · comptes (création du personnel, activation) · camions (CRUD, affectation des chauffeurs) · zones (tracé du contour sur la carte) · statistiques par période · exports CSV · journal d’activité |
+
+Pour tous : **notifications** dans l’application (signalement validé, rejeté, programmé, ramassé ; tournée confiée, terminée, annulée ; urgence critique), **application installable** sur téléphone et ouverture **hors ligne**, recherche d’adresse pour placer un signalement, exports CSV (ouvrables dans Excel) pour le personnel.
 
 ## Algorithmes
 
@@ -32,7 +36,10 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 - **Base de développement** : **PGlite** (PostgreSQL 18 + PostGIS 3.6 compilés en WebAssembly) : le projet démarre **sans installer PostgreSQL**. En production, la même base SQL tourne sur un vrai serveur PostgreSQL/PostGIS.
 - **Frontend** : React 18, Vite 5, Tailwind CSS 3, Leaflet / React-Leaflet (fond OpenStreetMap), Recharts, Axios, React Router 6, Framer Motion.
 - **Identité visuelle « signalisation urbaine »** : bleu signalisation (#0E518D) et bleu nuit (#0C1A2B) pour l’action de la commune, couleurs chaudes réservées aux déchets et aux urgences (rouge = critique), police Archivo (étroite pour les titres et les chiffres, comme les panneaux), arrêts en plaques numérotées et camions en plaques d’immatriculation.
-- **Tests** : Jest + Supertest (55 tests : algorithmes, authentification, signalements, collectes, base de données).
+- **Application installable (PWA)** : manifeste, icônes, service worker (interface disponible sans réseau ; données toujours lues en direct).
+- **Production** : compression des réponses, cache long des fichiers versionnés, journal des requêtes, migrations de base automatiques.
+- **Qualité** : ESLint (frontend et backend), intégration continue GitHub Actions (vérification du code, tests, compilation à chaque envoi).
+- **Tests** : Jest + Supertest (63 tests : algorithmes, authentification, signalements, collectes, notifications et exports, base de données).
 
 ## Démarrage rapide
 

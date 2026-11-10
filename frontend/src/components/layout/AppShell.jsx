@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../../hooks/useAuth'
 import { ROLES } from '../../utils/format'
 import { Logo } from './Logo'
+import Cloche from './Cloche'
 
 export const NAVIGATION = {
   citoyen: [
@@ -84,7 +85,10 @@ export default function AppShell() {
 
       {/* Barre latérale (ordinateur) */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col bg-nuit px-4 py-6 lg:flex">
-        <Logo clair className="px-2" />
+        <div className="flex items-center justify-between pl-2">
+          <Logo clair />
+          <Cloche sombre alignement="gauche" />
+        </div>
         <nav className="mt-9 flex flex-col gap-1" aria-label="Navigation principale">
           {liens.map((l) => (
             <LienLateral key={l.vers} lien={l} />
@@ -92,7 +96,7 @@ export default function AppShell() {
         </nav>
         <div className="mt-auto border-t border-white/10 pt-4">
           <NavLink to="/compte" className="flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-white/5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ciel font-titre text-sm font-bold text-nuit">{initiales(user)}</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-ciel font-titre text-sm font-bold text-nuit">{initiales(user)}</span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold text-white">
                 {user.prenom} {user.nom}
@@ -110,7 +114,10 @@ export default function AppShell() {
       {/* Barre du haut (téléphone, tablette) */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-trait bg-white/90 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur lg:hidden">
         <Logo />
-        <span className="rounded-full bg-bleu-100 px-2.5 py-1 text-xs font-semibold text-bleu">{ROLES[user.role]}</span>
+        <div className="flex items-center gap-1">
+          <span className="rounded-[5px] bg-bleu-50 px-2 py-1 text-xs font-semibold text-bleu">{ROLES[user.role]}</span>
+          <Cloche />
+        </div>
       </header>
 
       <main id="contenu" className="mx-auto max-w-[1240px] px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
