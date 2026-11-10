@@ -21,7 +21,8 @@ async function lister({ statut, camion_id, zone_id, chauffeur_id, limit, offset 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
   const total = (await db.query(`SELECT count(*)::int AS n ${JOINTURES} ${where}`, params)).rows[0].n
   const { rows } = await db.query(
-    `SELECT ${CHAMPS} ${JOINTURES} ${where} ORDER BY co.date_planifiee DESC LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}`,
+    // en liste, l'itinéraire sans ses tracés (lourds) : ils ne servent qu'au détail
+    `SELECT ${CHAMPS.replace('co.itineraire', "(co.itineraire - 'trace' - 'trace_naive') AS itineraire")} ${JOINTURES} ${where} ORDER BY co.date_planifiee DESC LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}`,
     params,
   )
   return { collectes: rows, total }

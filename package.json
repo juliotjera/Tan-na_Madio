@@ -1,0 +1,20 @@
+{
+  "name": "tanana-madio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Signalement des dépôts d'ordures et collecte optimisée (Dijkstra) à Antananarivo",
+  "author": "JERA Bevala Juliot",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "installer": "npm ci --prefix backend && npm ci --prefix frontend",
+    "dev:api": "npm run dev --prefix backend",
+    "dev:web": "npm run dev --prefix frontend",
+    "build": "npm ci --include=dev --prefix backend && npm ci --include=dev --prefix frontend && npm run build --prefix frontend",
+    "start": "npm start --prefix backend",
+    "test": "npm test --prefix backend",
+    "db:reset": "npm run db:reset --prefix backend"
+  }
+}

@@ -23,8 +23,7 @@ function creerApp() {
       crossOriginResourcePolicy: { policy: 'cross-origin' }, // photos affichées par le frontend de développement (port 5173)
       contentSecurityPolicy: {
         directives: {
-          'img-src': ["'self'", 'data:', 'blob:', 'https://*.basemaps.cartocdn.com', 'https://*.tile.openstreetmap.org'],
-          'connect-src': ["'self'", 'https://nominatim.openstreetmap.org'],
+          'img-src': ["'self'", 'data:', 'blob:', 'https://tile.openstreetmap.org'],
         },
       },
     }),

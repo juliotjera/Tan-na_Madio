@@ -1,7 +1,7 @@
 // Gestion des comptes par l'administrateur (création du personnel, activation)
 const bcrypt = require('bcryptjs')
 const db = require('../config/db')
-const { User, journaliser } = require('../models')
+const { User, Camion, journaliser } = require('../models')
 const { verifierMotDePasse, TOURS_BCRYPT } = require('./authController')
 const { ErreurApi, asyncHandler, pagination } = require('../utils/helpers')
 
@@ -31,6 +31,8 @@ const creer = asyncHandler(async (req, res) => {
   if (await User.parEmail(email)) throw new ErreurApi(409, 'Cette adresse e-mail est déjà utilisée', 'EMAIL_EXISTANT')
 
   const u = await User.creer({ nom, prenom, email, telephone, role, motDePasseHash: await bcrypt.hash(mot_de_passe, TOURS_BCRYPT), extras })
+  // affectation du camion tenue à jour des deux côtés (camion ↔ chauffeur)
+  if (role === 'chauffeur' && extras.camion_id) await Camion.modifier(extras.camion_id, { chauffeur_id: u.id })
   await journaliser(req, 'creation', 'utilisateur', u.id, { role })
   res.status(201).json(await User.profil(u.id))
 })

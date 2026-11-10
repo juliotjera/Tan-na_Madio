@@ -3,6 +3,7 @@ const c = require('../controllers/statsController')
 const { authentifier } = require('../middleware/auth')
 const { autoriser } = require('../middleware/validate')
 
+router.get('/public', c.apercu) // page d'accueil, sans connexion
 router.use(authentifier, autoriser('agent_municipal', 'administrateur'))
 router.get('/dashboard', c.dashboard)
 router.get('/zones', c.zones)

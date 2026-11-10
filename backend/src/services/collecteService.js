@@ -42,7 +42,9 @@ async function optimiser({ signalement_ids, camion_id }) {
   const { ordre, distance_km, distance_naive_km, gain_pourcent } = optimiserOrdre(matrice)
 
   const visite = ordre.map((i) => etapes[i]).filter((e) => !e.depot)
-  const trace = ordre.slice(1).flatMap((j, k) => (k === 0 ? traces[ordre[k]][j] : traces[ordre[k]][j].slice(1)))
+  // tracé complet d'un ordre de visite : plus courts chemins mis bout à bout
+  const tracer = (o) => o.slice(1).flatMap((j, k) => (k === 0 ? traces[o[k]][j] : traces[o[k]][j].slice(1)))
+  const trace = tracer(ordre)
   const arrondi = (x) => Math.round(x * 100) / 100
 
   return {
@@ -55,6 +57,7 @@ async function optimiser({ signalement_ids, camion_id }) {
     depart: depart ? { latitude: depart.lat, longitude: depart.lng } : null,
     itineraire: visite.map((e, i) => ({ ordre: i + 1, signalement_id: e.id, urgence: e.urgence, latitude: e.lat, longitude: e.lng })),
     trace, // [[lat, lng], …] : tracé à dessiner sur la carte
+    trace_naive: tracer(etapes.map((_, i) => i)), // ordre de la sélection, pour comparer
   }
 }
 

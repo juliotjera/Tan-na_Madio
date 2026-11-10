@@ -1,0 +1,163 @@
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/public-sans';
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-menthe font-sans text-[15px] leading-relaxed text-encre antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-titre tracking-tight text-foret;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-feuille ring-offset-2 ring-offset-menthe;
+  }
+  ::selection {
+    @apply bg-feuille/30;
+  }
+}
+
+@layer components {
+  /* Boutons : une action principale verte par écran, le reste en retrait */
+  .btn {
+    @apply inline-flex min-h-[42px] select-none items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-principal {
+    @apply btn bg-foret-700 text-white hover:bg-foret active:scale-[0.98];
+  }
+  .btn-vert {
+    @apply btn bg-feuille text-foret hover:bg-feuille-600 hover:text-white active:scale-[0.98];
+  }
+  .btn-secondaire {
+    @apply btn border border-trait bg-white text-foret hover:border-foret-700/40 hover:bg-feuille-50;
+  }
+  .btn-discret {
+    @apply btn text-encre-doux hover:bg-foret/5 hover:text-foret;
+  }
+  .btn-danger {
+    @apply btn border border-alerte/30 bg-white text-alerte-700 hover:bg-alerte-50;
+  }
+
+  .carte {
+    @apply rounded-carte border border-trait bg-white shadow-carte;
+  }
+
+  .champ {
+    @apply block w-full rounded-xl border border-trait bg-white px-3.5 py-2.5 text-[15px] text-encre placeholder:text-encre-pale
+      transition focus:border-feuille-600 focus:outline-none focus:ring-4 focus:ring-feuille/15;
+  }
+  .etiquette {
+    @apply mb-1.5 block text-sm font-medium text-encre;
+  }
+
+  .tableau {
+    @apply w-full text-left text-sm;
+  }
+  .tableau th {
+    @apply border-b border-trait px-4 py-3 text-[13px] font-semibold text-encre-doux;
+  }
+  .tableau td {
+    @apply border-b border-trait/70 px-4 py-3 align-middle;
+  }
+  .tableau tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .tableau tbody tr:hover td {
+    @apply bg-feuille-50/60;
+  }
+
+  .chiffre {
+    @apply font-titre font-semibold tabular-nums tracking-tight;
+  }
+}
+
+/* Leaflet : contrôles et fenêtres accordés à l'interface */
+.leaflet-container {
+  @apply font-sans;
+  background: #e8efe9;
+}
+/* fond de carte adouci : les couleurs d'urgence et le tracé ressortent */
+.leaflet-tile-pane {
+  filter: saturate(0.45) brightness(1.04) contrast(0.95);
+}
+.leaflet-control-zoom a {
+  @apply !text-foret;
+}
+.leaflet-popup-content-wrapper {
+  @apply rounded-xl shadow-flotte;
+}
+.leaflet-popup-content {
+  @apply m-3 text-sm;
+}
+.leaflet-control-attribution {
+  @apply !text-[10px];
+}
+
+/* Marqueurs de signalement (divIcon) */
+.marqueur {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2.5px solid #fff;
+  box-shadow: 0 2px 6px rgba(5, 46, 22, 0.35);
+}
+.marqueur-critique::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2px solid #dc2626;
+  animation: pulsation 1.8s ease-out infinite;
+}
+@keyframes pulsation {
+  from {
+    opacity: 0.8;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* Étapes numérotées d'une tournée */
+.etape {
+  @apply flex h-7 w-7 items-center justify-center rounded-full border-[2.5px] border-white font-titre text-[13px] font-bold shadow-md;
+}
+
+/* Tracé optimisé : dessiné une fois à l'affichage */
+.trace-anime {
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 3000;
+  animation: dessiner 2.2s ease-out forwards;
+}
+@keyframes dessiner {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .trace-anime {
+    stroke-dashoffset: 0;
+  }
+}

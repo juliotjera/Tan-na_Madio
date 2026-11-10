@@ -1,0 +1,22 @@
+# Déploiement Render (Blueprint) : une seule adresse, l'API sert aussi le frontend compilé.
+# Base : PostgreSQL avec PostGIS (Neon, Supabase…) — DATABASE_URL à renseigner dans le tableau de bord.
+services:
+  - type: web
+    name: tanana-madio
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/sante
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://tanana-madio.onrender.com

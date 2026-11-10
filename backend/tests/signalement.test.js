@@ -71,6 +71,15 @@ describe('consultation', () => {
     expect(pourAgent.body.signalements.some((s) => s.statut === 'rejete')).toBe(false)
   })
 
+  test('aperçu public (page d’accueil) : sans connexion, sans donnée personnelle', async () => {
+    const r = await request(app).get('/api/stats/public')
+    expect(r.status).toBe(200)
+    expect(r.body.signalements).toBeGreaterThan(0)
+    expect(r.body.points.length).toBeGreaterThan(0)
+    expect(Object.keys(r.body.points[0]).sort()).toEqual(['latitude', 'longitude', 'statut', 'urgence'])
+    expect(JSON.stringify(r.body)).not.toMatch(/citoyen_nom|description|@/)
+  })
+
   test('filtres et pagination, urgences critiques en tête', async () => {
     const r = await request(app).get('/api/signalements?statut=en_attente&limit=2&page=1').set(agent.entete)
     expect(r.body.signalements).toHaveLength(2)

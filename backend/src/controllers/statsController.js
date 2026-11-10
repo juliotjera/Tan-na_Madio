@@ -64,4 +64,27 @@ const periode = asyncHandler(async (req, res) => {
   res.json({ debut: debut.toISOString(), fin: fin.toISOString(), pas: pas === 'day' ? 'jour' : 'semaine', series: rows, par_urgence: urgences.rows })
 })
 
-module.exports = { dashboard, zones, periode }
+// Aperçu public (page d'accueil) : chiffres globaux et points anonymes, sans nom ni description
+const apercu = asyncHandler(async (req, res) => {
+  const chiffres = (
+    await db.query(`
+      SELECT (SELECT count(*) FROM signalements)::int AS signalements,
+             (SELECT count(*) FROM signalements WHERE statut = 'collecte')::int AS collectes,
+             (SELECT count(*) FROM zones WHERE actif)::int AS zones,
+             (SELECT count(*) FROM utilisateurs WHERE role = 'citoyen' AND actif)::int AS citoyens,
+             (SELECT COALESCE(sum(poids_collecte_kg), 0) FROM collectes WHERE statut = 'terminee')::float AS poids_total_kg`)
+  ).rows[0]
+  const points = (
+    await db.query(`SELECT statut, urgence, round(latitude::numeric, 4)::float AS latitude, round(longitude::numeric, 4)::float AS longitude
+                      FROM signalements_carte ORDER BY created_at DESC LIMIT 200`)
+  ).rows
+  const tournee = (
+    await db.query(`SELECT itineraire->'trace' AS trace, itineraire->'trace_naive' AS trace_naive, distance_km::float,
+                           (itineraire->>'distance_naive_km')::float AS distance_naive_km, (itineraire->>'gain_pourcent')::float AS gain_pourcent
+                      FROM collectes WHERE itineraire ? 'trace' ORDER BY (itineraire->>'gain_pourcent')::float DESC NULLS LAST LIMIT 1`)
+  ).rows[0] ?? null
+  res.set('Cache-Control', 'public, max-age=60')
+  res.json({ ...chiffres, points, tournee })
+})
+
+module.exports = { dashboard, zones, periode, apercu }
