@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: API (ESLint + 63 tests Jest)
+    name: API (ESLint + tests Jest)
     runs-on: ubuntu-latest
     defaults:
       run:
