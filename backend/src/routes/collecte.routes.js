@@ -8,6 +8,7 @@ const AGENTS = ['agent_municipal', 'administrateur']
 router.use(authentifier)
 router.get('/', autoriser(...AGENTS, 'chauffeur'), c.lister)
 router.post('/optimiser', autoriser(...AGENTS), requis('signalement_ids'), c.optimiser)
+router.post('/repartition', autoriser(...AGENTS), requis('signalement_ids'), c.repartition)
 router.post('/suggestion', autoriser(...AGENTS), requis('camion_id'), c.suggestion)
 router.post('/', autoriser(...AGENTS), requis('camion_id', 'date_planifiee', 'signalement_ids'), c.creer)
 router.get('/:id', autoriser(...AGENTS, 'chauffeur'), uuidParam('id'), c.detail)

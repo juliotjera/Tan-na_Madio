@@ -30,8 +30,8 @@ function Parcours({ statut }) {
     <ol className="flex items-center gap-1.5" aria-label="Avancement">
       {PARCOURS.map((etape, i) => (
         <li key={etape} className="flex flex-1 flex-col gap-1.5">
-          <span className={`h-1.5 rounded-full ${i <= atteint ? 'bg-bleu-500' : 'bg-bleu-100'}`} />
-          <span className={`text-[11px] font-medium ${i <= atteint ? 'text-nuit' : 'text-encre-pale'}`}>{NOMS[etape]}</span>
+          <span className={`h-1.5 rounded-full ${i <= atteint ? 'bg-vert-500' : 'bg-vert-100'}`} />
+          <span className={`text-[11px] font-medium ${i <= atteint ? 'text-ardoise' : 'text-encre-pale'}`}>{NOMS[etape]}</span>
         </li>
       ))}
     </ol>
@@ -102,7 +102,7 @@ export default function MesSignalements() {
       <ul className="grid gap-4 md:grid-cols-2">
         {liste.donnees?.signalements.map((s) => (
           <li key={s.id} className="carte flex flex-col overflow-hidden sm:flex-row">
-            <div className="h-40 shrink-0 bg-bleu-50 sm:h-auto sm:w-36">
+            <div className="h-40 shrink-0 bg-vert-50 sm:h-auto sm:w-36">
               {s.photo_url ? (
                 <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
               ) : (

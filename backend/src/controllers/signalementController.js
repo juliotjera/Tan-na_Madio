@@ -49,7 +49,11 @@ const carte = asyncHandler(async (req, res) => {
 const mes = asyncHandler(async (req, res) => {
   const { page, limit, offset } = pagination(req.query)
   const resultat = await Signalement.lister({ citoyen_id: req.user.id, statut: filtre(req.query.statut, STATUTS, 'statut'), limit, offset })
-  res.json({ ...resultat, page, limit })
+  // compteurs par statut pour l'en-tête de l'espace citoyen
+  const { rows } = await db.query('SELECT statut, count(*)::int AS n FROM signalements WHERE citoyen_id = $1 GROUP BY statut', [req.user.id])
+  const compteurs = Object.fromEntries(STATUTS.map((st) => [st, rows.find((r) => r.statut === st)?.n ?? 0]))
+  compteurs.total = rows.reduce((t, r) => t + r.n, 0)
+  res.json({ ...resultat, page, limit, compteurs })
 })
 
 const detail = asyncHandler(async (req, res) => {

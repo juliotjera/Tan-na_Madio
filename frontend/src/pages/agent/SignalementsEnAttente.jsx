@@ -122,10 +122,10 @@ export default function SignalementsEnAttente() {
             {signalements.map((s) => (
               <li key={s.id}>
                 <div
-                  className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-bleu-500' : 'hover:border-bleu/30'}`}
+                  className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-vert-500' : 'hover:border-vert/30'}`}
                   onClick={() => setChoisi(s)}
                 >
-                  <div className="h-44 shrink-0 bg-bleu-50 sm:h-auto sm:w-44">
+                  <div className="h-44 shrink-0 bg-vert-50 sm:h-auto sm:w-44">
                     {s.photo_url ? (
                       <button
                         type="button"
@@ -137,7 +137,7 @@ export default function SignalementsEnAttente() {
                         aria-label="Agrandir la photo"
                       >
                         <img src={s.photo_url} alt="Photo du dépôt" className="h-full w-full object-cover" loading="lazy" />
-                        <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-nuit/70 text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                        <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-ardoise/70 text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
                           <Maximize2 className="h-4 w-4" />
                         </span>
                       </button>
@@ -201,7 +201,7 @@ export default function SignalementsEnAttente() {
       <Modal ouvert={Boolean(agrandie)} onFermer={() => setAgrandie(null)} titre={agrandie?.description ?? 'Photo du dépôt'} large>
         {agrandie && (
           <div className="space-y-3">
-            <img src={agrandie.photo_url} alt="Photo du dépôt" className="max-h-[70vh] w-full rounded-lg bg-papier object-contain" />
+            <img src={agrandie.photo_url} alt="Photo du dépôt" className="max-h-[70vh] w-full rounded-lg bg-fond object-contain" />
             <div className="flex flex-wrap items-center gap-2 text-sm text-encre-doux">
               <UrgenceBadge urgence={agrandie.urgence} />
               <span>{[agrandie.adresse, agrandie.zone_nom ?? 'Hors zone'].filter(Boolean).join(', ')}</span>

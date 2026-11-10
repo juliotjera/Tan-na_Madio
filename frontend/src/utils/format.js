@@ -4,28 +4,28 @@ import { fr } from 'date-fns/locale'
 
 export const URGENCES = {
   faible: { libelle: 'Faible', couleur: '#64748B', fond: 'bg-slate-100 text-slate-700' },
-  moyen: { libelle: 'Moyenne', couleur: '#E8A317', fond: 'bg-ambre-100 text-ambre-700' },
+  moyen: { libelle: 'Moyenne', couleur: '#F59E0B', fond: 'bg-ambre-100 text-ambre-700' },
   eleve: { libelle: 'Élevée', couleur: '#EA580C', fond: 'bg-orange-100 text-orange-800' },
-  critique: { libelle: 'Critique', couleur: '#D92D20', fond: 'bg-alerte-100 text-alerte-700' }, // le rouge est réservé à ce niveau
+  critique: { libelle: 'Critique', couleur: '#DC2626', fond: 'bg-alerte-100 text-alerte-700' }, // le rouge est réservé à ce niveau
 }
 
 export const STATUTS_SIGNALEMENT = {
   en_attente: { libelle: 'En attente', fond: 'bg-ambre-50 text-ambre-700 ring-ambre/30' },
-  valide: { libelle: 'Validé', fond: 'bg-bleu-50 text-bleu-700 ring-bleu/30' },
+  valide: { libelle: 'Validé', fond: 'bg-vert-50 text-vert-700 ring-vert/30' },
   en_cours: { libelle: 'En tournée', fond: 'bg-sky-50 text-sky-800 ring-sky-300/50' },
-  collecte: { libelle: 'Collecté', fond: 'bg-bleu text-white ring-bleu' },
+  collecte: { libelle: 'Collecté', fond: 'bg-vert text-white ring-vert' },
   rejete: { libelle: 'Rejeté', fond: 'bg-slate-100 text-slate-600 ring-slate-300/60' },
 }
 
 export const STATUTS_COLLECTE = {
   planifiee: { libelle: 'Planifiée', fond: 'bg-ambre-50 text-ambre-700 ring-ambre/30' },
   en_cours: { libelle: 'En cours', fond: 'bg-sky-50 text-sky-800 ring-sky-300/50' },
-  terminee: { libelle: 'Terminée', fond: 'bg-bleu text-white ring-bleu' },
+  terminee: { libelle: 'Terminée', fond: 'bg-vert text-white ring-vert' },
   annulee: { libelle: 'Annulée', fond: 'bg-slate-100 text-slate-600 ring-slate-300/60' },
 }
 
 export const STATUTS_CAMION = {
-  disponible: { libelle: 'Disponible', fond: 'bg-bleu-50 text-bleu-700 ring-bleu/30' },
+  disponible: { libelle: 'Disponible', fond: 'bg-vert-50 text-vert-700 ring-vert/30' },
   en_tournee: { libelle: 'En tournée', fond: 'bg-sky-50 text-sky-800 ring-sky-300/50' },
   en_maintenance: { libelle: 'En maintenance', fond: 'bg-ambre-50 text-ambre-700 ring-ambre/30' },
   hors_service: { libelle: 'Hors service', fond: 'bg-slate-100 text-slate-600 ring-slate-300/60' },

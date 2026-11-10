@@ -13,6 +13,7 @@ const Login = page(() => import('./pages/auth/Login'))
 const Register = page(() => import('./pages/auth/Register'))
 const Compte = page(() => import('./pages/Compte'))
 const Introuvable = page(() => import('./pages/Introuvable'))
+const Conditions = page(() => import('./pages/Conditions'))
 
 const CitoyenDashboard = page(() => import('./pages/citoyen/Dashboard'))
 const Signaler = page(() => import('./pages/citoyen/Signaler'))
@@ -24,6 +25,7 @@ const PlanifierCollecte = page(() => import('./pages/agent/PlanifierCollecte'))
 const Collectes = page(() => import('./pages/agent/Collectes'))
 const Camions = page(() => import('./pages/agent/Camions'))
 
+const ChauffeurDashboard = page(() => import('./pages/chauffeur/Dashboard'))
 const MesTournees = page(() => import('./pages/chauffeur/MesTournees'))
 const DetailTournee = page(() => import('./pages/chauffeur/DetailTournee'))
 
@@ -45,6 +47,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/conditions" element={<Conditions />} />
 
         <Route element={<ProtectedRoute />}>
           <Route element={<AppShell />}>
@@ -65,7 +68,8 @@ export default function App() {
             </Route>
 
             <Route element={<ProtectedRoute roles={['chauffeur', 'administrateur']} />}>
-              <Route path="/chauffeur" element={<MesTournees />} />
+              <Route path="/chauffeur" element={<ChauffeurDashboard />} />
+              <Route path="/chauffeur/tournees" element={<MesTournees />} />
               <Route path="/chauffeur/tournees/:id" element={<DetailTournee />} />
             </Route>
 

@@ -33,8 +33,8 @@ export default function AgentDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Chiffre icone={ClipboardCheck} ton="ambre" valeur={s?.en_attente ?? '—'} libelle="À valider" detail="Signalements en attente" />
         <Chiffre icone={AlertTriangle} ton="alerte" valeur={s?.critiques_ouverts ?? '—'} libelle="Urgences critiques" detail="Non encore ramassées" />
-        <Chiffre icone={Route} valeur={s?.valides ?? '—'} libelle="Prêts à planifier" detail="Validés, sans tournée" />
-        <Chiffre icone={Truck} ton="nuit" valeur={s ? `${s.camions_disponibles}/${s.camions}` : '—'} libelle="Camions disponibles" />
+        <Chiffre icone={Route} ton="vert" valeur={s?.valides ?? '—'} libelle="Prêts à planifier" detail="Validés, sans tournée" />
+        <Chiffre icone={Truck} ton="bleu" valeur={s ? `${s.camions_disponibles}/${s.camions}` : '—'} libelle="Camions disponibles" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
@@ -63,7 +63,7 @@ export default function AgentDashboard() {
           <div className="carte p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">À vérifier en priorité</h2>
-              <Link to="/agent/signalements" className="text-sm font-semibold text-bleu hover:underline">
+              <Link to="/agent/signalements" className="text-sm font-semibold text-vert hover:underline">
                 Tout voir
               </Link>
             </div>
@@ -85,7 +85,7 @@ export default function AgentDashboard() {
           <div className="carte p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Tournées planifiées</h2>
-              <Link to="/agent/collectes" className="text-sm font-semibold text-bleu hover:underline">
+              <Link to="/agent/collectes" className="text-sm font-semibold text-vert hover:underline">
                 Toutes
               </Link>
             </div>

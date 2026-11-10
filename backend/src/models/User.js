@@ -64,7 +64,15 @@ async function lister({ role, recherche, limit, offset }) {
        ${where} ORDER BY u.created_at DESC LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}`,
     params,
   )
-  return { utilisateurs: rows, total }
+  const compteurs = (
+    await db.query(`SELECT count(*)::int AS total, count(*) FILTER (WHERE actif)::int AS actifs,
+                           count(*) FILTER (WHERE role = 'citoyen')::int AS citoyens,
+                           count(*) FILTER (WHERE role = 'agent_municipal')::int AS agents,
+                           count(*) FILTER (WHERE role = 'chauffeur')::int AS chauffeurs,
+                           count(*) FILTER (WHERE role = 'administrateur')::int AS administrateurs
+                      FROM utilisateurs`)
+  ).rows[0]
+  return { utilisateurs: rows, total, compteurs }
 }
 
 async function modifier(id, { nom, prenom, telephone }) {

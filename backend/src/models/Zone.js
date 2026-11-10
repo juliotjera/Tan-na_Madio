@@ -9,7 +9,8 @@ const CHAMPS = `z.id, z.nom, z.description, z.frequence_collecte_jours, z.actif,
 async function lister() {
   const { rows } = await db.query(
     `SELECT ${CHAMPS}, count(s.id)::int AS nb_signalements,
-            count(s.id) FILTER (WHERE s.statut IN ('en_attente', 'valide'))::int AS nb_a_traiter
+            count(s.id) FILTER (WHERE s.statut IN ('en_attente', 'valide'))::int AS nb_a_traiter,
+            count(s.id) FILTER (WHERE s.statut = 'valide')::int AS nb_valides
        FROM zones z LEFT JOIN signalements s ON s.zone_id = z.id
       GROUP BY z.id ORDER BY z.nom`,
   )

@@ -1,136 +1,318 @@
-// Citoyen : la carte des signalements de la ville, ses points éco, ses derniers envois
-import { useState } from 'react'
+// Espace citoyen (version d'origine) : actions rapides, points écologiques, compteurs,
+// carte filtrée des signalements, historique en photos, classement des citoyens
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Camera, Crosshair, Leaf } from 'lucide-react'
-import { carteSignalements, mesSignalements, profil } from '../../api'
-import { useAuth } from '../../hooks/useAuth'
+import { Eye, ImageOff, MapPin, Plus, RefreshCw, RotateCcw, Star, Trophy } from 'lucide-react'
+import { carteSignalements, mesSignalements, profil, topCitoyens } from '../../api'
 import { useDonnees } from '../../hooks/useDonnees'
 import { usePosition } from '../../hooks/usePosition'
-import { Cadrer, Carte, LegendeUrgences, MaPosition, MarqueurSignalement } from '../../components/map/Carte'
+import { useLangue } from '../../context/LangueContext'
+import { Cadrer, Carte, MaPosition, MarqueurSignalement } from '../../components/map/Carte'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
-import { Erreur, Segments, Spinner } from '../../components/common/ui'
-import { ilYa, palier, pluriel } from '../../utils/format'
+import { Compteur, Modal, Spinner } from '../../components/common/ui'
+import { dateCourte, dateHeure, palier, URGENCES } from '../../utils/format'
 
-const FILTRES = [
-  { valeur: '', libelle: 'Tous' },
-  { valeur: 'en_attente', libelle: 'En attente' },
-  { valeur: 'valide', libelle: 'Validés' },
-  { valeur: 'en_cours', libelle: 'En tournée' },
-  { valeur: 'collecte', libelle: 'Collectés' },
+const STATUTS = [
+  ['', 'Tous'],
+  ['en_attente', 'En attente'],
+  ['valide', 'Validé'],
+  ['en_cours', 'En cours'],
+  ['collecte', 'Collecté'],
+  ['rejete', 'Rejeté'],
 ]
+const NIVEAUX = [['', 'Tous'], ...Object.entries(URGENCES).map(([k, u]) => [k, u.libelle])]
 
-export function CartePoints({ points }) {
-  const { actuel, suivant, progression } = palier(points)
+function Pastilles({ options, valeur, onChange, libelle }) {
+  const { t } = useLangue()
   return (
-    <div className="carte overflow-hidden">
-      <div className="bg-nuit p-5 text-white">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-bleu-100/75">Vos points éco</p>
-          <Leaf className="h-5 w-5 text-ciel" />
-        </div>
-        <p className="chiffre mt-1 text-[44px] leading-none text-white">{points}</p>
-        <p className="mt-2 font-titre font-semibold text-ciel">{actuel.nom}</p>
+    <div role="radiogroup" aria-label={libelle} className="flex flex-wrap gap-2">
+      {options.map(([v, l]) => (
+        <button
+          key={v || 'tous'}
+          type="button"
+          role="radio"
+          aria-checked={valeur === v}
+          onClick={() => onChange(v)}
+          className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${valeur === v ? 'bg-vert-500 text-white' : 'bg-fond text-encre-doux hover:bg-vert-50 hover:text-vert'}`}
+        >
+          {t(l)}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// Points écologiques (repris aussi dans « Mon compte »)
+export function CartePoints({ points }) {
+  const { t } = useLangue()
+  const { actuel, suivant } = palier(points)
+  return (
+    <div className="flex flex-col gap-4 rounded-carte border border-vert-300/70 bg-gradient-to-r from-vert-50 to-white p-6 sm:flex-row sm:items-center">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vert-100 text-vert-500">
+        <Star className="h-6 w-6" />
+      </span>
+      <div className="flex-1">
+        <p className="font-titre text-lg font-bold text-ardoise">{t('Points Écologiques')}</p>
+        <p className="text-encre-doux">{t('Continuez à signaler pour gagner plus de points !')}</p>
+        {suivant && <p className="mt-1 text-xs text-encre-pale">{t('Encore {n} points pour devenir {palier}', { n: suivant.seuil - points, palier: t(suivant.nom) })}</p>}
       </div>
-      <div className="p-5">
-        {suivant ? (
-          <>
-            <div className="h-2 overflow-hidden rounded-full bg-bleu-100" role="progressbar" aria-valuenow={Math.round(progression * 100)} aria-valuemin={0} aria-valuemax={100}>
-              <div className="h-full rounded-full bg-bleu-500 transition-all" style={{ width: `${Math.round(progression * 100)}%` }} />
-            </div>
-            <p className="mt-2 text-sm text-encre-doux">
-              Encore {pluriel(suivant.seuil - points, 'point')} pour devenir <span className="font-semibold text-nuit">{suivant.nom}</span>
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-encre-doux">Palier le plus haut atteint. Merci pour votre engagement !</p>
-        )}
-        <p className="mt-3 text-xs text-encre-pale">+2 à l’envoi · +5 à la validation · +10 au ramassage</p>
+      <div className="text-left sm:text-right">
+        <p className="chiffre text-[34px] leading-none text-vert-500">{points}</p>
+        <p className="text-sm text-encre-doux">{t('points')}</p>
+        <span className="mt-2 inline-block rounded-full border border-vert-300 bg-white px-3 py-1 text-xs font-semibold text-vert">{t(actuel.nom)}</span>
+        <p className="mt-1 text-xs text-encre-pale">{t('Vous contribuez activement à la propreté.')}</p>
       </div>
     </div>
   )
 }
 
 export default function CitoyenDashboard() {
-  const { user } = useAuth()
+  const { t } = useLangue()
   const [statut, setStatut] = useState('')
-  const { position, localiser, recherche, erreur: erreurGps } = usePosition()
-  const carte = useDonnees(() => carteSignalements({ statut: statut || undefined }), [statut], { intervalle: 60000 })
+  const [urgence, setUrgence] = useState('')
+  const [choisi, setChoisi] = useState(null)
+  const [detail, setDetail] = useState(null)
+  const gps = usePosition()
+  const carte = useDonnees(() => carteSignalements({ statut: statut || undefined, urgence: urgence || undefined }), [statut, urgence], { intervalle: 60000 })
   const moi = useDonnees(profil, [])
-  const derniers = useDonnees(() => mesSignalements({ limit: 4 }), [])
+  const mes = useDonnees(() => mesSignalements({ limit: 5 }), [], { intervalle: 60000 })
+  const classement = useDonnees(topCitoyens, [])
+  const [miseAJour, setMiseAJour] = useState(() => new Date())
+  const c = mes.donnees?.compteurs
+
+  const cadre = useMemo(() => {
+    if (choisi) return [[choisi.latitude, choisi.longitude]]
+    if (gps.position) return [gps.position]
+    return null
+  }, [choisi, gps.position])
+
+  const rafraichir = async () => {
+    await Promise.all([carte.recharger({ silencieux: true }), mes.recharger({ silencieux: true })])
+    setMiseAJour(new Date())
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-[26px] font-semibold sm:text-[30px]">Bonjour {user.prenom}</h1>
-          <p className="mt-1 text-encre-doux">Les dépôts d’ordures signalés dans la ville, mis à jour chaque minute.</p>
+          <h1 className="text-[28px]">{t('Mon Espace Citoyen')}</h1>
+          <p className="mt-1 text-encre-doux">{t('Suivez vos signalements et vos points écologiques')}</p>
         </div>
-        <Link to="/citoyen/signaler" className="btn-principal min-h-[48px] px-5 text-base">
-          <Camera className="h-5 w-5" />
-          Signaler un dépôt
+        <Link to="/citoyen/signaler" className="btn-principal px-5">
+          <Plus className="h-5 w-5" /> {t('Nouveau signalement')}
         </Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <section className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <Segments options={FILTRES} valeur={statut} onChange={setStatut} libelle="Filtrer par statut" />
-            <button type="button" className="btn-secondaire" onClick={localiser} disabled={recherche}>
-              {recherche ? <Spinner className="h-4 w-4" /> : <Crosshair className="h-4 w-4" />}
-              Me localiser
+      {/* Actions rapides */}
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="carte p-6">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-encre-pale">{t('Actions rapides')}</p>
+          <p className="mt-2 font-titre text-lg font-bold">{t('Signaler un problème')}</p>
+          <p className="mt-1 text-sm text-encre-doux">{t('Déclarez un nouveau signalement avec toutes les informations utiles.')}</p>
+          <Link to="/citoyen/signaler" className="btn-accent mt-4 w-full">
+            {t('Signaler maintenant')}
+          </Link>
+        </div>
+        <div className="carte p-6">
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-encre-pale">{t('Suivi')}</p>
+          <p className="mt-2 font-titre text-lg font-bold">{t("Consulter l'historique")}</p>
+          <p className="mt-1 text-sm text-encre-doux">{t('Retrouvez facilement vos signalements passés et leur statut.')}</p>
+          <Link to="/citoyen/signalements" className="btn-secondaire mt-4 w-full">
+            {t('Voir mes signalements')}
+          </Link>
+        </div>
+      </div>
+
+      {moi.donnees && <CartePoints points={moi.donnees.points_eco ?? 0} />}
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Compteur valeur={c?.total ?? '—'} libelle={t('Total')} couleur="vert" />
+        <Compteur valeur={c?.en_attente ?? '—'} libelle={t('En attente')} couleur="ambre" />
+        <Compteur valeur={c ? c.valide + c.en_cours : '—'} libelle={t('En cours')} couleur="bleu" />
+        <Compteur valeur={c?.collecte ?? '—'} libelle={t('Collectés')} couleur="vert" />
+      </div>
+
+      {/* Carte des signalements */}
+      <section className="carte p-5 sm:p-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 className="text-xl">{t('Carte des signalements')}</h2>
+            <p className="text-sm text-encre-doux">{t('Filtres actifs pour la carte et le tableau.')}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-secondaire min-h-[38px]"
+              onClick={() => {
+                setStatut('')
+                setUrgence('')
+                setChoisi(null)
+              }}
+            >
+              <RotateCcw className="h-4 w-4" /> {t('Réinitialiser')}
+            </button>
+            <button type="button" className="btn-secondaire min-h-[38px]" onClick={gps.localiser} disabled={gps.recherche}>
+              {gps.recherche ? <Spinner className="h-4 w-4" /> : <MapPin className="h-4 w-4" />} {t('Me géolocaliser')}
+            </button>
+            <button type="button" className="btn-secondaire min-h-[38px]" onClick={rafraichir}>
+              <RefreshCw className="h-4 w-4" /> {t('Rafraîchir')}
             </button>
           </div>
-          {erreurGps && <p className="text-sm text-ambre-700">{erreurGps}</p>}
-          {carte.erreur && <Erreur message={carte.erreur} onReessayer={carte.recharger} />}
-          <Carte className="h-[440px] sm:h-[520px]">
-            {carte.donnees?.map((s) => (
-              <MarqueurSignalement key={s.id} signalement={s} estompe={s.statut === 'collecte'}>
-                <div className="w-52 space-y-2">
-                  {s.photo_url && <img src={s.photo_url} alt="" className="h-28 w-full rounded-lg object-cover" loading="lazy" />}
-                  <div className="flex flex-wrap gap-1.5">
-                    <StatutBadge statut={s.statut} />
-                    <UrgenceBadge urgence={s.urgence} compact />
-                  </div>
-                  {s.description && <p className="text-encre">{s.description}</p>}
-                  <p className="text-xs text-encre-pale">
-                    {s.zone_nom ?? 'Hors zone'} · {ilYa(s.created_at)}
-                  </p>
-                </div>
-              </MarqueurSignalement>
-            ))}
-            <MaPosition position={position} />
-            {position && <Cadrer points={[position]} max={16} />}
-          </Carte>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <LegendeUrgences />
-            {carte.donnees && <p className="text-xs text-encre-pale">{pluriel(carte.donnees.length, 'signalement')} affichés</p>}
-          </div>
-        </section>
+        </div>
 
-        <aside className="space-y-6">
-          {moi.donnees && <CartePoints points={moi.donnees.points_eco ?? 0} />}
-          <div className="carte p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Mes derniers envois</h2>
-              <Link to="/citoyen/signalements" className="text-sm font-semibold text-bleu hover:underline">
-                Tout voir
-              </Link>
-            </div>
-            {derniers.donnees?.signalements.length === 0 && <p className="mt-3 text-sm text-encre-doux">Aucun signalement pour l’instant. Le premier vous rapporte 2 points.</p>}
-            <ul className="mt-3 divide-y divide-trait">
-              {derniers.donnees?.signalements.map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-3 py-3">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{s.description ?? s.adresse ?? 'Signalement'}</p>
-                    <p className="text-xs text-encre-pale">{ilYa(s.created_at)}</p>
-                  </div>
-                  <StatutBadge statut={s.statut} />
-                </li>
-              ))}
-            </ul>
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+          <div>
+            <p className="etiquette">{t('Statut')}</p>
+            <Pastilles options={STATUTS} valeur={statut} onChange={setStatut} libelle={t('Statut')} />
           </div>
-        </aside>
-      </div>
+          <div>
+            <p className="etiquette">{t('Urgence')}</p>
+            <Pastilles options={NIVEAUX} valeur={urgence} onChange={setUrgence} libelle={t('Urgence')} />
+          </div>
+        </div>
+        {gps.erreur && <p className="mt-3 text-sm text-ambre-700">{gps.erreur}</p>}
+        <div className="mt-4 flex flex-wrap justify-between gap-2 text-sm text-encre-doux">
+          <span>{t('Dernière mise à jour : {heure}', { heure: miseAJour.toLocaleTimeString('fr-FR') })}</span>
+          <span>{t('{n} signalement(s) affiché(s)', { n: carte.donnees?.length ?? 0 })}</span>
+        </div>
+
+        <Carte className="mt-3 h-[380px] sm:h-[440px]" zoom={13}>
+          {carte.donnees?.map((s) => (
+            <MarqueurSignalement key={s.id} signalement={s} estompe={s.statut === 'collecte'} onClick={setChoisi}>
+              <div className="w-52 space-y-2">
+                {s.photo_url && <img src={s.photo_url} alt="" className="h-28 w-full rounded-lg object-cover" loading="lazy" />}
+                <div className="flex flex-wrap gap-1.5">
+                  <StatutBadge statut={s.statut} />
+                  <UrgenceBadge urgence={s.urgence} compact />
+                </div>
+                {s.description && <p>{s.description}</p>}
+                <p className="text-xs text-encre-pale">
+                  {s.zone_nom ?? t('Hors zone')} · {dateCourte(s.created_at)}
+                </p>
+              </div>
+            </MarqueurSignalement>
+          ))}
+          <MaPosition position={gps.position} />
+          {cadre && <Cadrer points={cadre} max={16} />}
+        </Carte>
+
+        {/* Repères sous la carte */}
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-xl border border-trait p-3">
+            <p className="text-xs font-semibold text-encre-doux">{t('Statut')}</p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {STATUTS.slice(1).map(([v, l]) => (
+                <span key={v} className="rounded-md bg-fond px-2 py-0.5 text-[11px] text-encre-doux">
+                  {t(l)}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-trait p-3">
+            <p className="text-xs font-semibold text-encre-doux">{t('Urgence')}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {Object.entries(URGENCES).map(([k, u]) => (
+                <span key={k} className="inline-flex items-center gap-1 text-[11px] text-encre-doux">
+                  <span className="h-2 w-2 rounded-full" style={{ background: u.couleur }} />
+                  {t(u.libelle)}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-xl border border-trait p-3">
+            <p className="text-xs font-semibold text-encre-doux">{t('Astuce')}</p>
+            <p className="mt-1 text-xs text-encre-doux">{t('Cliquez sur un marqueur pour centrer et afficher le signalement.')}</p>
+          </div>
+          <div className="rounded-xl border border-trait p-3">
+            <p className="text-xs font-semibold text-encre-doux">{t('Centre ville')}</p>
+            <p className="mt-1 text-xs text-encre-doux">{t('Les signalements sont localisés automatiquement selon vos données.')}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Historique en photos */}
+      <section>
+        <h2 className="mb-3 text-xl">{t('Historique')}</h2>
+        {mes.donnees?.signalements.length === 0 && (
+          <p className="carte p-5 text-sm text-encre-doux">{t('Aucun signalement pour l’instant. Le premier vous rapporte 2 points.')}</p>
+        )}
+        <ul className="space-y-3">
+          {mes.donnees?.signalements.map((s) => (
+            <li key={s.id} className="carte flex items-start gap-4 p-4">
+              <div className="h-24 w-36 shrink-0 overflow-hidden rounded-xl bg-fond">
+                {s.photo_url ? (
+                  <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-encre-pale">
+                    <ImageOff className="h-6 w-6" />
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="truncate font-semibold">{s.description ?? t('Sans description')}</p>
+                  <StatutBadge statut={s.statut} />
+                </div>
+                <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-encre-doux">
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" /> {s.zone_nom ?? s.adresse ?? t('Hors zone')}
+                  </span>
+                  <span>{dateCourte(s.created_at)}</span>
+                </p>
+              </div>
+              <button type="button" className="btn-secondaire min-h-0 p-2" onClick={() => setDetail(s)} aria-label="Voir le signalement">
+                <Eye className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Classement */}
+      <section className="carte p-5 sm:p-6">
+        <h2 className="flex items-center gap-2 text-xl">
+          <Trophy className="h-5 w-5 text-ambre" /> {t('Top Citoyens Écologiques')}
+        </h2>
+        <ol className="mt-4 space-y-2">
+          {classement.donnees?.map((c, i) => (
+            <li key={i} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${c.moi ? 'bg-vert-50 ring-1 ring-vert-300' : 'bg-fond/70'}`}>
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  i === 0 ? 'bg-ambre-100 text-ambre-700' : i === 1 ? 'bg-slate-200 text-slate-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-white text-encre-doux'
+                }`}
+              >
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium">
+                  {c.nom}
+                  {c.moi && <span className="ml-1.5 text-xs font-semibold text-vert">· vous</span>}
+                </span>
+                <span className="block text-xs text-encre-pale">{c.quartier ?? t('Quartier non spécifié')}</span>
+              </span>
+              <span className="font-semibold text-vert">{c.points_eco} pts</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <Modal ouvert={Boolean(detail)} onFermer={() => setDetail(null)} titre={detail?.description ?? 'Signalement'} large>
+        {detail && (
+          <div className="space-y-3">
+            {detail.photo_url && <img src={detail.photo_url} alt="Photo du dépôt" className="max-h-[60vh] w-full rounded-xl object-contain" />}
+            <div className="flex flex-wrap gap-2">
+              <StatutBadge statut={detail.statut} />
+              <UrgenceBadge urgence={detail.urgence} />
+            </div>
+            <p className="text-sm text-encre-doux">
+              {[detail.adresse, detail.zone_nom].filter(Boolean).join(', ') || t('Hors zone')} · {dateHeure(detail.created_at)}
+            </p>
+            <Link to="/citoyen/signalements" className="btn-secondaire">
+              {t('Voir mes signalements')}
+            </Link>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

@@ -82,3 +82,8 @@ export async function telechargerCsv(ressource, params) {
   setTimeout(() => URL.revokeObjectURL(lien.href), 1000)
   return nom
 }
+
+// ── Reprises de la version d'origine
+export const topCitoyens = () => api.get('/stats/top-citoyens').then((r) => r.data.citoyens)
+export const statsCamions = () => api.get('/stats/camions').then((r) => r.data.camions)
+export const repartition = (signalement_ids) => api.post('/collectes/repartition', { signalement_ids }).then(donnees)

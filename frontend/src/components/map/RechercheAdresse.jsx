@@ -52,7 +52,7 @@ export default function RechercheAdresse({ onChoix }) {
             <li key={r.id}>
               <button
                 type="button"
-                className="w-full px-3.5 py-2.5 text-left text-sm transition hover:bg-bleu-50"
+                className="w-full px-3.5 py-2.5 text-left text-sm transition hover:bg-vert-50"
                 onClick={() => {
                   onChoix(r.position, r.nom)
                   setResultats(null)

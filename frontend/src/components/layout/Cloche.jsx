@@ -6,15 +6,16 @@ import { AlertTriangle, Bell, CheckCheck, CheckCircle2, Route, Truck, XCircle } 
 import { lireNotification, listerNotifications, toutLire } from '../../api'
 import { useDonnees } from '../../hooks/useDonnees'
 import { ilYa } from '../../utils/format'
+import { useLangue } from '../../context/LangueContext'
 
 const ICONES = {
   urgence_critique: [AlertTriangle, 'bg-alerte-100 text-alerte-700'],
-  signalement_valide: [CheckCircle2, 'bg-bleu-50 text-bleu'],
+  signalement_valide: [CheckCircle2, 'bg-vert-50 text-vert'],
   signalement_rejete: [XCircle, 'bg-slate-100 text-slate-600'],
-  signalement_planifie: [Route, 'bg-bleu-50 text-bleu'],
-  signalement_collecte: [CheckCircle2, 'bg-bleu text-white'],
+  signalement_planifie: [Route, 'bg-vert-50 text-vert'],
+  signalement_collecte: [CheckCircle2, 'bg-vert text-white'],
   tournee_affectee: [Truck, 'bg-ambre-100 text-ambre-700'],
-  tournee_terminee: [CheckCheck, 'bg-bleu-50 text-bleu'],
+  tournee_terminee: [CheckCheck, 'bg-vert-50 text-vert'],
   tournee_annulee: [XCircle, 'bg-slate-100 text-slate-600'],
 }
 
@@ -24,6 +25,20 @@ export default function Cloche({ sombre = false, alignement = 'droite' }) {
   const boite = useRef(null)
   const { donnees, setDonnees, recharger } = useDonnees(() => listerNotifications({ limit: 15 }), [], { intervalle: 60000 })
   const nonLues = donnees?.non_lues ?? 0
+  const { t } = useLangue()
+
+  // Alt+N : ouvrir ou fermer les notifications
+  useEffect(() => {
+    const surTouche = (e) => {
+      if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault()
+        setOuvert((o) => !o)
+        recharger({ silencieux: true })
+      }
+    }
+    window.addEventListener('keydown', surTouche)
+    return () => window.removeEventListener('keydown', surTouche)
+  }, [recharger])
 
   // fermeture au clic extérieur et à la touche Échap
   useEffect(() => {
@@ -60,7 +75,7 @@ export default function Cloche({ sombre = false, alignement = 'droite' }) {
           setOuvert(!ouvert)
           if (!ouvert) recharger({ silencieux: true })
         }}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition ${sombre ? 'text-bleu-100 hover:bg-white/10 hover:text-white' : 'text-encre-doux hover:bg-nuit/5 hover:text-nuit'}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition ${sombre ? 'text-vert-100 hover:bg-white/10 hover:text-white' : 'text-encre-doux hover:bg-ardoise/5 hover:text-ardoise'}`}
         aria-label={nonLues ? `Notifications, ${nonLues} non lue${nonLues > 1 ? 's' : ''}` : 'Notifications'}
         aria-expanded={ouvert}
       >
@@ -86,29 +101,29 @@ export default function Cloche({ sombre = false, alignement = 'droite' }) {
             aria-label="Notifications"
           >
             <div className="flex items-center justify-between border-b border-trait px-4 py-3">
-              <p className="font-titre text-[17px] font-bold text-nuit">Notifications</p>
+              <p className="font-titre text-[17px] font-bold text-ardoise">{t('Notifications')}</p>
               {nonLues > 0 && (
-                <button type="button" onClick={toutMarquer} className="text-sm font-semibold text-bleu hover:underline">
-                  Tout marquer comme lu
+                <button type="button" onClick={toutMarquer} className="text-sm font-semibold text-vert hover:underline">
+                  {t('Tout marquer comme lu')}
                 </button>
               )}
             </div>
-            {donnees?.notifications.length === 0 && <p className="px-4 py-10 text-center text-sm text-encre-doux">Aucune notification pour l’instant.</p>}
+            {donnees?.notifications.length === 0 && <p className="px-4 py-10 text-center text-sm text-encre-doux">{t('Aucune notification pour l’instant.')}</p>}
             <ul className="max-h-[420px] divide-y divide-trait overflow-y-auto">
               {donnees?.notifications.map((n) => {
-                const [Icone, ton] = ICONES[n.type] ?? [Bell, 'bg-bleu-50 text-bleu']
+                const [Icone, ton] = ICONES[n.type] ?? [Bell, 'bg-vert-50 text-vert']
                 return (
                   <li key={n.id}>
-                    <button type="button" onClick={() => ouvrir(n)} className={`flex w-full gap-3 px-4 py-3 text-left transition hover:bg-papier ${n.lu ? '' : 'bg-bleu-50/50'}`}>
+                    <button type="button" onClick={() => ouvrir(n)} className={`flex w-full gap-3 px-4 py-3 text-left transition hover:bg-fond ${n.lu ? '' : 'bg-vert-50/50'}`}>
                       <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${ton}`}>
                         <Icone className="h-4 w-4" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className={`block text-sm ${n.lu ? 'text-encre' : 'font-semibold text-nuit'}`}>{n.titre}</span>
+                        <span className={`block text-sm ${n.lu ? 'text-encre' : 'font-semibold text-ardoise'}`}>{n.titre}</span>
                         {n.message && <span className="mt-0.5 line-clamp-2 block text-[13px] text-encre-doux">{n.message}</span>}
                         <span className="mt-1 block text-xs text-encre-pale">{ilYa(n.created_at)}</span>
                       </span>
-                      {!n.lu && <span className="mt-2 h-2 w-2 shrink-0 rounded-[2px] bg-bleu" aria-label="Non lue" />}
+                      {!n.lu && <span className="mt-2 h-2 w-2 shrink-0 rounded-[2px] bg-vert" aria-label="Non lue" />}
                     </button>
                   </li>
                 )

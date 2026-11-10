@@ -53,7 +53,7 @@ export default function DetailTournee() {
 
   return (
     <div className="space-y-5">
-      <Link to="/chauffeur" className="btn-discret -ml-3">
+      <Link to="/chauffeur/tournees" className="btn-discret -ml-3">
         <ArrowLeft className="h-4 w-4" /> Mes tournées
       </Link>
 
@@ -81,21 +81,45 @@ export default function DetailTournee() {
       {/* Progression X/N */}
       <div className="carte p-4">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium">Points collectés</span>
-          <span className="chiffre text-lg text-nuit">
-            {faits}/{total}
+          <span>
+            <span className="block font-titre text-lg font-bold text-ardoise">Progression</span>
+            <span className="text-encre-doux">
+              {faits} / {total} points collectés
+            </span>
+          </span>
+          <span className="text-right">
+            <span className="block text-encre-doux">Distance estimée</span>
+            <span className="chiffre text-lg text-ardoise">{km(c.distance_km)}</span>
           </span>
         </div>
-        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-bleu-100" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
-          <div className="h-full rounded-full bg-bleu-500 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
+        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-vert-100" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
+          <div className="h-full rounded-full bg-vert-500 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
         </div>
+        {tousFaits && c.statut === 'en_cours' && (
+          <p className="mt-3 rounded-xl border border-vert-300 bg-vert-50 px-4 py-3 text-sm text-vert-700">Tous les points collectés ! Vous pouvez terminer la tournée.</p>
+        )}
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_400px]">
-        <Carte className="h-[340px] lg:h-[560px]" zoom={15}>
-          <Itineraire trace={c.itineraire?.trace} etapes={etapes} depart={c.itineraire?.depart} onEtape={setCible} />
-          <Cadrer points={cadre} max={17} />
-        </Carte>
+        <div className="relative">
+          <Carte className="h-[340px] lg:h-[560px]" zoom={15}>
+            <Itineraire trace={c.itineraire?.trace} etapes={etapes} depart={c.itineraire?.depart} onEtape={setCible} />
+            <Cadrer points={cadre} max={17} />
+          </Carte>
+          {/* Légende */}
+          <div className="absolute bottom-3 left-3 z-[500] rounded-xl bg-white/95 px-4 py-3 text-sm shadow-carte">
+            <p className="font-semibold">Légende</p>
+            <p className="mt-1 flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-vert-500" /> ✓ Collecté
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-[#4B5563]" /> Ordre de collecte
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-ambre" /> Prochain arrêt
+            </p>
+          </div>
+        </div>
 
         <section className="carte p-4 sm:p-5">
           <h2 className="mb-3 text-lg font-semibold">Arrêts dans l’ordre</h2>
@@ -103,9 +127,9 @@ export default function DetailTournee() {
             {c.signalements.map((s) => {
               const actif = c.statut === 'en_cours' && s.id === prochain?.id
               return (
-                <li key={s.id} className={`rounded-xl border p-3 transition ${actif ? 'border-ambre bg-ambre-50/60' : s.collecte_fait ? 'border-trait bg-bleu-50/50' : 'border-trait'}`}>
+                <li key={s.id} className={`rounded-xl border p-3 transition ${actif ? 'border-ambre bg-ambre-50/60' : s.collecte_fait ? 'border-trait bg-vert-50/50' : 'border-trait'}`}>
                   <div className="flex items-start gap-3">
-                    <button type="button" onClick={() => setCible(s)} className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-ciel text-nuit' : actif ? 'bg-ambre text-nuit' : 'bg-nuit text-white'}`} aria-label={`Voir l’arrêt ${s.ordre} sur la carte`}>
+                    <button type="button" onClick={() => setCible(s)} className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-menthe text-ardoise' : actif ? 'bg-ambre text-ardoise' : 'bg-ardoise text-white'}`} aria-label={`Voir l’arrêt ${s.ordre} sur la carte`}>
                       {s.collecte_fait ? <Check className="h-4 w-4" /> : s.ordre}
                     </button>
                     <div className="min-w-0 flex-1">
@@ -147,7 +171,7 @@ export default function DetailTournee() {
             </div>
           )}
           {c.statut === 'terminee' && (
-            <p className="mt-4 rounded-xl bg-bleu-50 px-4 py-3 text-sm text-nuit">
+            <p className="mt-4 rounded-xl bg-vert-50 px-4 py-3 text-sm text-ardoise">
               Tournée terminée : {faits}/{total} arrêts{c.poids_collecte_kg != null && `, ${kg(c.poids_collecte_kg)} collectés`}.
             </p>
           )}

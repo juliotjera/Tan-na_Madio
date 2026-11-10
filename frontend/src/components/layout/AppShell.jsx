@@ -1,131 +1,309 @@
-// Cadre de l'application connectée : barre latérale (ordinateur), barre du bas (téléphone)
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+// Cadre de l'application connectée (version d'origine) :
+// barre latérale blanche par sections, repliable (Alt+M) ; en-tête avec titre, cloche (Alt+N),
+// choix de la langue, utilisateur et déconnexion ; fil d'Ariane ; barre du bas sur téléphone.
+import { useCallback, useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   BarChart3,
-  ClipboardCheck,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Home,
   LayoutDashboard,
-  ListChecks,
   LogOut,
   Map,
-  MapPinned,
-  Plus,
-  Route,
+  MapPin,
+  Menu,
+  TriangleAlert,
   Truck,
   UserRound,
   Users,
+  X,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useLangue } from '../../context/LangueContext'
 import { ROLES } from '../../utils/format'
-import { Logo } from './Logo'
+import { Logo, Marque } from './Logo'
 import Cloche from './Cloche'
 
+// Menus par rôle, regroupés en sections comme sur la version d'origine
 export const NAVIGATION = {
   citoyen: [
-    { vers: '/citoyen', libelle: 'Carte', icone: Map, fin: true },
-    { vers: '/citoyen/signaler', libelle: 'Signaler', icone: Plus, principal: true },
-    { vers: '/citoyen/signalements', libelle: 'Mes signalements', court: 'Mes envois', icone: ListChecks },
+    {
+      section: 'Mon espace',
+      liens: [
+        { vers: '/citoyen', libelle: 'Accueil', icone: Home, fin: true },
+        { vers: '/citoyen/signaler', libelle: 'Signaler', icone: MapPin, principal: true },
+        { vers: '/citoyen/signalements', libelle: 'Mes signalements', icone: FileText },
+      ],
+    },
   ],
   agent_municipal: [
-    { vers: '/agent', libelle: 'Tableau de bord', court: 'Accueil', icone: LayoutDashboard, fin: true },
-    { vers: '/agent/signalements', libelle: 'À valider', icone: ClipboardCheck },
-    { vers: '/agent/planifier', libelle: 'Planifier une tournée', court: 'Planifier', icone: Route, principal: true },
-    { vers: '/agent/collectes', libelle: 'Collectes', icone: ListChecks },
-    { vers: '/agent/camions', libelle: 'Camions', icone: Truck },
+    { section: "Vue d'ensemble", liens: [{ vers: '/agent', libelle: 'Dashboard', icone: LayoutDashboard, fin: true }] },
+    {
+      section: 'Opérations',
+      liens: [
+        { vers: '/agent/signalements', libelle: 'Signalements', icone: TriangleAlert },
+        { vers: '/agent/collectes', libelle: 'Collectes', icone: ClipboardList },
+        { vers: '/agent/planifier', libelle: 'Planifier', icone: CalendarDays, principal: true },
+      ],
+    },
+    { section: 'Ressources', liens: [{ vers: '/agent/camions', libelle: 'Camions', icone: Truck }] },
   ],
-  chauffeur: [{ vers: '/chauffeur', libelle: 'Mes tournées', court: 'Tournées', icone: Route, fin: false }],
+  chauffeur: [
+    {
+      section: 'Navigation',
+      liens: [
+        { vers: '/chauffeur', libelle: 'Dashboard', icone: LayoutDashboard, fin: true },
+        { vers: '/chauffeur/tournees', libelle: 'Mes tournées', icone: Truck },
+      ],
+    },
+  ],
   administrateur: [
-    { vers: '/admin', libelle: 'Tableau de bord', court: 'Accueil', icone: LayoutDashboard, fin: true },
-    { vers: '/admin/utilisateurs', libelle: 'Utilisateurs', icone: Users },
-    { vers: '/admin/camions', libelle: 'Camions', icone: Truck },
-    { vers: '/admin/zones', libelle: 'Zones', icone: MapPinned },
-    { vers: '/admin/stats', libelle: 'Statistiques', court: 'Stats', icone: BarChart3 },
+    {
+      section: "Vue d'ensemble",
+      liens: [
+        { vers: '/admin', libelle: 'Dashboard', icone: LayoutDashboard, fin: true },
+        { vers: '/admin/stats', libelle: 'Statistiques', icone: BarChart3 },
+      ],
+    },
+    {
+      section: 'Gestion',
+      liens: [
+        { vers: '/admin/camions', libelle: 'Camions', icone: Truck },
+        { vers: '/admin/zones', libelle: 'Zones', icone: Map },
+        { vers: '/admin/utilisateurs', libelle: 'Utilisateurs', icone: Users },
+      ],
+    },
   ],
 }
 
 const initiales = (u) => `${u?.prenom?.[0] ?? ''}${u?.nom?.[0] ?? ''}`.toUpperCase()
 
-function LienLateral({ lien }) {
+function lireReplie() {
+  try {
+    return localStorage.getItem('tanana-madio-menu') === 'replie'
+  } catch {
+    return false
+  }
+}
+
+function LienMenu({ lien, replie, onClick }) {
+  const { t } = useLangue()
   const Icone = lien.icone
   return (
     <NavLink
       to={lien.vers}
       end={lien.fin}
+      onClick={onClick}
+      title={replie ? t(lien.libelle) : undefined}
       className={({ isActive }) =>
-        `group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition ${
-          isActive ? 'bg-white/10 text-white' : 'text-bleu-100/70 hover:bg-white/5 hover:text-white'
+        `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition ${replie ? 'justify-center' : ''} ${
+          isActive ? 'bg-vert-50 text-vert' : 'text-encre-doux hover:bg-fond hover:text-ardoise'
         }`
       }
     >
-      {({ isActive }) => (
-        <>
-          <Icone className={`h-[18px] w-[18px] ${isActive ? 'text-ciel' : ''}`} />
-          {lien.libelle}
-        </>
-      )}
+      <Icone className="h-[19px] w-[19px] shrink-0" />
+      {!replie && <span className="truncate">{t(lien.libelle)}</span>}
     </NavLink>
+  )
+}
+
+function MenuSections({ sections, replie, onLien }) {
+  const { t } = useLangue()
+  return (
+    <nav aria-label="Navigation principale" className="flex flex-col">
+      {sections.map((s, i) => (
+        <div key={s.section} className={i > 0 ? 'mt-2 border-t border-trait pt-1' : ''}>
+          {replie ? <div className="h-4" /> : <p className="section-menu">{t(s.section)}</p>}
+          <div className="flex flex-col gap-1">
+            {s.liens.map((l) => (
+              <LienMenu key={l.vers} lien={l} replie={replie} onClick={onLien} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </nav>
   )
 }
 
 export default function AppShell() {
   const { user, deconnecter } = useAuth()
+  const { langue, setLangue, t } = useLangue()
   const navigate = useNavigate()
-  const liens = NAVIGATION[user.role] ?? []
+  const lieu = useLocation()
+  const sections = NAVIGATION[user.role] ?? []
+  const liens = sections.flatMap((s) => s.liens)
+  const [replie, setReplie] = useState(lireReplie)
+  const [tiroir, setTiroir] = useState(false)
+
+  const basculerMenu = useCallback(() => {
+    if (window.matchMedia('(min-width: 1024px)').matches) {
+      setReplie((r) => {
+        try {
+          localStorage.setItem('tanana-madio-menu', r ? 'ouvert' : 'replie')
+        } catch {
+          /* préférence non mémorisée */
+        }
+        return !r
+      })
+    } else setTiroir((o) => !o)
+  }, [])
+
+  // Alt+M : menu (le raccourci Alt+N est géré par la cloche)
+  useEffect(() => {
+    const surTouche = (e) => {
+      if (e.altKey && e.key.toLowerCase() === 'm') {
+        e.preventDefault()
+        basculerMenu()
+      }
+      if (e.key === 'Escape') setTiroir(false)
+    }
+    window.addEventListener('keydown', surTouche)
+    return () => window.removeEventListener('keydown', surTouche)
+  }, [basculerMenu])
+
+  useEffect(() => setTiroir(false), [lieu.pathname])
+
   const sortir = async () => {
     await deconnecter()
     navigate('/login', { replace: true })
   }
-  // en bas sur téléphone : jusqu'à 4 destinations + le compte
-  const liensBas = [...liens.slice(0, 4), { vers: '/compte', libelle: 'Compte', icone: UserRound }]
+
+  // Fil d'Ariane : accueil de l'espace / page courante
+  const accueil = liens[0]
+  const courant = [...liens].sort((a, b) => b.vers.length - a.vers.length).find((l) => lieu.pathname.startsWith(l.vers))
+  const sousPage = lieu.pathname.startsWith('/chauffeur/tournees/') ? 'Tournée' : lieu.pathname === '/compte' ? 'Mon compte' : null
+
+  const titreEnTete = user.role === 'administrateur' ? 'Administration' : 'Tableau de bord'
+  // téléphone : 4 destinations au plus + compte
+  const liensBas = [...liens.slice(0, 4), { vers: '/compte', libelle: 'Mon compte', icone: UserRound }]
+
+  const largeur = replie ? 'lg:w-[84px]' : 'lg:w-[264px]'
+  const marge = replie ? 'lg:pl-[84px]' : 'lg:pl-[264px]'
 
   return (
-    <div className="min-h-screen lg:pl-[264px]">
+    <div className={`min-h-screen transition-[padding] ${marge}`}>
       <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[2000] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">
         Aller au contenu
       </a>
 
       {/* Barre latérale (ordinateur) */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[264px] flex-col bg-nuit px-4 py-6 lg:flex">
-        <div className="flex items-center justify-between pl-2">
-          <Logo clair />
-          <Cloche sombre alignement="gauche" />
+      <aside className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-trait bg-white transition-[width] lg:flex ${largeur}`}>
+        <div className={`flex h-[72px] items-center border-b border-trait ${replie ? 'justify-center' : 'px-4'}`}>
+          <Link to={accueil?.vers ?? '/'} className={`flex items-center ${replie ? '' : 'w-full rounded-2xl bg-vert-50 px-3 py-2'}`}>
+            {replie ? <Marque className="h-9 w-9" /> : <Logo />}
+          </Link>
         </div>
-        <nav className="mt-9 flex flex-col gap-1" aria-label="Navigation principale">
-          {liens.map((l) => (
-            <LienLateral key={l.vers} lien={l} />
-          ))}
-        </nav>
-        <div className="mt-auto border-t border-white/10 pt-4">
-          <NavLink to="/compte" className="flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-white/5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-ciel font-titre text-sm font-bold text-nuit">{initiales(user)}</span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-white">
-                {user.prenom} {user.nom}
-              </span>
-              <span className="block text-xs text-bleu-100/60">{ROLES[user.role]}</span>
-            </span>
-          </NavLink>
-          <button type="button" onClick={sortir} className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-bleu-100/70 transition hover:bg-white/5 hover:text-white">
-            <LogOut className="h-[18px] w-[18px]" />
-            Se déconnecter
+        <div className="flex-1 overflow-y-auto px-3 pb-6">
+          <MenuSections sections={sections} replie={replie} />
+        </div>
+        {/* bouton de repli, sur le bord de la barre */}
+        <div className="absolute -right-4 top-1/2 flex -translate-y-1/2 items-center gap-1.5">
+          <button
+            type="button"
+            onClick={basculerMenu}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-trait bg-white text-encre-doux shadow-carte transition hover:text-vert"
+            aria-label={replie ? t('Agrandir le menu') : t('Réduire le menu')}
+            title="Alt+M"
+          >
+            {replie ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
+          <span className="pointer-events-none translate-x-1 text-[11px] font-medium text-encre-pale">Alt+M</span>
         </div>
       </aside>
 
-      {/* Barre du haut (téléphone, tablette) */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-trait bg-white/90 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] backdrop-blur lg:hidden">
-        <Logo />
-        <div className="flex items-center gap-1">
-          <span className="rounded-[5px] bg-bleu-50 px-2 py-1 text-xs font-semibold text-bleu">{ROLES[user.role]}</span>
+      {/* Tiroir (téléphone, tablette) */}
+      {tiroir && (
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <div className="absolute inset-0 bg-ardoise/40" onClick={() => setTiroir(false)} aria-hidden />
+          <aside className="absolute inset-y-0 left-0 flex w-[280px] flex-col bg-white shadow-flotte">
+            <div className="flex h-[72px] items-center justify-between border-b border-trait px-4">
+              <Logo />
+              <button type="button" className="btn-discret min-h-0 p-2" onClick={() => setTiroir(false)} aria-label={t('Fermer le menu')}>
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 pb-6">
+              <MenuSections sections={sections} onLien={() => setTiroir(false)} />
+            </div>
+            <label className="border-t border-trait p-4">
+              <span className="etiquette">{t('Langue')}</span>
+              <select value={langue} onChange={(e) => setLangue(e.target.value)} className="champ py-2">
+                <option value="fr">Français</option>
+                <option value="mg">Malagasy</option>
+              </select>
+            </label>
+          </aside>
+        </div>
+      )}
+
+      {/* En-tête */}
+      <header className="sticky top-0 z-30 border-b border-trait bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="flex h-[72px] items-center gap-2 px-4 sm:gap-3 sm:px-6">
+          <button type="button" onClick={basculerMenu} className="btn-discret min-h-0 p-2 lg:hidden" aria-label={t('Ouvrir le menu')}>
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-titre text-[17px] font-bold text-ardoise">{t(titreEnTete)}</p>
+            <p className="hidden truncate text-xs text-encre-doux sm:block">{t('Gérez vos actions en toute clarté')}</p>
+            <p className="hidden truncate text-[11px] text-encre-pale xl:block">{t('Raccourcis clavier : Alt+M pour le menu, Alt+N pour les notifications')}</p>
+          </div>
           <Cloche />
+          <label className="hidden sm:block">
+            <span className="sr-only">{t('Langue')}</span>
+            <select
+              value={langue}
+              onChange={(e) => setLangue(e.target.value)}
+              className="rounded-full border border-trait bg-white py-1.5 pl-3 pr-8 text-xs font-medium text-encre focus:border-vert-500 focus:outline-none"
+            >
+              <option value="fr">Français</option>
+              <option value="mg">Malagasy</option>
+            </select>
+          </label>
+          <Link to="/compte" className="flex items-center gap-2.5 rounded-xl px-1.5 py-1 transition hover:bg-fond">
+            <span className="hidden text-right leading-tight md:block">
+              <span className="block text-sm font-semibold text-ardoise">
+                {user.prenom} {user.nom}
+              </span>
+              <span className="block text-xs text-encre-doux">{t(ROLES[user.role])}</span>
+            </span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-vert-100 text-sm font-bold text-vert">{initiales(user)}</span>
+          </Link>
+          <button type="button" onClick={sortir} className="btn-discret min-h-0 p-2" aria-label={t('Se déconnecter')} title={t('Se déconnecter')}>
+            <LogOut className="h-5 w-5" />
+          </button>
         </div>
       </header>
 
-      <main id="contenu" className="mx-auto max-w-[1240px] px-4 pb-28 pt-6 sm:px-6 lg:px-10 lg:pb-12 lg:pt-10">
+      <main id="contenu" className="mx-auto max-w-[1280px] px-4 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-12">
+        {/* Fil d'Ariane */}
+        {accueil && (
+          <nav aria-label="Fil d’Ariane" className="mb-4 flex items-center gap-2 text-sm text-encre-doux">
+            <Link to={accueil.vers} className="hover:text-vert">
+              {t(accueil.libelle)}
+            </Link>
+            {courant && courant.vers !== accueil.vers && (
+              <>
+                <span aria-hidden>/</span>
+                <span className={sousPage ? '' : 'font-semibold text-ardoise'}>{t(courant.libelle)}</span>
+              </>
+            )}
+            {sousPage && (
+              <>
+                <span aria-hidden>/</span>
+                <span className="font-semibold text-ardoise">{t(sousPage)}</span>
+              </>
+            )}
+          </nav>
+        )}
         <Outlet />
       </main>
 
-      {/* Barre de navigation du bas (téléphone) */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-trait bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Navigation principale">
+      {/* Barre du bas (téléphone) */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-trait bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Raccourcis">
         <ul className="mx-auto flex max-w-lg">
           {liensBas.map((l) => {
             const Icone = l.icone
@@ -134,18 +312,14 @@ export default function AppShell() {
                 <NavLink
                   to={l.vers}
                   end={l.fin}
-                  className={({ isActive }) => `flex flex-col items-center gap-1 px-1 pb-2 pt-2.5 text-[11px] font-semibold transition ${isActive ? 'text-nuit' : 'text-encre-pale'}`}
+                  className={({ isActive }) => `flex flex-col items-center gap-1 px-1 pb-2 pt-2.5 text-[11px] font-semibold transition ${isActive ? 'text-vert' : 'text-encre-pale'}`}
                 >
                   {({ isActive }) => (
                     <>
-                      <span
-                        className={`flex h-8 w-12 items-center justify-center rounded-full transition ${
-                          l.principal ? 'bg-bleu text-white' : isActive ? 'bg-bleu-100 text-bleu' : ''
-                        }`}
-                      >
+                      <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${l.principal ? 'bg-vert-500 text-white' : isActive ? 'bg-vert-50' : ''}`}>
                         <Icone className="h-5 w-5" />
                       </span>
-                      <span className="truncate">{l.court ?? l.libelle}</span>
+                      <span className="max-w-full truncate">{t(l.libelle)}</span>
                     </>
                   )}
                 </NavLink>

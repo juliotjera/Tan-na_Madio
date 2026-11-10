@@ -4,7 +4,7 @@ const db = require('../config/db')
 const CHAMPS = `c.id, c.immatriculation, c.modele, c.capacite_kg::float AS capacite_kg, c.statut, c.chauffeur_id,
   c.derniere_maintenance, c.created_at,
   ST_Y(c.position_actuelle::geometry) AS latitude, ST_X(c.position_actuelle::geometry) AS longitude,
-  u.prenom || ' ' || u.nom AS chauffeur_nom`
+  u.prenom || ' ' || u.nom AS chauffeur_nom, u.telephone AS chauffeur_telephone`
 
 async function lister({ statut } = {}) {
   const params = []

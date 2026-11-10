@@ -6,7 +6,7 @@ import { activerUtilisateur, creerUtilisateur, listerCamions, listerUtilisateurs
 import { messageErreur } from '../../api/axiosConfig'
 import { useAuth } from '../../hooks/useAuth'
 import { useDonnees } from '../../hooks/useDonnees'
-import { Champ, Chargement, EnTete, Erreur, Modal, Pagination, Segments, Spinner } from '../../components/common/ui'
+import { Champ, Chargement, Compteur, EnTete, Erreur, Modal, Pagination, Segments, Spinner } from '../../components/common/ui'
 import { dateCourte, ROLES } from '../../utils/format'
 
 const FILTRES = [{ valeur: '', libelle: 'Tous' }, ...Object.entries(ROLES).map(([valeur, libelle]) => ({ valeur, libelle: `${libelle}s` }))]
@@ -169,6 +169,14 @@ export default function Utilisateurs() {
           </button>
         }
       />
+      {liste.donnees?.compteurs && (
+        <div className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <Compteur valeur={liste.donnees.compteurs.total} libelle="Total" couleur="vert" />
+          <Compteur valeur={liste.donnees.compteurs.actifs} libelle="Actifs" couleur="vert" />
+          <Compteur valeur={liste.donnees.compteurs.agents} libelle="Agents" couleur="bleu" />
+          <Compteur valeur={liste.donnees.compteurs.chauffeurs} libelle="Chauffeurs" couleur="violet" />
+        </div>
+      )}
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="overflow-x-auto">
           <Segments
@@ -236,7 +244,7 @@ export default function Utilisateurs() {
                         aria-label={`${u.actif ? 'Désactiver' : 'Activer'} le compte de ${u.prenom} ${u.nom}`}
                         disabled={bascule === u.id}
                         onClick={() => activer(u)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.actif ? 'bg-bleu-500' : 'bg-slate-300'}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.actif ? 'bg-vert-500' : 'bg-slate-300'}`}
                       >
                         <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${u.actif ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                       </button>

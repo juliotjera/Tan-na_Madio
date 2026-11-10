@@ -3,24 +3,27 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
+import { LangueProvider } from './context/LangueContext'
 import App from './App'
 import './index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+      <LangueProvider>
       <AuthProvider>
         <App />
         <Toaster
           position="top-center"
           toastOptions={{
             duration: 3500,
-            style: { borderRadius: '8px', background: '#0C1A2B', color: '#FFFFFF', fontSize: '14px' },
-            success: { iconTheme: { primary: '#8EC5FF', secondary: '#0C1A2B' } },
-            error: { style: { borderRadius: '8px', background: '#FEF3F2', color: '#B42318', fontSize: '14px' } },
+            style: { borderRadius: '8px', background: '#065F46', color: '#FFFFFF', fontSize: '14px' },
+            success: { iconTheme: { primary: '#6EE7B7', secondary: '#065F46' } },
+            error: { style: { borderRadius: '8px', background: '#FEF2F2', color: '#B91C1C', fontSize: '14px' } },
           }}
         />
       </AuthProvider>
+      </LangueProvider>
     </BrowserRouter>
   </StrictMode>,
 )

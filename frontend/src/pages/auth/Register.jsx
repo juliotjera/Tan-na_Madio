@@ -77,7 +77,7 @@ export default function Register() {
       </form>
       <p className="mt-6 text-center text-sm text-encre-doux">
         Déjà inscrit ?{' '}
-        <Link to="/login" className="font-semibold text-bleu underline-offset-4 hover:underline">
+        <Link to="/login" className="font-semibold text-vert underline-offset-4 hover:underline">
           Se connecter
         </Link>
       </p>

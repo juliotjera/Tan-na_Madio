@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle, Loader2, X } from 'lucide-react'
 
 export function Spinner({ className = 'h-5 w-5' }) {
-  return <Loader2 className={`animate-spin text-bleu-500 ${className}`} aria-label="Chargement" />
+  return <Loader2 className={`animate-spin text-vert-500 ${className}`} aria-label="Chargement" />
 }
 
 // Chargement : la forme du contenu à venir (squelette) plutôt qu'une roue qui tourne
@@ -15,10 +15,10 @@ export function Chargement({ texte = 'Chargement…', lignes = 3 }) {
       <span className="sr-only">{texte}</span>
       {Array.from({ length: lignes }, (_, i) => (
         <div key={i} className="flex animate-pulse items-center gap-4 rounded-carte border border-trait bg-white p-4" aria-hidden>
-          <div className="h-10 w-10 shrink-0 rounded-lg bg-papier" />
+          <div className="h-10 w-10 shrink-0 rounded-lg bg-fond" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 rounded bg-papier" style={{ width: `${70 - i * 12}%` }} />
-            <div className="h-3 w-2/5 rounded bg-papier" />
+            <div className="h-3 rounded bg-fond" style={{ width: `${70 - i * 12}%` }} />
+            <div className="h-3 w-2/5 rounded bg-fond" />
           </div>
         </div>
       ))}
@@ -45,11 +45,11 @@ export function Vide({ icone: Icone, titre, texte, action }) {
   return (
     <div className="flex flex-col items-center px-6 py-14 text-center">
       {Icone && (
-        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-bleu-100 text-bleu">
+        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-vert-100 text-vert">
           <Icone className="h-6 w-6" />
         </span>
       )}
-      <p className="font-titre text-lg font-semibold text-nuit">{titre}</p>
+      <p className="font-titre text-lg font-semibold text-ardoise">{titre}</p>
       {texte && <p className="mt-1 max-w-sm text-sm text-encre-doux">{texte}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -69,25 +69,59 @@ export function EnTete({ titre, texte, actions }) {
 }
 
 // Chiffre clé : le nombre d'abord, l'étiquette ensuite
-export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'neutre' }) {
-  const tons = {
-    neutre: 'bg-bleu-100 text-bleu',
-    ambre: 'bg-ambre-100 text-ambre-700',
-    alerte: 'bg-alerte-100 text-alerte-700',
-    nuit: 'bg-nuit text-ciel',
-  }
+// Carte d'indicateur de la version d'origine : libellé, grand chiffre, tendance, mini-graphique, icône
+const TONS = {
+  vert: { carte: 'border-vert-300/60 bg-gradient-to-br from-vert-50 to-white', icone: 'bg-vert-100 text-vert-500', trait: '#10B981' },
+  ambre: { carte: 'border-ambre/40 bg-gradient-to-br from-ambre-50 to-white', icone: 'bg-ambre-100 text-ambre-700', trait: '#F59E0B' },
+  bleu: { carte: 'border-blue-200 bg-gradient-to-br from-blue-50 to-white', icone: 'bg-blue-100 text-blue-500', trait: '#3B82F6' },
+  violet: { carte: 'border-violet-200 bg-gradient-to-br from-violet-50 to-white', icone: 'bg-violet-100 text-violet-500', trait: '#8B5CF6' },
+  alerte: { carte: 'border-alerte/30 bg-gradient-to-br from-alerte-50 to-white', icone: 'bg-alerte-100 text-alerte-700', trait: '#DC2626' },
+  blanc: { carte: 'border-trait/80 bg-white', icone: 'bg-vert-50 text-vert-500', trait: '#10B981' },
+}
+
+function MiniCourbe({ valeurs, couleur }) {
+  if (!valeurs?.length || valeurs.every((v) => v === 0)) return null
+  const max = Math.max(...valeurs, 1)
+  const pts = valeurs.map((v, i) => `${(i / (valeurs.length - 1)) * 100},${28 - (v / max) * 26}`).join(' ')
   return (
-    <div className="carte flex items-start gap-4 p-5">
+    <svg viewBox="0 0 100 30" className="mt-2 h-8 w-28" preserveAspectRatio="none" aria-hidden>
+      <polyline points={pts} fill="none" stroke={couleur} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+    </svg>
+  )
+}
+
+export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', tendance, serie }) {
+  const t = TONS[ton] ?? TONS.blanc
+  const hausse = tendance != null && tendance >= 0
+  return (
+    <div className={`relative flex min-h-[150px] flex-col rounded-carte border p-5 shadow-carte ${t.carte}`}>
+      <p className="pr-12 text-sm text-encre-doux">{libelle}</p>
+      <p className="chiffre mt-1 text-[30px] leading-tight text-ardoise">{valeur}</p>
+      {tendance != null && (
+        <p className={`mt-1 inline-flex items-center gap-1 text-sm font-semibold ${hausse ? 'text-vert' : 'text-alerte-700'}`}>
+          <span aria-hidden>{hausse ? '↗' : '↘'}</span>
+          {hausse ? '+' : ''}
+          {tendance.toLocaleString('fr-FR')} % ce mois
+        </p>
+      )}
+      {detail && <p className="mt-1 text-xs text-encre-pale">{detail}</p>}
+      <MiniCourbe valeurs={serie} couleur={t.trait} />
       {Icone && (
-        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tons[ton]}`}>
+        <span className={`absolute ${serie ? 'bottom-5' : 'top-5'} right-5 flex h-11 w-11 items-center justify-center rounded-xl ${t.icone}`}>
           <Icone className="h-5 w-5" />
         </span>
       )}
-      <div className="min-w-0">
-        <p className="chiffre text-[28px] leading-none text-nuit">{valeur}</p>
-        <p className="mt-1.5 text-sm font-medium text-encre">{libelle}</p>
-        {detail && <p className="mt-0.5 text-xs text-encre-pale">{detail}</p>}
-      </div>
+    </div>
+  )
+}
+
+// Compteur centré (« 40 Total », « 4 En attente »…) comme sur la version d'origine
+const COULEURS_COMPTEUR = { vert: 'text-vert-500', ambre: 'text-ambre', bleu: 'text-blue-500', violet: 'text-violet-500', ardoise: 'text-ardoise' }
+export function Compteur({ valeur, libelle, couleur = 'vert' }) {
+  return (
+    <div className="carte flex flex-col items-center justify-center px-4 py-5 text-center">
+      <p className={`chiffre text-[30px] leading-none ${COULEURS_COMPTEUR[couleur]}`}>{valeur}</p>
+      <p className="mt-2 text-sm text-encre-doux">{libelle}</p>
     </div>
   )
 }
@@ -109,7 +143,7 @@ export function Champ({ libelle, aide, erreur, children, className = '' }) {
 // Segments (filtres) : boutons radio visuels
 export function Segments({ options, valeur, onChange, libelle }) {
   return (
-    <div role="radiogroup" aria-label={libelle} className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl border border-trait bg-white p-1 [scrollbar-width:none]">
+    <div role="radiogroup" aria-label={libelle} className="inline-flex max-w-full gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none]">
       {options.map((o) => (
         <button
           key={o.valeur}
@@ -117,12 +151,12 @@ export function Segments({ options, valeur, onChange, libelle }) {
           role="radio"
           aria-checked={valeur === o.valeur}
           onClick={() => onChange(o.valeur)}
-          className={`shrink-0 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${
-            valeur === o.valeur ? 'bg-bleu text-white' : 'text-encre-doux hover:bg-bleu-50 hover:text-nuit'
+          className={`shrink-0 whitespace-nowrap rounded-lg border-[1.5px] px-3.5 py-1.5 text-sm font-semibold transition ${
+            valeur === o.valeur ? 'border-vert-500 bg-vert-500 text-white shadow-sm' : 'border-vert-300 bg-white text-vert hover:bg-vert-50'
           }`}
         >
           {o.libelle}
-          {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-ciel' : 'text-encre-pale'}`}>{o.nombre}</span>}
+          {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-white/80' : 'text-vert/60'}`}>{o.nombre}</span>}
         </button>
       ))}
     </div>
@@ -147,7 +181,7 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
     <AnimatePresence>
       {ouvert && (
         <motion.div className="fixed inset-0 z-[1000] flex items-end justify-center sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="absolute inset-0 bg-nuit/50 backdrop-blur-[2px]" onClick={onFermer} aria-hidden />
+          <div className="absolute inset-0 bg-ardoise/50 backdrop-blur-[2px]" onClick={onFermer} aria-hidden />
           <motion.div
             ref={boite}
             role="dialog"

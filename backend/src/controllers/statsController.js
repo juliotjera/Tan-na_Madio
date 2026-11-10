@@ -24,12 +24,59 @@ const dashboard = asyncHandler(async (req, res) => {
       (SELECT avg(EXTRACT(EPOCH FROM (date_validation - created_at)) / 3600) FROM signalements WHERE date_validation IS NOT NULL)::float AS delai_moyen_heures
   `)
   const s = rows[0]
+  // tendances : signalements du mois en cours face au mois précédent, et 14 derniers jours (mini-graphique)
+  const tendance = (
+    await db.query(`
+      SELECT (SELECT count(*) FROM signalements WHERE created_at >= date_trunc('month', NOW()))::int AS mois,
+             (SELECT count(*) FROM signalements WHERE created_at >= date_trunc('month', NOW()) - interval '1 month'
+                                                 AND created_at < date_trunc('month', NOW()))::int AS mois_precedent`)
+  ).rows[0]
+  const serie = (
+    await db.query(`
+      SELECT to_char(j, 'YYYY-MM-DD') AS date, (SELECT count(*) FROM signalements WHERE date_trunc('day', created_at) = j)::int AS n
+        FROM generate_series(date_trunc('day', NOW()) - interval '13 days', date_trunc('day', NOW()), interval '1 day') AS j ORDER BY j`)
+  ).rows
+  const evolution = tendance.mois_precedent > 0 ? arrondi(((tendance.mois - tendance.mois_precedent) / tendance.mois_precedent) * 100) : null
   // taux de réussite : part des signalements traités (non rejetés) qui ont été effectivement collectés
   const traites = s.signalements - s.rejetes
   res.json({
     ...s,
     taux_reussite: traites > 0 ? arrondi((s.collectes_signalements / traites) * 100) : 0,
     delai_moyen_heures: arrondi(s.delai_moyen_heures),
+    signalements_mois: tendance.mois,
+    evolution_signalements_pct: evolution,
+    serie_14_jours: serie,
+  })
+})
+
+// Classement des citoyens les plus actifs (prénom et initiale seulement : pas de nom complet exposé)
+const topCitoyens = asyncHandler(async (req, res) => {
+  const { rows } = await db.query(
+    `SELECT u.id, u.prenom || ' ' || left(u.nom, 1) || '.' AS nom, c.quartier, c.points_eco,
+            (SELECT count(*) FROM signalements s WHERE s.citoyen_id = u.id)::int AS signalements
+       FROM citoyens c JOIN utilisateurs u ON u.id = c.id
+      WHERE u.actif AND c.points_eco > 0
+      ORDER BY c.points_eco DESC, u.created_at LIMIT 5`,
+  )
+  res.json({ citoyens: rows.map((c) => ({ ...c, moi: c.id === req.user.id, id: undefined })) })
+})
+
+// Performance par camion : tournées, points planifiés et ramassés, efficacité, kilomètres
+const camions = asyncHandler(async (req, res) => {
+  const { rows } = await db.query(`
+    SELECT ca.id, ca.immatriculation, ca.modele, ca.statut,
+           count(DISTINCT co.id)::int AS collectes,
+           count(DISTINCT co.id) FILTER (WHERE co.statut = 'terminee')::int AS terminees,
+           count(cs.signalement_id)::int AS points_planifies,
+           count(cs.signalement_id) FILTER (WHERE cs.collecte_fait)::int AS points_collectes,
+           (SELECT COALESCE(sum(distance_km), 0) FROM collectes WHERE camion_id = ca.id AND statut = 'terminee')::float AS km,
+           (SELECT COALESCE(sum(poids_collecte_kg), 0) FROM collectes WHERE camion_id = ca.id AND statut = 'terminee')::float AS kg
+      FROM camions ca
+      LEFT JOIN collectes co ON co.camion_id = ca.id AND co.statut <> 'annulee'
+      LEFT JOIN collecte_signalements cs ON cs.collecte_id = co.id
+     GROUP BY ca.id ORDER BY collectes DESC, ca.immatriculation`)
+  res.json({
+    camions: rows.map((c) => ({ ...c, efficacite_pct: c.points_planifies ? Math.round((c.points_collectes / c.points_planifies) * 100) : 0 })),
   })
 })
 
@@ -87,4 +134,4 @@ const apercu = asyncHandler(async (req, res) => {
   res.json({ ...chiffres, points, tournee })
 })
 
-module.exports = { dashboard, zones, periode, apercu }
+module.exports = { dashboard, zones, periode, apercu, topCitoyens, camions }

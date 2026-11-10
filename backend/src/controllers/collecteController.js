@@ -70,6 +70,34 @@ const suggestion = asyncHandler(async (req, res) => {
   })
 })
 
+// Mode « plusieurs tournées » (glouton) : les signalements sont répartis sur les camions disponibles,
+// les plus urgents d'abord, sans dépasser la capacité de chacun ; chaque lot reçoit son itinéraire optimisé.
+const repartition = asyncHandler(async (req, res) => {
+  const { signalement_ids } = req.body
+  if (!Array.isArray(signalement_ids) || !signalement_ids.length) throw new ErreurApi(400, 'Sélectionnez au moins un signalement', 'SIGNALEMENTS_REQUIS')
+  const camions = (
+    await db.query(`SELECT c.id, c.immatriculation, c.capacite_kg::float AS capacite_kg, u.prenom || ' ' || u.nom AS chauffeur_nom
+                      FROM camions c LEFT JOIN utilisateurs u ON u.id = c.chauffeur_id
+                     WHERE c.statut = 'disponible' AND c.chauffeur_id IS NOT NULL ORDER BY c.capacite_kg DESC`)
+  ).rows
+  if (!camions.length) throw new ErreurApi(422, 'Aucun camion disponible avec un chauffeur', 'AUCUN_CAMION')
+  const restants = (await db.query(`SELECT id, urgence, created_at FROM signalements WHERE id = ANY($1::uuid[]) AND statut = 'valide'`, [signalement_ids])).rows
+  if (restants.length !== signalement_ids.length) throw new ErreurApi(422, 'Seuls les signalements validés peuvent être planifiés', 'STATUT_INVALIDE')
+
+  const tournees = []
+  let reste = restants
+  for (const camion of camions) {
+    if (!reste.length) break
+    const { retenus, charge_estimee_kg } = selectionnerPourCamion(reste, camion.capacite_kg)
+    if (!retenus.length) continue
+    const ids = new Set(retenus.map((s) => s.id))
+    reste = reste.filter((s) => !ids.has(s.id))
+    const plan = await collecteService.optimiser({ signalement_ids: retenus.map((s) => s.id), camion_id: camion.id })
+    tournees.push({ camion, charge_estimee_kg, signalement_ids: retenus.map((s) => s.id), plan })
+  }
+  res.json({ tournees, non_attribues: reste.map((s) => s.id) })
+})
+
 const creer = asyncHandler(async (req, res) => {
   const { camion_id, zone_id, date_planifiee, signalement_ids, notes } = req.body
   if (!estUuid(camion_id)) throw new ErreurApi(400, 'Choisissez un camion', 'CAMION_REQUIS')
@@ -202,4 +230,4 @@ const annuler = asyncHandler(async (req, res) => {
   res.json(await charger(c.id))
 })
 
-module.exports = { lister, detail, optimiser, suggestion, creer, demarrer, marquerPoint, terminer, annuler }
+module.exports = { lister, detail, optimiser, suggestion, repartition, creer, demarrer, marquerPoint, terminer, annuler }

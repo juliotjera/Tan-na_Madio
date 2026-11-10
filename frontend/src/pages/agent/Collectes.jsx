@@ -25,8 +25,8 @@ export function Avancement({ faits, total }) {
   const part = total ? faits / total : 0
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-bleu-100">
-        <div className="h-full rounded-full bg-bleu-500" style={{ width: `${part * 100}%` }} />
+      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-vert-100">
+        <div className="h-full rounded-full bg-vert-500" style={{ width: `${part * 100}%` }} />
       </div>
       <span className="text-xs tabular-nums text-encre-doux">
         {faits}/{total}
@@ -167,9 +167,9 @@ export default function Collectes() {
                 ['Gain', c.itineraire?.gain_pourcent != null ? `−${Math.round(c.itineraire.gain_pourcent)} %` : '—'],
                 ['Collecté', c.poids_collecte_kg != null ? kg(c.poids_collecte_kg) : `${c.nb_faits}/${c.nb_points} points`],
               ].map(([k, v]) => (
-                <div key={k} className="rounded-xl bg-bleu-50 px-3 py-2.5">
+                <div key={k} className="rounded-xl bg-vert-50 px-3 py-2.5">
                   <p className="text-xs text-encre-pale">{k}</p>
-                  <p className="font-semibold text-nuit">{v}</p>
+                  <p className="font-semibold text-ardoise">{v}</p>
                 </div>
               ))}
             </div>
@@ -177,7 +177,7 @@ export default function Collectes() {
             <ol className="divide-y divide-trait">
               {c.signalements.map((s) => (
                 <li key={s.id} className="flex items-center gap-3 py-2.5">
-                  <span className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-ciel text-nuit' : 'bg-nuit text-white'}`}>{s.collecte_fait ? '✓' : s.ordre}</span>
+                  <span className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-menthe text-ardoise' : 'bg-ardoise text-white'}`}>{s.collecte_fait ? '✓' : s.ordre}</span>
                   <span className="min-w-0 flex-1 truncate text-sm">{s.description ?? s.adresse ?? 'Signalement'}</span>
                   <UrgenceBadge urgence={s.urgence} compact />
                 </li>

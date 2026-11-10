@@ -1,47 +1,70 @@
-// Signaler un dépôt : position (GPS ou carte), photo, urgence, précisions — puis envoi
+// « Signaler un problème » (formulaire de la version d'origine) : description, adresse, urgence,
+// localisation (GPS, carte ou recherche), photo réduite avant l'envoi, puis Envoyer / Annuler
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Camera, CheckCircle2, Crosshair, ImagePlus, MapPin, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, ImagePlus, MapPin, Send, Trash2 } from 'lucide-react'
 import { Marker } from 'react-leaflet'
 import { envoyerSignalement } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { usePosition } from '../../hooks/usePosition'
+import { useLangue } from '../../context/LangueContext'
 import { AuClic, Cadrer, Carte, CENTRE_TANA, iconeUrgence } from '../../components/map/Carte'
 import RechercheAdresse from '../../components/map/RechercheAdresse'
-import { Champ, Spinner } from '../../components/common/ui'
+import { Spinner } from '../../components/common/ui'
 import { compresserPhoto } from '../../utils/image'
-import { URGENCES } from '../../utils/format'
 
-const AIDES_URGENCE = {
-  faible: 'Quelques sacs, pas de gêne immédiate',
-  moyen: 'Tas visible, à ramasser cette semaine',
-  eleve: 'Gros dépôt, odeurs, gêne pour le passage',
-  critique: 'Danger : près d’une école, d’un point d’eau, ou feu',
-}
+const NIVEAUX = [
+  ['faible', 'Faible - Peu gênant'],
+  ['moyen', 'Moyen - À ramasser cette semaine'],
+  ['eleve', 'Élevé - Gêne importante'],
+  ['critique', 'Critique - Danger sanitaire'],
+]
 
-function Bloc({ numero, titre, fait, children }) {
+// Champ à étiquette posée sur la bordure, avec message « Valide » / erreur sous le champ
+function ChampCadre({ libelle, requis, aide, valide, erreur, children }) {
+  const { t } = useLangue()
   return (
-    <section className="carte p-5 sm:p-6">
-      <div className="mb-4 flex items-center gap-3">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full font-titre text-sm font-bold ${fait ? 'bg-ciel text-nuit' : 'bg-nuit text-white'}`}>
-          {fait ? <CheckCircle2 className="h-4 w-4" /> : numero}
+    <div>
+      <div
+        className={`relative rounded-xl border-[1.5px] bg-white px-3.5 pb-2.5 pt-3 transition focus-within:border-vert-500 ${
+          erreur ? 'border-alerte' : valide ? 'border-vert-500' : 'border-trait'
+        }`}
+      >
+        <span className={`absolute -top-2.5 left-3 bg-white px-1 text-xs font-semibold ${erreur ? 'text-alerte-700' : 'text-vert'}`}>
+          {libelle}
+          {requis && <span className="text-alerte"> *</span>}
         </span>
-        <h2 className="text-lg font-semibold">{titre}</h2>
+        {children}
       </div>
-      {children}
-    </section>
+      {aide && <p className="mt-1.5 text-xs text-encre-doux">{aide}</p>}
+      {erreur ? (
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-alerte-700">
+          <AlertCircle className="h-4 w-4" /> {erreur}
+        </p>
+      ) : (
+        valide && (
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-vert">
+            <CheckCircle2 className="h-4 w-4" /> {t('Valide')}
+          </p>
+        )
+      )}
+    </div>
   )
 }
 
 export default function Signaler() {
   const navigate = useNavigate()
+  const { t } = useLangue()
   const gps = usePosition()
   const [photo, setPhoto] = useState(null)
   const [apercu, setApercu] = useState(null)
   const [urgence, setUrgence] = useState('moyen')
   const [description, setDescription] = useState('')
   const [adresse, setAdresse] = useState('')
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
+  const [tente, setTente] = useState(false) // erreurs affichées après une première tentative d'envoi
   const [envoi, setEnvoi] = useState(null) // progression 0-100
   const [resultat, setResultat] = useState(null)
   const entree = useRef(null)
@@ -49,6 +72,19 @@ export default function Signaler() {
 
   useEffect(() => localiser(), [localiser]) // position demandée dès l'ouverture
   useEffect(() => () => apercu && URL.revokeObjectURL(apercu), [apercu])
+  // la position GPS ou le clic sur la carte remplissent les champs latitude / longitude
+  useEffect(() => {
+    if (gps.position) {
+      setLat(String(gps.position[0]))
+      setLng(String(gps.position[1]))
+    }
+  }, [gps.position])
+
+  const latN = Number(lat)
+  const lngN = Number(lng)
+  const positionOk = lat !== '' && lng !== '' && Number.isFinite(latN) && Number.isFinite(lngN) && Math.abs(latN) <= 90 && Math.abs(lngN) <= 180
+  const position = positionOk ? [latN, lngN] : null
+  const descriptionOk = description.trim().length >= 3
 
   const choisirPhoto = async (e) => {
     const f = e.target.files?.[0]
@@ -59,16 +95,18 @@ export default function Signaler() {
     setApercu(URL.createObjectURL(reduite))
   }
 
-  const pret = gps.position && (photo || description.trim())
+  const placer = ([la, lo]) => {
+    gps.setPosition([la, lo])
+    gps.setPrecision(null)
+  }
 
-  const envoyer = async () => {
+  const envoyer = async (e) => {
+    e.preventDefault()
+    setTente(true)
+    if (!positionOk || !descriptionOk) return
     setEnvoi(0)
     try {
-      const r = await envoyerSignalement(
-        { latitude: gps.position[0], longitude: gps.position[1], urgence, description: description.trim(), adresse: adresse.trim() },
-        photo,
-        setEnvoi,
-      )
+      const r = await envoyerSignalement({ latitude: latN, longitude: lngN, urgence, description: description.trim(), adresse: adresse.trim() }, photo, setEnvoi)
       setResultat(r)
     } catch (err) {
       toast.error(messageErreur(err))
@@ -80,17 +118,18 @@ export default function Signaler() {
   if (resultat) {
     return (
       <div className="mx-auto max-w-lg py-10 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-ciel text-nuit">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-vert-100 text-vert-500">
           <CheckCircle2 className="h-8 w-8" />
         </span>
-        <h1 className="mt-6 text-[28px] font-semibold">Signalement envoyé</h1>
+        <h1 className="mt-6 text-[28px]">{t('Signalement envoyé')}</h1>
         <p className="mt-2 text-encre-doux">
-          {resultat.zone_nom ? `Il a été rattaché à la zone ${resultat.zone_nom}. ` : ''}Un agent municipal va le vérifier. Vous serez crédité de 5 points à la validation.
+          {resultat.zone_nom ? `${resultat.zone_nom}. ` : ''}
+          {t('Un agent municipal va le vérifier. Vous serez crédité de 5 points à la validation.')}
         </p>
-        <p className="chiffre mt-6 text-[40px] text-bleu-700">+{resultat.points_gagnes} points</p>
+        <p className="chiffre mt-6 text-[40px] text-vert-500">+{resultat.points_gagnes} {t('points')}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/citoyen/signalements" className="btn-principal">
-            Suivre mon signalement
+            {t('Suivre mon signalement')}
           </Link>
           <button
             type="button"
@@ -102,9 +141,10 @@ export default function Signaler() {
               setDescription('')
               setAdresse('')
               setUrgence('moyen')
+              setTente(false)
             }}
           >
-            Signaler un autre dépôt
+            {t('Signaler un autre dépôt')}
           </button>
         </div>
       </div>
@@ -112,69 +152,99 @@ export default function Signaler() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <form onSubmit={envoyer} className="mx-auto max-w-[620px] space-y-5" noValidate>
       <div>
-        <h1 className="text-[26px] font-semibold sm:text-[30px]">Signaler un dépôt d’ordures</h1>
-        <p className="mt-1 text-encre-doux">Placez le point, ajoutez une photo, indiquez l’urgence.</p>
+        <h1 className="text-[28px]">{t('Signaler un problème')}</h1>
+        <p className="mt-1 text-encre-doux">{t('Aidez-nous à maintenir votre quartier propre')}</p>
       </div>
 
-      <Bloc numero={1} titre="Où se trouve le dépôt ?" fait={Boolean(gps.position)}>
-        <RechercheAdresse
-          onChoix={(position, nom) => {
-            gps.setPosition(position)
-            gps.setPrecision(null)
-            if (!adresse) setAdresse(nom.slice(0, 255))
-          }}
-        />
-        <Carte className="h-[300px] sm:h-[340px]" centre={gps.position ?? CENTRE_TANA} zoom={16}>
-          <AuClic
-            onClic={(p) => {
-              gps.setPosition(p)
-              gps.setPrecision(null)
-            }}
-          />
-          {gps.position && (
-            <Marker
-              position={gps.position}
-              icon={iconeUrgence(urgence)}
-              draggable
-              eventHandlers={{
-                dragend: (e) => {
-                  const { lat, lng } = e.target.getLatLng()
-                  gps.setPosition([lat, lng])
-                  gps.setPrecision(null)
-                },
+      <ChampCadre
+        libelle={t('Description')}
+        requis
+        aide={t('Décrivez le problème (déchets, encombrants, etc.)')}
+        valide={descriptionOk}
+        erreur={tente && !descriptionOk ? t('Ce champ est requis.') : null}
+      >
+        <textarea rows={4} maxLength={2000} className="w-full resize-y border-0 p-0 text-[15px] outline-none" value={description} onChange={(e) => setDescription(e.target.value)} />
+      </ChampCadre>
+
+      <ChampCadre libelle={t('Adresse')} aide={t('Optionnel, mais utile pour la collecte')} valide={adresse.trim().length > 1}>
+        <input className="w-full border-0 p-0 text-[15px] outline-none" maxLength={255} value={adresse} onChange={(e) => setAdresse(e.target.value)} />
+      </ChampCadre>
+
+      <label className="block">
+        <span className="etiquette">{t("Niveau d'urgence")}</span>
+        <select className="champ" value={urgence} onChange={(e) => setUrgence(e.target.value)}>
+          {NIVEAUX.map(([v, l]) => (
+            <option key={v} value={v}>
+              {t(l)}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <section className="rounded-carte bg-fond/80 p-4">
+        <p className="etiquette">{t('Localisation')}</p>
+        <div className="grid gap-3 pt-2 sm:grid-cols-2">
+          <ChampCadre libelle={t('Latitude')} requis valide={positionOk}>
+            <input inputMode="decimal" className="w-full border-0 p-0 text-[15px] outline-none" value={lat} onChange={(e) => setLat(e.target.value)} />
+          </ChampCadre>
+          <ChampCadre libelle={t('Longitude')} requis valide={positionOk}>
+            <input inputMode="decimal" className="w-full border-0 p-0 text-[15px] outline-none" value={lng} onChange={(e) => setLng(e.target.value)} />
+          </ChampCadre>
+        </div>
+        {tente && !positionOk && (
+          <p className="mt-2 flex items-center gap-1.5 text-sm text-alerte-700">
+            <AlertCircle className="h-4 w-4" /> {t('Ce champ est requis.')}
+          </p>
+        )}
+        <button type="button" className="btn-secondaire mt-3 w-full" onClick={gps.localiser} disabled={gps.recherche}>
+          {gps.recherche ? <Spinner className="h-4 w-4" /> : <MapPin className="h-4 w-4" />} {t('Utiliser ma position')}
+        </button>
+        {gps.erreur && !position && <p className="mt-2 text-sm text-ambre-700">{gps.erreur}</p>}
+
+        <div className="mt-4 overflow-hidden rounded-xl border border-trait bg-white">
+          <div className="px-4 py-3">
+            <p className="text-sm font-semibold">{t('Placez un marqueur sur la carte')}</p>
+            <p className="text-xs text-encre-doux">{t('Cliquez sur la carte pour définir la latitude et la longitude.')}</p>
+          </div>
+          <div className="px-3">
+            <RechercheAdresse
+              onChoix={(p, nom) => {
+                placer(p)
+                if (!adresse) setAdresse(nom.slice(0, 255))
               }}
             />
-          )}
-          {gps.position && <Cadrer points={[gps.position]} max={17} />}
-        </Carte>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="flex items-center gap-2 text-sm text-encre-doux">
-            <MapPin className="h-4 w-4 text-bleu" />
-            {gps.recherche
-              ? 'Recherche de votre position…'
-              : gps.position
-                ? `${gps.position[0].toFixed(5)}, ${gps.position[1].toFixed(5)}${gps.precision ? ` · précision ${gps.precision} m` : ''}`
-                : 'Touchez la carte pour placer le point'}
-          </p>
-          <button type="button" className="btn-secondaire min-h-[38px]" onClick={gps.localiser} disabled={gps.recherche}>
-            {gps.recherche ? <Spinner className="h-4 w-4" /> : <Crosshair className="h-4 w-4" />}
-            Ma position
-          </button>
+          </div>
+          <Carte className="h-[260px] rounded-none border-0 border-t" centre={position ?? CENTRE_TANA} zoom={16}>
+            <AuClic onClic={placer} />
+            {position && (
+              <Marker
+                position={position}
+                icon={iconeUrgence(urgence)}
+                draggable
+                eventHandlers={{
+                  dragend: (e) => {
+                    const { lat: la, lng: lo } = e.target.getLatLng()
+                    placer([la, lo])
+                  },
+                }}
+              />
+            )}
+            {position && <Cadrer points={[position]} max={17} />}
+          </Carte>
         </div>
-        {gps.erreur && !gps.position && <p className="mt-2 text-sm text-ambre-700">{gps.erreur}</p>}
-        <p className="mt-2 text-xs text-encre-pale">Vous pouvez déplacer le marqueur pour être plus précis.</p>
-      </Bloc>
+      </section>
 
-      <Bloc numero={2} titre="Une photo du dépôt" fait={Boolean(photo)}>
+      <section className="rounded-carte bg-fond/80 p-4">
+        <p className="etiquette">{t('Photo (optionnel)')}</p>
         <input ref={entree} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" onChange={choisirPhoto} />
         {apercu ? (
-          <div className="relative overflow-hidden rounded-xl">
-            <img src={apercu} alt="Aperçu de la photo" className="max-h-[360px] w-full object-cover" />
+          <div className="relative mt-2 overflow-hidden rounded-xl">
+            <img src={apercu} alt="Aperçu de la photo" className="max-h-[320px] w-full object-cover" />
             <button
               type="button"
-              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-nuit/80 text-white backdrop-blur hover:bg-nuit"
+              className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg bg-alerte text-white shadow hover:bg-alerte-700"
               onClick={() => {
                 setPhoto(null)
                 setApercu(null)
@@ -182,75 +252,31 @@ export default function Signaler() {
               }}
               aria-label="Retirer la photo"
             >
-              <X className="h-5 w-5" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ) : (
           <button
             type="button"
             onClick={() => entree.current.click()}
-            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-trait bg-bleu-50/50 px-6 py-10 text-encre-doux transition hover:border-bleu-500 hover:bg-bleu-50"
+            className="mt-2 flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-vert-300 bg-white px-6 py-8 text-encre-doux transition hover:bg-vert-50"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-bleu shadow-carte">
-              <Camera className="h-6 w-6" />
-            </span>
-            <span className="font-semibold text-nuit">Prendre ou choisir une photo</span>
-            <span className="text-xs">JPEG, PNG ou WebP · réduite automatiquement avant l’envoi</span>
+            <ImagePlus className="h-7 w-7 text-vert-500" />
+            <span className="font-semibold text-vert">{t('Prendre ou choisir une photo')}</span>
+            <span className="text-xs">{t('JPEG, PNG ou WebP · réduite automatiquement avant l’envoi')}</span>
           </button>
         )}
-        {apercu && (
-          <button type="button" onClick={() => entree.current.click()} className="btn-discret mt-2">
-            <ImagePlus className="h-4 w-4" /> Changer de photo
-          </button>
-        )}
-      </Bloc>
+      </section>
 
-      <Bloc numero={3} titre="Quelle urgence ?" fait>
-        <div role="radiogroup" aria-label="Niveau d'urgence" className="grid gap-2 sm:grid-cols-2">
-          {Object.entries(URGENCES).map(([cle, u]) => (
-            <button
-              key={cle}
-              type="button"
-              role="radio"
-              aria-checked={urgence === cle}
-              onClick={() => setUrgence(cle)}
-              className={`flex items-start gap-3 rounded-xl border-2 p-3.5 text-left transition ${urgence === cle ? 'border-bleu bg-bleu-50' : 'border-trait hover:border-bleu/30'}`}
-            >
-              <span className="mt-1 h-3.5 w-3.5 shrink-0 rounded-full" style={{ background: u.couleur }} />
-              <span>
-                <span className="block font-semibold text-nuit">{u.libelle}</span>
-                <span className="block text-sm text-encre-doux">{AIDES_URGENCE[cle]}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </Bloc>
-
-      <Bloc numero={4} titre="Précisions" fait={Boolean(description.trim())}>
-        <div className="space-y-4">
-          <Champ libelle="Description" aide={photo ? 'Facultatif' : 'Obligatoire sans photo'}>
-            {(id) => (
-              <textarea id={id} rows={3} maxLength={2000} className="champ resize-y" placeholder="Ex. : tas d’ordures devant l’entrée du marché" value={description} onChange={(e) => setDescription(e.target.value)} />
-            )}
-          </Champ>
-          <Champ libelle="Repère ou adresse" aide="Facultatif : rue, bâtiment, arrêt de taxi-be…">
-            {(id) => <input id={id} className="champ" maxLength={255} value={adresse} onChange={(e) => setAdresse(e.target.value)} />}
-          </Champ>
-        </div>
-      </Bloc>
-
-      <div className="sticky bottom-[84px] z-30 flex flex-col gap-2 rounded-xl border border-trait bg-white/95 p-3 shadow-flotte backdrop-blur sm:flex-row sm:items-center sm:justify-between lg:bottom-4">
-        <p className="px-2 text-sm text-encre-doux">{!gps.position ? 'Placez d’abord le point sur la carte' : !pret ? 'Ajoutez une photo ou une description' : 'Prêt à envoyer'}</p>
-        <div className="flex gap-2">
-          <button type="button" className="btn-discret" onClick={() => navigate(-1)}>
-            Annuler
-          </button>
-          <button type="button" className="btn-principal min-h-[46px] flex-1 px-6 sm:flex-none" disabled={!pret || envoi != null} onClick={envoyer}>
-            {envoi != null && <Spinner className="h-4 w-4 text-white" />}
-            {envoi != null ? `Envoi… ${envoi} %` : 'Envoyer le signalement'}
-          </button>
-        </div>
+      <div className="grid gap-3 pb-4 sm:grid-cols-2">
+        <button type="submit" className="btn-principal min-h-[48px] text-base" disabled={envoi != null}>
+          {envoi != null ? <Spinner className="h-4 w-4 text-white" /> : <Send className="h-4 w-4" />}
+          {envoi != null ? t('Envoi… {p} %', { p: envoi }) : t('Envoyer')}
+        </button>
+        <button type="button" className="btn-secondaire min-h-[48px] text-base" onClick={() => navigate(-1)}>
+          {t('Annuler')}
+        </button>
       </div>
-    </div>
+    </form>
   )
 }

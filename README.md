@@ -12,12 +12,12 @@ Les citoyens signalent un dépôt (photo, position GPS, urgence) ; les agents mu
 
 | Rôle | Ce qu’il peut faire |
 | --- | --- |
-| **Citoyen** | Carte des signalements (filtres, rafraîchissement automatique, « Me localiser ») · signaler un dépôt (GPS automatique ou point placé sur la carte, photo réduite avant l’envoi, urgence) · suivre ses signalements étape par étape · points éco et paliers (+2 envoi, +5 validation, +10 ramassage) |
-| **Agent municipal** | Tableau de bord · valider / rejeter les signalements · **planifier une tournée en 4 étapes** (camion et date → signalements, avec sélection automatique selon la capacité → itinéraire optimisé sur la carte, gain affiché → confirmation) · suivre et annuler les collectes · état de la flotte |
-| **Chauffeur** | Prochaine tournée · **exécution de la tournée** : carte avec tracé et arrêts numérotés, prochain arrêt mis en évidence, guidage GPS, « Marquer collecté », progression X/N, fin de tournée avec poids |
-| **Administrateur** | 5 indicateurs et graphiques · comptes (création du personnel, activation) · camions (CRUD, affectation des chauffeurs) · zones (tracé du contour sur la carte) · statistiques par période · exports CSV · journal d’activité |
+| **Citoyen** | Actions rapides · carte des signalements (filtres statut et urgence, rafraîchissement automatique, « Me géolocaliser ») · signaler un problème (description, adresse, urgence, latitude/longitude par GPS, carte ou recherche d’adresse, photo réduite avant l’envoi) · historique en photos · suivi étape par étape · points éco et paliers (+2 envoi, +5 validation, +10 ramassage) · **classement Top Citoyens Écologiques** |
+| **Agent municipal** | Tableau de bord · valider / rejeter les signalements · **planifier une collecte en 4 étapes** : sélection (camion, chauffeur joignable par **WhatsApp ou appel**, zone et nombre de signalements disponibles, **mode mono-tournée Dijkstra ou plusieurs tournées gloutonnes**, date) → signalements (photo, adresse, déclarant, sélection automatique selon la capacité) → aperçu de la route (récapitulatif, carte légendée, gain) → confirmation · suivre et annuler les collectes · état de la flotte |
+| **Chauffeur** | Tableau de bord (4 compteurs, tournée du jour, dernières tournées) · mes tournées (compteurs, filtres, en cours / historique) · **exécution de la tournée** : carte légendée avec tracé et arrêts numérotés, prochain arrêt mis en évidence, guidage GPS, « Marquer », progression X/N, fin de tournée avec poids |
+| **Administrateur** | Actions rapides, **priorité du mois**, 5 indicateurs avec tendance et mini-graphique, signalements par statut, performance mensuelle, derniers signalements et collectes · comptes (compteurs, création du personnel, activation) · camions (CRUD, affectation des chauffeurs) · zones (tracé du contour, activation) · statistiques par période (évolution, zones, **performance des camions**) · exports CSV · journal d’activité |
 
-Pour tous : **notifications** dans l’application (signalement validé, rejeté, programmé, ramassé ; tournée confiée, terminée, annulée ; urgence critique), **application installable** sur téléphone et ouverture **hors ligne**, recherche d’adresse pour placer un signalement, exports CSV (ouvrables dans Excel) pour le personnel.
+Pour tous : interface **en français ou en malagasy**, barre latérale repliable (**Alt+M**), notifications (**Alt+N**), fil d’Ariane, **notifications** dans l’application (signalement validé, rejeté, programmé, ramassé ; tournée confiée, terminée, annulée ; urgence critique), **application installable** sur téléphone et ouverture **hors ligne**, recherche d’adresse pour placer un signalement, exports CSV (ouvrables dans Excel) pour le personnel.
 
 ## Algorithmes
 
@@ -35,11 +35,11 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 - **Backend** : Node.js, Express 4, PostgreSQL + **PostGIS** (géométries, trigger d’affectation de zone, vues), JWT (accès 15 min + renouvellement 7 j), bcrypt, Multer, Helmet, limitation de débit.
 - **Base de développement** : **PGlite** (PostgreSQL 18 + PostGIS 3.6 compilés en WebAssembly) : le projet démarre **sans installer PostgreSQL**. En production, la même base SQL tourne sur un vrai serveur PostgreSQL/PostGIS.
 - **Frontend** : React 18, Vite 5, Tailwind CSS 3, Leaflet / React-Leaflet (fond OpenStreetMap), Recharts, Axios, React Router 6, Framer Motion.
-- **Identité visuelle « signalisation urbaine »** : bleu signalisation (#0E518D) et bleu nuit (#0C1A2B) pour l’action de la commune, couleurs chaudes réservées aux déchets et aux urgences (rouge = critique), police Archivo (étroite pour les titres et les chiffres, comme les panneaux), arrêts en plaques numérotées et camions en plaques d’immatriculation.
+- **Identité visuelle d’origine** : vert émeraude (#10B981), fond menthe, cartes blanches et cartes pastel, police Inter, logo rond à épingle ; accueil sur une carte sombre animée d’Antananarivo (marqueurs qui apparaissent, badges flottants) ; le rouge est réservé à l’urgence critique.
 - **Application installable (PWA)** : manifeste, icônes, service worker (interface disponible sans réseau ; données toujours lues en direct).
 - **Production** : compression des réponses, cache long des fichiers versionnés, journal des requêtes, migrations de base automatiques.
 - **Qualité** : ESLint (frontend et backend), intégration continue GitHub Actions (vérification du code, tests, compilation à chaque envoi).
-- **Tests** : Jest + Supertest (63 tests : algorithmes, authentification, signalements, collectes, notifications et exports, base de données).
+- **Tests** : Jest + Supertest (69 tests : algorithmes, authentification, signalements, collectes, notifications et exports, fonctionnalités de la version d’origine, base de données).
 
 ## Démarrage rapide
 
