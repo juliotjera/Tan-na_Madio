@@ -26,7 +26,7 @@ function creerApp() {
       contentSecurityPolicy: {
         directives: {
           'img-src': ["'self'", 'data:', 'blob:', 'https://tile.openstreetmap.org'],
-          'connect-src': ["'self'", 'https://nominatim.openstreetmap.org'], // recherche d'adresse
+          'connect-src': ["'self'", 'https://nominatim.openstreetmap.org', 'https://tile.openstreetmap.org'], // recherche d'adresse, tuiles gardées hors ligne
         },
       },
     }),

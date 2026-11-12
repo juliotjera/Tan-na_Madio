@@ -124,3 +124,16 @@ test('flux temps réel : une notification arrive aussitôt sur le flux de son de
   expect(n.user_id).toBeUndefined()
   await new Promise((r) => serveur.close(r))
 })
+
+test('notifications push : clé publique stable, abonnement d’un appareil, désabonnement', async () => {
+  const c1 = await request(app).get('/api/notifications/push/cle').set(citoyen.entete)
+  expect(c1.status).toBe(200)
+  expect(c1.body.cle).toMatch(/^[A-Za-z0-9_-]{80,}$/)
+  expect((await request(app).get('/api/notifications/push/cle').set(citoyen.entete)).body.cle).toBe(c1.body.cle)
+  const abonnement = { endpoint: 'https://push.exemple.test/abc', keys: { p256dh: 'BCle', auth: 'secret' } }
+  expect((await request(app).post('/api/notifications/push').set(citoyen.entete).send(abonnement)).status).toBe(201)
+  expect((await db.query('SELECT count(*)::int AS n FROM abonnements_push')).rows[0].n).toBe(1)
+  expect((await request(app).post('/api/notifications/push').set(citoyen.entete).send({ endpoint: 'http://x' })).status).toBe(400)
+  await request(app).delete('/api/notifications/push').set(citoyen.entete).send({ endpoint: abonnement.endpoint })
+  expect((await db.query('SELECT count(*)::int AS n FROM abonnements_push')).rows[0].n).toBe(0)
+})

@@ -2,12 +2,15 @@
 // - fichiers compilés (/assets, nom avec empreinte) : cache d'abord ;
 // - pages : réseau d'abord, page en cache si le réseau ne répond pas ;
 // - photos des signalements : cache d'abord, complété au fil de l'usage (taille limitée) ;
-//   (les tuiles de carte, d'un autre domaine, restent gérées par le navigateur) ;
-// - API : jamais mise en cache (données toujours fraîches et propres à chaque compte).
-const VERSION = 'tm-v1'
+// - tuiles de carte déjà affichées : gardées (le chauffeur retrouve le plan de sa tournée sans réseau) ;
+// - API : jamais mise en cache (données toujours fraîches et propres à chaque compte) ;
+// - notifications push : affichage et ouverture de la page concernée.
+const VERSION = 'tm-v2'
 const COQUILLE = `${VERSION}-coquille`
 const MEDIAS = `${VERSION}-medias`
+const TUILES = 'tm-tuiles' // conservé d'une version à l'autre
 const MAX_MEDIAS = 300
+const MAX_TUILES = 1500 // environ 25 Mo
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -22,7 +25,7 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches
       .keys()
-      .then((cles) => Promise.all(cles.filter((c) => !c.startsWith(VERSION)).map((c) => caches.delete(c))))
+      .then((cles) => Promise.all(cles.filter((c) => !c.startsWith(VERSION) && c !== TUILES).map((c) => caches.delete(c))))
       .then(() => self.clients.claim()),
   )
 })
@@ -41,6 +44,7 @@ async function cacheDabord(requete, nom) {
     const cache = await caches.open(nom)
     cache.put(requete, reponse.clone())
     if (nom === MEDIAS) limiter(MEDIAS, MAX_MEDIAS)
+    if (nom === TUILES) limiter(TUILES, MAX_TUILES)
   }
   return reponse
 }
@@ -69,7 +73,43 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  if (url.origin === location.origin && url.pathname.startsWith('/uploads/')) {
+  if (url.origin === location.origin && (url.pathname.startsWith('/uploads/') || url.pathname.startsWith('/images/'))) {
     e.respondWith(cacheDabord(request, MEDIAS))
+    return
   }
+
+  // tuiles OpenStreetMap : celles déjà vues servent hors connexion (aucun téléchargement en masse)
+  if (url.hostname === 'tile.openstreetmap.org') {
+    e.respondWith(cacheDabord(request, TUILES).catch(() => new Response('', { status: 504 })))
+  }
+})
+
+self.addEventListener('push', (e) => {
+  let n = {}
+  try {
+    n = e.data?.json() ?? {}
+  } catch {
+    n = { titre: e.data?.text() }
+  }
+  e.waitUntil(
+    self.registration.showNotification(n.titre || 'Tanàna Madio', {
+      body: n.message || '',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: { lien: n.lien || '/' },
+      lang: 'fr',
+    }),
+  )
+})
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close()
+  const cible = new URL(e.notification.data?.lien || '/', self.location.origin).href
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenetres) => {
+      const ouverte = fenetres.find((f) => f.url.startsWith(self.location.origin))
+      if (ouverte) return ouverte.navigate(cible).then((f) => (f ?? ouverte).focus())
+      return self.clients.openWindow(cible)
+    }),
+  )
 })

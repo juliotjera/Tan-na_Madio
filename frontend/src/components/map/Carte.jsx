@@ -12,6 +12,7 @@ export function Carte({ centre = CENTRE_TANA, zoom = 14, className = 'h-[420px]'
       <MapContainer center={centre} zoom={zoom} scrollWheelZoom={defilement} className="h-full w-full" {...props}>
         <TileLayer
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          crossOrigin="anonymous"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">contributeurs OpenStreetMap</a>'
           maxZoom={19}
         />

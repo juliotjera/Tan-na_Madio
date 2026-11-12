@@ -1,6 +1,7 @@
 // Notifications dans l'application (cloche de l'en-tête)
 const db = require('../config/db')
 const { bus, canal } = require('../utils/evenements')
+const push = require('../services/push')
 
 // Envoi à un ou plusieurs utilisateurs. Comme le journal, ne bloque jamais l'action qui la déclenche.
 async function notifier(destinataires, { type, titre, message = null, lien = null }) {
@@ -14,6 +15,7 @@ async function notifier(destinataires, { type, titre, message = null, lien = nul
       [ids, type, titre, message, lien],
     )
     for (const { user_id: userId, ...n } of rows) bus.emit(canal(userId), n)
+    push.envoyer(ids, { titre, message, lien }) // téléphone, même application fermée
   } catch (erreur) {
     console.warn('notification :', erreur.message)
   }

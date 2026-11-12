@@ -10,6 +10,7 @@ import { useDonnees } from '../hooks/useDonnees'
 import { Champ, Chargement, EnTete, Spinner } from '../components/common/ui'
 import { CartePoints } from './citoyen/Dashboard'
 import { dateCourte, ROLES } from '../utils/format'
+import InterrupteurPush from '../components/common/InterrupteurPush'
 
 export default function Compte() {
   const { user: moiSession, deconnecter, majUser } = useAuth()
@@ -67,6 +68,7 @@ export default function Compte() {
         </section>
         <div className="space-y-6">
           {u.role === 'citoyen' && <CartePoints points={u.points_eco ?? 0} />}
+          <InterrupteurPush />
           <form onSubmit={changer} className="carte space-y-4 p-5">
             <h2 className="text-lg font-semibold">Changer de mot de passe</h2>
             {moiSession?.mdp_provisoire && (

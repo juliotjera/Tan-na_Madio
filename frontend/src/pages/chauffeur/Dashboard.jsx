@@ -9,6 +9,7 @@ import { useDonnees } from '../../hooks/useDonnees'
 import { useLangue } from '../../context/LangueContext'
 import { Chargement, Erreur } from '../../components/common/ui'
 import { dateCourte, jourHeure, km } from '../../utils/format'
+import InterrupteurPush from '../../components/common/InterrupteurPush'
 
 function Stat({ icone: Icone, valeur, libelle }) {
   return (
@@ -51,6 +52,8 @@ export default function ChauffeurDashboard() {
           </p>
         )}
       </section>
+
+      <InterrupteurPush compact />
 
       {liste.erreur && <Erreur message={liste.erreur} onReessayer={liste.recharger} />}
       {liste.chargement && !liste.donnees && <Chargement />}

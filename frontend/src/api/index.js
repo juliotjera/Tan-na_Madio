@@ -91,5 +91,8 @@ export async function telechargerCsv(ressource, params) {
 // ── Reprises de la version d'origine
 export const topCitoyens = () => api.get('/stats/top-citoyens').then((r) => r.data.citoyens)
 export const statsCamions = () => api.get('/stats/camions').then((r) => r.data.camions)
+export const clePush = () => api.get('/notifications/push/cle').then((r) => r.data.cle)
+export const abonnerPush = (abonnement) => api.post('/notifications/push', abonnement).then(donnees)
+export const desabonnerPush = (endpoint) => api.delete('/notifications/push', { data: { endpoint } }).then(donnees)
 export const pointsNoirs = (jours) => api.get('/stats/points-noirs', { params: { jours } }).then((r) => r.data.points)
 export const repartition = (signalement_ids) => api.post('/collectes/repartition', { signalement_ids }).then(donnees)

@@ -2,6 +2,7 @@
 const { Notification } = require('../models')
 const { ErreurApi, asyncHandler } = require('../utils/helpers')
 const { bus, canal } = require('../utils/evenements')
+const push = require('../services/push')
 
 const lister = asyncHandler(async (req, res) => {
   const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20))
@@ -36,4 +37,21 @@ const flux = (req, res) => {
   })
 }
 
-module.exports = { lister, lire, toutLire, flux }
+// Notifications push : clé publique, abonnement et désabonnement d'un appareil
+const clePush = asyncHandler(async (req, res) => {
+  res.json({ cle: (await push.clesVapid()).publicKey })
+})
+
+const abonnerPush = asyncHandler(async (req, res) => {
+  const { endpoint, keys } = req.body ?? {}
+  if (!/^https:\/\//.test(endpoint ?? '') || !keys?.p256dh || !keys?.auth) throw new ErreurApi(400, 'Abonnement invalide', 'ABONNEMENT_INVALIDE')
+  await push.abonner(req.user.id, { endpoint, keys })
+  res.status(201).json({ message: 'Notifications activées sur cet appareil' })
+})
+
+const desabonnerPush = asyncHandler(async (req, res) => {
+  await push.desabonner(req.user.id, String(req.body?.endpoint ?? ''))
+  res.json({ message: 'Notifications désactivées sur cet appareil' })
+})
+
+module.exports = { lister, lire, toutLire, flux, clePush, abonnerPush, desabonnerPush }

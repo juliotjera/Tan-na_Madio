@@ -240,4 +240,14 @@ export const MALAGASY = {
   'En français et en malagasy': 'Amin’ny teny frantsay sy malagasy',
   'Utilisable avec un réseau faible ou coupé': 'Azo ampiasaina na malemy na tapaka aza ny tambajotra',
   'Installable sur un téléphone, sans magasin d’applications': 'Azo apetraka amin’ny finday, tsy mila fivarotana rindranasa',
+  // notifications push
+  'Notifications sur ce téléphone': 'Fampandrenesana amin’ity finday ity',
+  'Activées sur cet appareil': 'Mandeha amin’ity fitaovana ity',
+  'Recevez une alerte sur ce téléphone, même application fermée.': 'Mahazoa fampandrenesana amin’ity finday ity, na mihidy aza ny rindranasa.',
+  'Bloquées dans les réglages du navigateur pour ce site.': 'Voasakana ao amin’ny fikirakiran’ny navigateur ho an’ity tranonkala ity.',
+  'Disponibles une fois l’application installée ou ouverte dans un navigateur récent.': 'Azo ampiasaina rehefa apetraka ny rindranasa na sokafana amin’ny navigateur vaovao.',
+  'Notifications activées sur cet appareil': 'Mandeha ny fampandrenesana amin’ity fitaovana ity',
+  'Notifications désactivées sur cet appareil': 'Najanona ny fampandrenesana amin’ity fitaovana ity',
+  Activer: 'Alefaso',
+  Désactiver: 'Ajanony',
 }

@@ -55,3 +55,19 @@ CREATE TABLE IF NOT EXISTS photos (
 -- Forme réelle de la rue entre deux carrefours ([[lat, lng], …], réseau OpenStreetMap) :
 -- le tracé affiché suit les courbes au lieu d'aller en ligne droite d'un carrefour à l'autre
 ALTER TABLE aretes_graphe ADD COLUMN IF NOT EXISTS trace JSONB;
+
+-- Notifications push : appareils abonnés (un compte peut en avoir plusieurs)
+CREATE TABLE IF NOT EXISTS abonnements_push (
+  endpoint   TEXT PRIMARY KEY,
+  user_id    UUID NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
+  p256dh     TEXT NOT NULL,
+  auth       TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_abonnements_push_user ON abonnements_push (user_id);
+
+-- Paramètres générés par l'application elle-même (clés des notifications push)
+CREATE TABLE IF NOT EXISTS parametres (
+  cle    VARCHAR(50) PRIMARY KEY,
+  valeur TEXT NOT NULL
+);
