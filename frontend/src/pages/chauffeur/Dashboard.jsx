@@ -71,15 +71,15 @@ export default function ChauffeurDashboard() {
             <p className="mt-2 text-encre-doux">{jourHeure(duJour.date_planifiee)}</p>
             <dl className="mt-4 grid grid-cols-3 gap-4">
               <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-encre-pale">{t('Zone')}</dt>
+                <dt className="text-xs text-encre-pale">{t('Zone')}</dt>
                 <dd className="font-semibold">{duJour.zone_nom ?? t('Plusieurs zones')}</dd>
               </div>
               <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-encre-pale">{t('Camion')}</dt>
+                <dt className="text-xs text-encre-pale">{t('Camion')}</dt>
                 <dd className="font-semibold">{duJour.camion_immatriculation}</dd>
               </div>
               <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-encre-pale">{t('Points')}</dt>
+                <dt className="text-xs text-encre-pale">{t('Points')}</dt>
                 <dd className="font-semibold">
                   {duJour.nb_faits}/{duJour.nb_points}
                 </dd>

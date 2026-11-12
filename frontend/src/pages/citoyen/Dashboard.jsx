@@ -106,16 +106,14 @@ export default function CitoyenDashboard() {
       {/* Actions rapides */}
       <div className="grid gap-5 md:grid-cols-2">
         <div className="carte p-6">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-encre-pale">{t('Actions rapides')}</p>
-          <p className="mt-2 font-titre text-lg font-bold">{t('Signaler un problème')}</p>
+          <h2 className="text-lg">{t('Signaler un problème')}</h2>
           <p className="mt-1 text-sm text-encre-doux">{t('Déclarez un nouveau signalement avec toutes les informations utiles.')}</p>
           <Link to="/citoyen/signaler" className="btn-accent mt-4 w-full">
             {t('Signaler maintenant')}
           </Link>
         </div>
         <div className="carte p-6">
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-encre-pale">{t('Suivi')}</p>
-          <p className="mt-2 font-titre text-lg font-bold">{t("Consulter l'historique")}</p>
+          <h2 className="text-lg">{t("Consulter l'historique")}</h2>
           <p className="mt-1 text-sm text-encre-doux">{t('Retrouvez facilement vos signalements passés et leur statut.')}</p>
           <Link to="/citoyen/signalements" className="btn-secondaire mt-4 w-full">
             {t('Voir mes signalements')}
