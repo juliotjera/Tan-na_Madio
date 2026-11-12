@@ -134,4 +134,27 @@ const apercu = asyncHandler(async (req, res) => {
   res.json({ ...chiffres, points, tournee })
 })
 
-module.exports = { dashboard, zones, periode, apercu, topCitoyens, camions }
+// Points noirs : les signalements regroupés sur une grille d'environ 200 m (PostGIS ST_SnapToGrid),
+// pour repérer les lieux où les dépôts reviennent et y placer un bac ou une campagne de sensibilisation
+const pointsNoirs = asyncHandler(async (req, res) => {
+  const jours = Math.min(365, Math.max(7, Number(req.query.jours) || 90))
+  const { rows } = await db.query(
+    `SELECT ST_Y(ST_Centroid(ST_Collect(s.localisation::geometry))) AS latitude,
+            ST_X(ST_Centroid(ST_Collect(s.localisation::geometry))) AS longitude,
+            count(*)::int AS total,
+            count(*) FILTER (WHERE s.statut IN ('en_attente', 'valide', 'en_cours'))::int AS ouverts,
+            count(*) FILTER (WHERE s.urgence IN ('eleve', 'critique'))::int AS urgents,
+            mode() WITHIN GROUP (ORDER BY z.nom) AS zone_nom,
+            max(s.created_at) AS dernier
+       FROM signalements s LEFT JOIN zones z ON z.id = s.zone_id
+      WHERE s.statut != 'rejete' AND s.created_at >= NOW() - ($1 || ' days')::interval
+      GROUP BY ST_SnapToGrid(s.localisation::geometry, 0.002)
+      HAVING count(*) >= 2
+      ORDER BY total DESC, ouverts DESC
+      LIMIT 30`,
+    [String(jours)],
+  )
+  res.json({ jours, points: rows.map((p) => ({ ...p, latitude: Number(p.latitude), longitude: Number(p.longitude) })) })
+})
+
+module.exports = { dashboard, zones, periode, apercu, topCitoyens, camions, pointsNoirs }

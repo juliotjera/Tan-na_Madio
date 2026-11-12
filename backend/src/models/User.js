@@ -1,7 +1,7 @@
 // Utilisateurs et leurs tables d'héritage (citoyens, agents_municipaux, chauffeurs, administrateurs)
 const db = require('../config/db')
 
-const CHAMPS = 'u.id, u.nom, u.prenom, u.email, u.role, u.telephone, u.actif, u.created_at'
+const CHAMPS = 'u.id, u.nom, u.prenom, u.email, u.role, u.telephone, u.actif, u.mdp_provisoire, u.created_at'
 
 async function parEmail(email) {
   const { rows } = await db.query('SELECT * FROM utilisateurs WHERE email = $1', [email.trim().toLowerCase()])
@@ -30,12 +30,12 @@ async function profil(id) {
 }
 
 // Création dans une transaction : la ligne « utilisateurs » et celle de son rôle, ou rien
-async function creer({ nom, prenom, email, motDePasseHash, role, telephone, extras = {} }) {
+async function creer({ nom, prenom, email, motDePasseHash, role, telephone, extras = {}, provisoire = false }) {
   return db.transaction(async (tx) => {
     const { rows } = await tx.query(
-      `INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role, telephone)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, nom, prenom, email, role, telephone, actif, created_at`,
-      [nom.trim(), prenom.trim(), email.trim().toLowerCase(), motDePasseHash, role, telephone ?? null],
+      `INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role, telephone, mdp_provisoire)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, nom, prenom, email, role, telephone, actif, mdp_provisoire, created_at`,
+      [nom.trim(), prenom.trim(), email.trim().toLowerCase(), motDePasseHash, role, telephone ?? null, provisoire],
     )
     const u = rows[0]
     if (role === 'citoyen') await tx.query('INSERT INTO citoyens (id, quartier) VALUES ($1, $2)', [u.id, extras.quartier ?? null])
@@ -75,11 +75,13 @@ async function lister({ role, recherche, limit, offset }) {
   return { utilisateurs: rows, total, compteurs }
 }
 
+// telephone : absent = inchangé, null ou vide = effacé
 async function modifier(id, { nom, prenom, telephone }) {
   const { rows } = await db.query(
-    `UPDATE utilisateurs SET nom = COALESCE($2, nom), prenom = COALESCE($3, prenom), telephone = COALESCE($4, telephone)
+    `UPDATE utilisateurs SET nom = COALESCE($2, nom), prenom = COALESCE($3, prenom),
+            telephone = CASE WHEN $5 THEN $4 ELSE telephone END
       WHERE id = $1 RETURNING id, nom, prenom, email, role, telephone, actif`,
-    [id, nom ?? null, prenom ?? null, telephone ?? null],
+    [id, nom?.trim() || null, prenom?.trim() || null, telephone?.trim() || null, telephone !== undefined],
   )
   return rows[0] ?? null
 }

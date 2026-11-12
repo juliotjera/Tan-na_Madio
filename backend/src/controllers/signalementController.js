@@ -102,19 +102,23 @@ const creer = asyncHandler(async (req, res) => {
 // Validation ou rejet par un agent. Les statuts en_cours / collecte sont gérés par les collectes.
 const TRANSITIONS = { en_attente: ['valide', 'rejete'], valide: ['rejete', 'en_attente'], rejete: ['en_attente', 'valide'] }
 
+// Motifs proposés à l'agent ; un motif libre reste possible
+const MOTIFS_REJET = ['Doublon d’un autre signalement', 'Dépôt déjà ramassé', 'Photo ou position insuffisante', 'Hors du territoire de la commune']
+
 const changerStatut = asyncHandler(async (req, res) => {
   const { statut } = req.body
+  const motif = statut === 'rejete' ? String(req.body.motif ?? '').trim().slice(0, 255) || null : null
   const actuel = await Signalement.parId(req.params.id)
   if (!actuel) throw new ErreurApi(404, 'Signalement introuvable', 'SIGNALEMENT_INTROUVABLE')
   if (!TRANSITIONS[actuel.statut]?.includes(statut)) {
     throw new ErreurApi(422, `Passage de « ${actuel.statut} » à « ${statut} » impossible`, 'TRANSITION_INVALIDE')
   }
   await db.transaction(async (tx) => {
-    await Signalement.changerStatut(actuel.id, statut, req.user.id, tx)
+    await Signalement.changerStatut(actuel.id, statut, req.user.id, tx, motif)
     // les points de validation ne sont attribués qu'une fois par signalement
     if (statut === 'valide' && !actuel.date_validation) await User.ajouterPointsEco(actuel.citoyen_id, POINTS_ECO.valide, tx)
   })
-  await journaliser(req, 'changement_statut', 'signalement', actuel.id, { de: actuel.statut, vers: statut })
+  await journaliser(req, 'changement_statut', 'signalement', actuel.id, { de: actuel.statut, vers: statut, ...(motif && { motif }) })
   const objet = actuel.description ?? actuel.adresse ?? 'Votre signalement'
   if (statut === 'valide') {
     await Notification.notifier(actuel.citoyen_id, {
@@ -127,11 +131,32 @@ const changerStatut = asyncHandler(async (req, res) => {
     await Notification.notifier(actuel.citoyen_id, {
       type: 'signalement_rejete',
       titre: 'Signalement non retenu',
-      message: `${objet}. Doublon ou dépôt déjà ramassé.`,
+      message: `${objet}. ${motif ? `Motif : ${motif}.` : 'Doublon ou dépôt déjà ramassé.'}`,
       lien: '/citoyen/signalements',
     })
   }
   res.json(await Signalement.parId(actuel.id))
+})
+
+// Doublons : signalements ouverts à moins de 50 m du point choisi
+const proximite = asyncHandler(async (req, res) => {
+  const latitude = Number(req.query.latitude)
+  const longitude = Number(req.query.longitude)
+  if (!latitudeValide(latitude) || !longitudeValide(longitude)) throw new ErreurApi(400, 'Position GPS invalide', 'GPS_INVALIDE')
+  const rayon = Math.min(200, Math.max(10, Number(req.query.rayon) || 50))
+  const proches = await Signalement.proximite({ latitude, longitude, rayon, citoyenId: req.user.id })
+  res.json({ signalements: estPersonnel(req.user.role) ? proches : proches.map(({ citoyen_nom, ...p }) => ({ ...p, moi: p.citoyen_id === req.user.id })) })
+})
+
+// « Moi aussi » : un citoyen confirme le dépôt signalé par un autre ; il remonte dans la planification
+const soutenir = asyncHandler(async (req, res) => {
+  const s = await Signalement.parId(req.params.id)
+  if (!s) throw new ErreurApi(404, 'Signalement introuvable', 'SIGNALEMENT_INTROUVABLE')
+  if (s.citoyen_id === req.user.id) throw new ErreurApi(422, 'C’est votre propre signalement', 'PROPRE_SIGNALEMENT')
+  if (!['en_attente', 'valide', 'en_cours'].includes(s.statut)) throw new ErreurApi(422, 'Ce signalement est déjà traité', 'SIGNALEMENT_TRAITE')
+  const nb = await Signalement.soutenir(s.id, req.user.id)
+  await journaliser(req, 'soutien', 'signalement', s.id)
+  res.json({ id: s.id, nb_soutiens: nb })
 })
 
 // Suppression : l'administrateur, ou le citoyen auteur tant que son signalement est en attente
@@ -147,4 +172,4 @@ const supprimer = asyncHandler(async (req, res) => {
   res.json({ message: 'Signalement supprimé' })
 })
 
-module.exports = { lister, carte, mes, detail, creer, changerStatut, supprimer, URGENCES, STATUTS }
+module.exports = { lister, carte, mes, detail, creer, changerStatut, proximite, soutenir, supprimer, URGENCES, STATUTS, MOTIFS_REJET }

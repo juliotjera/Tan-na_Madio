@@ -59,7 +59,7 @@ const suggestion = asyncHandler(async (req, res) => {
   if (!camion) throw new ErreurApi(404, 'Camion introuvable', 'CAMION_INTROUVABLE')
   const params = []
   const filtreZone = estUuid(zone_id) ? `AND zone_id = $${params.push(zone_id)}` : ''
-  const { rows } = await db.query(`SELECT id, urgence, created_at FROM signalements WHERE statut = 'valide' ${filtreZone}`, params)
+  const { rows } = await db.query(`SELECT id, urgence, created_at, (SELECT count(*) FROM signalement_soutiens ss WHERE ss.signalement_id = signalements.id)::int AS nb_soutiens FROM signalements WHERE statut = 'valide' ${filtreZone}`, params)
   const { retenus, charge_estimee_kg } = selectionnerPourCamion(rows, camion.capacite_kg)
   res.json({
     signalement_ids: retenus.map((s) => s.id),
@@ -81,7 +81,7 @@ const repartition = asyncHandler(async (req, res) => {
                      WHERE c.statut = 'disponible' AND c.chauffeur_id IS NOT NULL ORDER BY c.capacite_kg DESC`)
   ).rows
   if (!camions.length) throw new ErreurApi(422, 'Aucun camion disponible avec un chauffeur', 'AUCUN_CAMION')
-  const restants = (await db.query(`SELECT id, urgence, created_at FROM signalements WHERE id = ANY($1::uuid[]) AND statut = 'valide'`, [signalement_ids])).rows
+  const restants = (await db.query(`SELECT id, urgence, created_at, (SELECT count(*) FROM signalement_soutiens ss WHERE ss.signalement_id = signalements.id)::int AS nb_soutiens FROM signalements WHERE id = ANY($1::uuid[]) AND statut = 'valide'`, [signalement_ids])).rows
   if (restants.length !== signalement_ids.length) throw new ErreurApi(422, 'Seuls les signalements validés peuvent être planifiés', 'STATUT_INVALIDE')
 
   const tournees = []

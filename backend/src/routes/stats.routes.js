@@ -9,6 +9,7 @@ router.use(authentifier, autoriser('agent_municipal', 'administrateur'))
 router.get('/dashboard', c.dashboard)
 router.get('/zones', c.zones)
 router.get('/camions', c.camions)
+router.get('/points-noirs', c.pointsNoirs)
 router.get('/periode', autoriser('administrateur'), c.periode)
 
 module.exports = router

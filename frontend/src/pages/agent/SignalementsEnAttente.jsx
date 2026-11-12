@@ -1,8 +1,8 @@
 // Validation des signalements : photo, lieu, urgence — valider ou rejeter
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Check, Download, ImageOff, Inbox, Maximize2, RotateCcw, X } from 'lucide-react'
-import { changerStatut, listerSignalements, listerZones, telechargerCsv } from '../../api'
+import { Check, Download, ImageOff, Inbox, Maximize2, RotateCcw, Users, X } from 'lucide-react'
+import { changerStatut, listerSignalements, listerZones, motifsRejet, telechargerCsv } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Cadrer, Carte, MarqueurSignalement, Zones } from '../../components/map/Carte'
@@ -38,10 +38,16 @@ export default function SignalementsEnAttente() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liste.donnees])
 
-  const decider = async (s, nouveau) => {
+  const [aRejeter, setARejeter] = useState(null)
+  const [motif, setMotif] = useState('')
+  const [motifLibre, setMotifLibre] = useState('')
+  const motifs = useDonnees(() => (aRejeter ? motifsRejet() : null), [Boolean(aRejeter)])
+
+  const decider = async (s, nouveau, raison) => {
     setAction(s.id)
     try {
-      await changerStatut(s.id, nouveau)
+      await changerStatut(s.id, nouveau, raison)
+      if (nouveau === 'rejete') setARejeter(null)
       toast.success(nouveau === 'valide' ? 'Signalement validé : +5 points pour le citoyen' : nouveau === 'rejete' ? 'Signalement rejeté' : 'Remis en attente')
       await liste.recharger({ silencieux: true })
     } catch (err) {
@@ -159,6 +165,12 @@ export default function SignalementsEnAttente() {
                     <p className="text-xs text-encre-pale" title={dateHeure(s.created_at)}>
                       Par {s.citoyen_nom} · {ilYa(s.created_at)}
                     </p>
+                    {s.nb_soutiens > 0 && (
+                      <p className="flex items-center gap-1.5 text-xs font-semibold text-vert-700">
+                        <Users className="h-3.5 w-3.5" /> Confirmé par {s.nb_soutiens} autre{s.nb_soutiens > 1 ? 's' : ''} habitant{s.nb_soutiens > 1 ? 's' : ''}
+                      </p>
+                    )}
+                    {s.statut === 'rejete' && s.motif_rejet && <p className="text-xs text-encre-doux">Motif : {s.motif_rejet}</p>}
                     <div className="mt-auto flex flex-wrap gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
                       {s.statut === 'en_attente' && (
                         <>
@@ -166,7 +178,16 @@ export default function SignalementsEnAttente() {
                             {action === s.id ? <Spinner className="h-4 w-4 text-current" /> : <Check className="h-4 w-4" />}
                             Valider
                           </button>
-                          <button type="button" className="btn-secondaire min-h-[38px]" disabled={action === s.id} onClick={() => decider(s, 'rejete')}>
+                          <button
+                            type="button"
+                            className="btn-secondaire min-h-[38px]"
+                            disabled={action === s.id}
+                            onClick={() => {
+                              setMotif('')
+                              setMotifLibre('')
+                              setARejeter(s)
+                            }}
+                          >
                             <X className="h-4 w-4" /> Rejeter
                           </button>
                         </>
@@ -208,6 +229,43 @@ export default function SignalementsEnAttente() {
               <span className="text-encre-pale">{dateHeure(agrandie.created_at)}</span>
             </div>
           </div>
+        )}
+      </Modal>
+
+      <Modal
+        ouvert={Boolean(aRejeter)}
+        onFermer={() => setARejeter(null)}
+        titre="Rejeter le signalement"
+        pied={
+          <>
+            <button type="button" className="btn-secondaire" onClick={() => setARejeter(null)}>
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn-danger"
+              disabled={action === aRejeter?.id || !(motif === 'autre' ? motifLibre.trim() : motif)}
+              onClick={() => decider(aRejeter, 'rejete', motif === 'autre' ? motifLibre.trim() : motif)}
+            >
+              {action === aRejeter?.id && <Spinner className="h-4 w-4" />}
+              Rejeter
+            </button>
+          </>
+        }
+      >
+        {aRejeter && (
+          <fieldset className="space-y-2">
+            <legend className="mb-3 text-sm text-encre-doux">Le citoyen verra ce motif dans son suivi et dans sa notification.</legend>
+            {[...(motifs.donnees ?? []), 'autre'].map((m) => (
+              <label key={m} className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition ${motif === m ? 'border-vert-500 bg-vert-50' : 'border-trait hover:bg-fond'}`}>
+                <input type="radio" name="motif" className="accent-vert" checked={motif === m} onChange={() => setMotif(m)} />
+                {m === 'autre' ? 'Autre motif' : m}
+              </label>
+            ))}
+            {motif === 'autre' && (
+              <input className="champ mt-2" maxLength={255} placeholder="Précisez le motif" value={motifLibre} onChange={(e) => setMotifLibre(e.target.value)} autoFocus />
+            )}
+          </fieldset>
         )}
       </Modal>
     </div>

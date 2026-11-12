@@ -1,21 +1,23 @@
 // Statistiques globales (version d'origine) : période + export, 4 indicateurs,
-// évolution des signalements, répartition par zone, performance des camions
+// évolution des signalements, répartition par zone, points noirs (carte), performance des camions
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { CheckCircle2, Download, TrendingUp, TriangleAlert, Truck, Users } from 'lucide-react'
-import { statsCamions, statsPeriode, statsZones, tableauDeBord, telechargerCsv } from '../../api'
+import { CheckCircle2, Download, Flame, TrendingUp, TriangleAlert, Truck, Users } from 'lucide-react'
+import { CircleMarker, Tooltip } from 'react-leaflet'
+import { pointsNoirs, statsCamions, statsPeriode, statsZones, tableauDeBord, telechargerCsv } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
 import { CourbeEvolution } from '../../components/common/Graphiques'
+import { Cadrer, Carte } from '../../components/map/Carte'
 import { Chargement, Chiffre, Erreur, Spinner } from '../../components/common/ui'
-import { nombre } from '../../utils/format'
+import { dateCourte, nombre } from '../../utils/format'
 
 // période choisie → date de début
 const PERIODES = {
-  semaine: { libelle: 'Cette semaine', debut: () => new Date(Date.now() - 7 * 86400000) },
-  mois: { libelle: 'Ce mois', debut: () => new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
-  trimestre: { libelle: '3 derniers mois', debut: () => new Date(Date.now() - 90 * 86400000) },
-  annee: { libelle: 'Cette année', debut: () => new Date(new Date().getFullYear(), 0, 1) },
+  semaine: { libelle: 'Cette semaine', jours: 7, debut: () => new Date(Date.now() - 7 * 86400000) },
+  mois: { libelle: 'Ce mois', jours: 31, debut: () => new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+  trimestre: { libelle: '3 derniers mois', jours: 90, debut: () => new Date(Date.now() - 90 * 86400000) },
+  annee: { libelle: 'Cette année', jours: 365, debut: () => new Date(new Date().getFullYear(), 0, 1) },
 }
 
 export default function Stats() {
@@ -26,6 +28,8 @@ export default function Stats() {
   const stats = useDonnees(tableauDeBord, [])
   const zones = useDonnees(statsZones, [])
   const camions = useDonnees(statsCamions, [])
+  const noirs = useDonnees(() => pointsNoirs(PERIODES[periodeCle].jours), [periodeCle])
+  const maxNoir = Math.max(1, ...(noirs.donnees ?? []).map((p) => p.total))
   const s = stats.donnees
   const maxZone = Math.max(1, ...(zones.donnees ?? []).map((z) => z.total_signalements))
 
@@ -94,6 +98,51 @@ export default function Stats() {
           </ul>
         </section>
       </div>
+
+      <section className="carte p-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="flex items-center gap-2 text-xl">
+              <Flame className="h-5 w-5 text-ambre" /> Points noirs
+            </h2>
+            <p className="text-sm text-encre-doux">Lieux où les dépôts reviennent (au moins 2 signalements dans un rayon d’environ 200 m)</p>
+          </div>
+        </div>
+        {noirs.donnees?.length === 0 && <p className="mt-4 rounded-xl bg-fond/70 p-6 text-center text-sm text-encre-doux">Aucun lieu récurrent sur cette période.</p>}
+        {noirs.donnees?.length > 0 && (
+          <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <Carte className="h-[340px]" zoom={13}>
+              {noirs.donnees.map((p, i) => (
+                <CircleMarker
+                  key={i}
+                  center={[p.latitude, p.longitude]}
+                  radius={8 + 18 * (p.total / maxNoir)}
+                  pathOptions={{ color: p.ouverts ? '#B45309' : '#047857', weight: 2, fillColor: p.ouverts ? '#F59E0B' : '#10B981', fillOpacity: 0.45 }}
+                >
+                  <Tooltip>
+                    {p.zone_nom ?? 'Hors zone'} : {p.total} signalements, {p.ouverts} encore ouverts
+                  </Tooltip>
+                </CircleMarker>
+              ))}
+              <Cadrer points={noirs.donnees.map((p) => [p.latitude, p.longitude])} max={15} />
+            </Carte>
+            <ol className="space-y-2">
+              {noirs.donnees.slice(0, 6).map((p, i) => (
+                <li key={i} className="flex items-center gap-3 rounded-xl bg-fond/70 px-3 py-2.5">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ambre-50 text-sm font-bold text-ambre-700">{i + 1}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{p.zone_nom ?? 'Hors zone'}</p>
+                    <p className="text-xs text-encre-pale">
+                      {p.ouverts} ouvert{p.ouverts > 1 ? 's' : ''} · dernier le {dateCourte(p.dernier)}
+                    </p>
+                  </div>
+                  <span className="chiffre text-lg text-ardoise">{p.total}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
 
       <section className="carte p-6">
         <h2 className="text-xl">Performance des camions</h2>

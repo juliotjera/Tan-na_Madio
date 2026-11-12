@@ -69,7 +69,7 @@ const PRIORITE = { critique: 0, eleve: 1, moyen: 2, faible: 3 }
 // Glouton par urgence puis ancienneté, tant que la capacité du camion le permet
 function selectionnerPourCamion(signalements, capaciteKg) {
   const tries = [...signalements].sort(
-    (a, b) => PRIORITE[a.urgence] - PRIORITE[b.urgence] || new Date(a.created_at) - new Date(b.created_at),
+    (a, b) => PRIORITE[a.urgence] - PRIORITE[b.urgence] || (b.nb_soutiens ?? 0) - (a.nb_soutiens ?? 0) || new Date(a.created_at) - new Date(b.created_at),
   )
   const retenus = []
   let charge = 0

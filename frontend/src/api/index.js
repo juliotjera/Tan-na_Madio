@@ -15,7 +15,10 @@ export const listerSignalements = (params) => api.get('/signalements', { params 
 export const carteSignalements = (params) => api.get('/signalements/carte', { params }).then((r) => r.data.signalements)
 export const mesSignalements = (params) => api.get('/signalements/mes', { params }).then(donnees)
 export const supprimerSignalement = (id) => api.delete(`/signalements/${id}`)
-export const changerStatut = (id, statut) => api.patch(`/signalements/${id}/statut`, { statut }).then(donnees)
+export const changerStatut = (id, statut, motif) => api.patch(`/signalements/${id}/statut`, { statut, motif }).then(donnees)
+export const motifsRejet = () => api.get('/signalements/motifs-rejet').then((r) => r.data.motifs)
+export const signalementsProches = (latitude, longitude) => api.get('/signalements/proximite', { params: { latitude, longitude } }).then((r) => r.data.signalements)
+export const soutenirSignalement = (id) => api.post(`/signalements/${id}/soutien`).then(donnees)
 
 // multipart/form-data : la photo part avec les champs, progression d'envoi suivie
 export function envoyerSignalement(champs, photo, surProgression) {
@@ -64,6 +67,7 @@ export const listerUtilisateurs = (params) => api.get('/utilisateurs', { params 
 export const creerUtilisateur = (champs) => api.post('/utilisateurs', champs).then(donnees)
 export const modifierUtilisateur = (id, champs) => api.put(`/utilisateurs/${id}`, champs).then(donnees)
 export const activerUtilisateur = (id, actif) => api.patch(`/utilisateurs/${id}/activer`, { actif }).then(donnees)
+export const reinitialiserMotDePasse = (id) => api.post(`/utilisateurs/${id}/mot-de-passe`).then(donnees)
 export const supprimerUtilisateur = (id) => api.delete(`/utilisateurs/${id}`).then(donnees)
 export const journal = (params) => api.get('/utilisateurs/journal', { params }).then(donnees)
 
@@ -87,4 +91,5 @@ export async function telechargerCsv(ressource, params) {
 // ── Reprises de la version d'origine
 export const topCitoyens = () => api.get('/stats/top-citoyens').then((r) => r.data.citoyens)
 export const statsCamions = () => api.get('/stats/camions').then((r) => r.data.camions)
+export const pointsNoirs = (jours) => api.get('/stats/points-noirs', { params: { jours } }).then((r) => r.data.points)
 export const repartition = (signalement_ids) => api.post('/collectes/repartition', { signalement_ids }).then(donnees)

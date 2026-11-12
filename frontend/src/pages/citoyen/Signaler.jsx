@@ -1,16 +1,18 @@
 // « Signaler un problème » (formulaire de la version d'origine) : description, adresse, urgence,
-// localisation (GPS, carte ou recherche), photo réduite avant l'envoi, puis Envoyer / Annuler
+// localisation (GPS, carte ou recherche), photo réduite avant l'envoi, puis Envoyer / Annuler.
+// Si un dépôt est déjà signalé à moins de 50 m, le citoyen peut le confirmer (« Moi aussi ») au lieu de créer un doublon.
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { AlertCircle, CheckCircle2, ImagePlus, MapPin, Send, Trash2 } from 'lucide-react'
-import { Marker } from 'react-leaflet'
-import { envoyerSignalement } from '../../api'
+import { AlertCircle, CheckCircle2, ImagePlus, MapPin, Send, ThumbsUp, Trash2, Users } from 'lucide-react'
+import { CircleMarker, Marker, Tooltip } from 'react-leaflet'
+import { envoyerSignalement, signalementsProches, soutenirSignalement } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { usePosition } from '../../hooks/usePosition'
 import { useLangue } from '../../context/LangueContext'
 import { AuClic, Cadrer, Carte, CENTRE_TANA, iconeUrgence } from '../../components/map/Carte'
 import RechercheAdresse from '../../components/map/RechercheAdresse'
+import { StatutBadge } from '../../components/common/Badge'
 import { Spinner } from '../../components/common/ui'
 import { compresserPhoto } from '../../utils/image'
 
@@ -67,6 +69,8 @@ export default function Signaler() {
   const [tente, setTente] = useState(false) // erreurs affichées après une première tentative d'envoi
   const [envoi, setEnvoi] = useState(null) // progression 0-100
   const [resultat, setResultat] = useState(null)
+  const [proches, setProches] = useState([])
+  const [soutien, setSoutien] = useState(null)
   const entree = useRef(null)
   const { localiser } = gps
 
@@ -85,6 +89,34 @@ export default function Signaler() {
   const positionOk = lat !== '' && lng !== '' && Number.isFinite(latN) && Number.isFinite(lngN) && Math.abs(latN) <= 90 && Math.abs(lngN) <= 180
   const position = positionOk ? [latN, lngN] : null
   const descriptionOk = description.trim().length >= 3
+
+  // doublons : recherche des signalements ouverts autour du point, après une courte pause
+  useEffect(() => {
+    if (!positionOk) return setProches([])
+    let actif = true
+    const minuterie = setTimeout(() => {
+      signalementsProches(latN, lngN)
+        .then((liste) => actif && setProches(liste))
+        .catch(() => actif && setProches([]))
+    }, 600)
+    return () => {
+      actif = false
+      clearTimeout(minuterie)
+    }
+  }, [positionOk, latN, lngN])
+
+  const confirmer = async (s) => {
+    setSoutien(s.id)
+    try {
+      await soutenirSignalement(s.id)
+      toast.success(t('Merci ! Votre confirmation fait remonter ce dépôt dans la planification.'))
+      navigate('/citoyen')
+    } catch (err) {
+      toast.error(messageErreur(err))
+    } finally {
+      setSoutien(null)
+    }
+  }
 
   const choisirPhoto = async (e) => {
     const f = e.target.files?.[0]
@@ -231,9 +263,55 @@ export default function Signaler() {
                 }}
               />
             )}
+            {proches.map((p) => (
+              <CircleMarker key={p.id} center={[p.latitude, p.longitude]} radius={8} pathOptions={{ color: '#FFFFFF', weight: 2, fillColor: '#F59E0B', fillOpacity: 0.95 }}>
+                <Tooltip>{p.description ?? t('Dépôt déjà signalé')}</Tooltip>
+              </CircleMarker>
+            ))}
             {position && <Cadrer points={[position]} max={17} />}
           </Carte>
         </div>
+
+        {proches.length > 0 && (
+          <div className="mt-4 rounded-xl border border-ambre/50 bg-ambre-50 p-4" role="status">
+            <p className="font-semibold text-ambre-700">{t('Ce dépôt a peut-être déjà été signalé')}</p>
+            <p className="mt-0.5 text-sm text-encre-doux">{t('Si c’est le même, confirmez-le : il sera ramassé plus vite, sans doublon.')}</p>
+            <ul className="mt-3 space-y-2">
+              {proches.map((p) => (
+                <li key={p.id} className="flex items-center gap-3 rounded-xl bg-white p-2.5">
+                  {p.photo_url ? (
+                    <img src={p.photo_url} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+                  ) : (
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-fond text-encre-pale">
+                      <MapPin className="h-5 w-5" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{p.description ?? p.adresse ?? t('Dépôt signalé')}</p>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-encre-doux">
+                      <span>{t('à {n} m', { n: p.distance_m })}</span>
+                      <StatutBadge statut={p.statut} />
+                      {p.nb_soutiens > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3" /> +{p.nb_soutiens}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  {p.moi ? (
+                    <span className="shrink-0 text-xs text-encre-pale">{t('Votre signalement')}</span>
+                  ) : p.deja_soutenu ? (
+                    <span className="shrink-0 text-xs font-semibold text-vert">{t('Déjà confirmé')}</span>
+                  ) : (
+                    <button type="button" className="btn-secondaire min-h-[38px] shrink-0 px-3" disabled={soutien === p.id} onClick={() => confirmer(p)}>
+                      {soutien === p.id ? <Spinner className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />} {t('Moi aussi')}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       <section className="rounded-carte bg-fond/80 p-4">

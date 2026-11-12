@@ -23,8 +23,13 @@ const PARCOURS = ['en_attente', 'valide', 'en_cours', 'collecte']
 const NOMS = { en_attente: 'Envoyé', valide: 'Validé', en_cours: 'En tournée', collecte: 'Ramassé' }
 
 // Avancement : les quatre étapes du signalement
-function Parcours({ statut }) {
-  if (statut === 'rejete') return <p className="text-sm text-encre-doux">Ce signalement n’a pas été retenu par la commune (doublon ou dépôt déjà ramassé).</p>
+function Parcours({ statut, motif }) {
+  if (statut === 'rejete')
+    return (
+      <p className="text-sm text-encre-doux">
+        Ce signalement n’a pas été retenu par la commune{motif ? <> : <strong className="text-ardoise">{motif}</strong>.</> : ' (doublon ou dépôt déjà ramassé).'}
+      </p>
+    )
   const atteint = PARCOURS.indexOf(statut)
   return (
     <ol className="flex items-center gap-1.5" aria-label="Avancement">
@@ -124,7 +129,7 @@ export default function MesSignalements() {
               </div>
               <div className="mt-auto flex items-end gap-3">
                 <div className="flex-1">
-                  <Parcours statut={s.statut} />
+                  <Parcours statut={s.statut} motif={s.motif_rejet} />
                 </div>
                 {s.statut === 'en_attente' && (
                   <button type="button" className="btn-discret min-h-[36px] px-2 text-encre-pale hover:text-alerte-700" onClick={() => setASupprimer(s)} aria-label="Supprimer ce signalement">

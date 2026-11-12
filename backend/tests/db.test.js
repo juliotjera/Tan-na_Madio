@@ -4,14 +4,14 @@ const { db, preparer } = require('./aide')
 beforeAll(() => preparer())
 afterAll(() => db.fermer())
 
-test('les 15 tables du projet existent (16 avec spatial_ref_sys de PostGIS)', async () => {
+test('les 16 tables du projet existent (17 avec spatial_ref_sys de PostGIS)', async () => {
   const { rows } = await db.query(`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`)
   const tables = rows.map((r) => r.table_name)
-  expect(tables).toHaveLength(16)
+  expect(tables).toHaveLength(17)
   expect(tables).toEqual(
     expect.arrayContaining([
       'utilisateurs', 'citoyens', 'agents_municipaux', 'chauffeurs', 'administrateurs', 'zones', 'camions', 'signalements',
-      'noeuds_graphe', 'aretes_graphe', 'collectes', 'collecte_signalements', 'refresh_tokens', 'logs_activite', 'notifications', 'spatial_ref_sys',
+      'noeuds_graphe', 'aretes_graphe', 'collectes', 'collecte_signalements', 'refresh_tokens', 'logs_activite', 'notifications', 'signalement_soutiens', 'spatial_ref_sys',
     ]),
   )
 })

@@ -10,12 +10,14 @@ import {
   ChevronRight,
   ClipboardList,
   FileText,
+  KeyRound,
   Home,
   LayoutDashboard,
   LogOut,
   Map,
   MapPin,
   Menu,
+  ScrollText,
   TriangleAlert,
   Truck,
   UserRound,
@@ -75,6 +77,7 @@ export const NAVIGATION = {
         { vers: '/admin/camions', libelle: 'Camions', icone: Truck },
         { vers: '/admin/zones', libelle: 'Zones', icone: Map },
         { vers: '/admin/utilisateurs', libelle: 'Utilisateurs', icone: Users },
+        { vers: '/admin/journal', libelle: 'Journal d’activité', icone: ScrollText },
       ],
     },
   ],
@@ -298,6 +301,16 @@ export default function AppShell() {
               </>
             )}
           </nav>
+        )}
+        {user?.mdp_provisoire && lieu.pathname !== '/compte' && (
+          <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-ambre/40 bg-ambre-50 px-4 py-3 text-sm text-ambre-700 sm:flex-row sm:items-center sm:justify-between" role="alert">
+            <p className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 shrink-0" /> {t('Vous utilisez un mot de passe provisoire. Choisissez le vôtre pour sécuriser votre compte.')}
+            </p>
+            <Link to="/compte" className="btn-principal min-h-[38px] shrink-0">
+              {t('Changer mon mot de passe')}
+            </Link>
+          </div>
         )}
         <Outlet />
       </main>

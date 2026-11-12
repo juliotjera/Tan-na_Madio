@@ -1,4 +1,5 @@
 // Gestion des comptes par l'administrateur (création du personnel, activation)
+const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const db = require('../config/db')
 const { User, Camion, journaliser } = require('../models')
@@ -30,7 +31,7 @@ const creer = asyncHandler(async (req, res) => {
   verifierMotDePasse(mot_de_passe)
   if (await User.parEmail(email)) throw new ErreurApi(409, 'Cette adresse e-mail est déjà utilisée', 'EMAIL_EXISTANT')
 
-  const u = await User.creer({ nom, prenom, email, telephone, role, motDePasseHash: await bcrypt.hash(mot_de_passe, TOURS_BCRYPT), extras })
+  const u = await User.creer({ nom, prenom, email, telephone, role, motDePasseHash: await bcrypt.hash(mot_de_passe, TOURS_BCRYPT), extras, provisoire: true })
   // affectation du camion tenue à jour des deux côtés (camion ↔ chauffeur)
   if (role === 'chauffeur' && extras.camion_id) await Camion.modifier(extras.camion_id, { chauffeur_id: u.id })
   await journaliser(req, 'creation', 'utilisateur', u.id, { role })
@@ -61,6 +62,25 @@ const activer = asyncHandler(async (req, res) => {
   res.json(u)
 })
 
+// Mot de passe oublié : l'administrateur génère un mot de passe provisoire (affiché une seule fois),
+// les sessions ouvertes sont fermées et la personne devra le changer à sa prochaine connexion
+const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789' // sans 0/O, 1/l/I
+const motDePasseProvisoire = () => {
+  const lettres = Array.from(crypto.randomBytes(8), (o) => ALPHABET[o % ALPHABET.length]).join('')
+  return `${lettres.slice(0, 4)}-${lettres.slice(4)}-${crypto.randomInt(10, 100)}`
+}
+
+const reinitialiserMotDePasse = asyncHandler(async (req, res) => {
+  if (req.params.id === req.user.id) throw new ErreurApi(422, 'Changez votre propre mot de passe depuis « Mon compte »', 'AUTO_REINITIALISATION')
+  const u = await User.profil(req.params.id)
+  if (!u) throw new ErreurApi(404, 'Utilisateur introuvable', 'UTILISATEUR_INTROUVABLE')
+  const mot_de_passe = motDePasseProvisoire()
+  await db.query('UPDATE utilisateurs SET mot_de_passe = $2, mdp_provisoire = TRUE WHERE id = $1', [u.id, await bcrypt.hash(mot_de_passe, TOURS_BCRYPT)])
+  await db.query('DELETE FROM refresh_tokens WHERE user_id = $1', [u.id])
+  await journaliser(req, 'reinitialisation_mot_de_passe', 'utilisateur', u.id)
+  res.json({ mot_de_passe })
+})
+
 // Suppression d'un compte sans historique ; un compte qui a des signalements ou des tournées est
 // conservé pour la traçabilité : il faut alors le désactiver
 const supprimer = asyncHandler(async (req, res) => {
@@ -84,16 +104,29 @@ const supprimer = asyncHandler(async (req, res) => {
 })
 
 // Journal d'activité (traçabilité)
+// filtres : action, entité (signalement, collecte…), recherche sur le nom ou l'e-mail de l'auteur
 const journal = asyncHandler(async (req, res) => {
   const { page, limit, offset } = pagination(req.query)
+  const conditions = []
+  const params = []
+  if (req.query.action) conditions.push(`l.action = $${params.push(String(req.query.action))}`)
+  if (req.query.entite) conditions.push(`l.entite = $${params.push(String(req.query.entite))}`)
+  if (req.query.q?.trim()) {
+    const n = params.push(`%${req.query.q.trim().toLowerCase()}%`)
+    conditions.push(`(lower(u.prenom || ' ' || u.nom) LIKE $${n} OR lower(u.email) LIKE $${n})`)
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+  const base = 'FROM logs_activite l LEFT JOIN utilisateurs u ON u.id = l.user_id'
+  const total = (await db.query(`SELECT count(*)::int AS n ${base} ${where}`, params)).rows[0].n
   const { rows } = await db.query(
     `SELECT l.id, l.action, l.entite, l.entite_id, l.details, host(l.ip_address) AS ip, l.created_at,
             u.prenom || ' ' || u.nom AS utilisateur, u.role
-       FROM logs_activite l LEFT JOIN utilisateurs u ON u.id = l.user_id
-      ORDER BY l.created_at DESC LIMIT $1 OFFSET $2`,
-    [limit, offset],
+       ${base} ${where}
+      ORDER BY l.created_at DESC LIMIT $${params.push(limit)} OFFSET $${params.push(offset)}`,
+    params,
   )
-  res.json({ logs: rows, page, limit })
+  const actions = (await db.query('SELECT DISTINCT action FROM logs_activite ORDER BY action')).rows.map((r) => r.action)
+  res.json({ logs: rows, total, page, limit, actions })
 })
 
-module.exports = { lister, detail, creer, modifier, activer, supprimer, journal }
+module.exports = { lister, detail, creer, modifier, activer, reinitialiserMotDePasse, supprimer, journal }

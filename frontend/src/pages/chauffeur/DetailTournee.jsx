@@ -1,9 +1,10 @@
 // Détail de la tournée (version d'origine) : carte légendée et progression à gauche ;
-// statut, camion, zone, date et bouton « Terminer la tournée » à droite ; points à collecter avec « Marquer »
-import { useMemo, useState } from 'react'
+// statut, camion, zone, date et bouton « Terminer la tournée » à droite ; points à collecter avec « Marquer ».
+// Hors connexion, les points marqués sont gardés sur le téléphone et envoyés au retour du réseau.
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ArrowLeft, CheckCircle2, Navigation, Play, Truck } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, CloudOff, Navigation, Play, RefreshCw, Truck } from 'lucide-react'
 import { collecte as chargerCollecte, demarrerCollecte, marquerPoint, terminerCollecte } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
@@ -11,6 +12,7 @@ import { Cadrer, Carte, Itineraire } from '../../components/map/Carte'
 import { StatutBadge } from '../../components/common/Badge'
 import { Champ, Chargement, Erreur, Modal, Spinner } from '../../components/common/ui'
 import { kg, km } from '../../utils/format'
+import { avecPointsEnAttente, erreurReseau, garderTournee, mettreEnAttente, pointsEnAttente, synchroniser, tourneeGardee } from '../../utils/horsLigne'
 
 // Lien vers l'application de navigation du téléphone
 const guidage = (s) => `https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}&travelmode=driving`
@@ -19,12 +21,65 @@ const dateFr = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—')
 export default function DetailTournee() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const tournee = useDonnees(() => chargerCollecte(id), [id])
+  const [horsLigne, setHorsLigne] = useState(false) // tournée affichée depuis la copie du téléphone
+  const tournee = useDonnees(async () => {
+    try {
+      const frais = await chargerCollecte(id)
+      garderTournee(frais)
+      setHorsLigne(false)
+      return avecPointsEnAttente(frais)
+    } catch (err) {
+      const copie = erreurReseau(err) && tourneeGardee(id)
+      if (!copie) throw err
+      setHorsLigne(true)
+      return avecPointsEnAttente(copie)
+    }
+  }, [id])
+  const [attente, setAttente] = useState(() => pointsEnAttente(id).length)
+  const [synchro, setSynchro] = useState(false)
   const [occupe, setOccupe] = useState(null)
   const [fin, setFin] = useState(false)
   const [poids, setPoids] = useState('')
   const [cible, setCible] = useState(null) // arrêt centré sur la carte
   const c = tournee.donnees
+  const { recharger } = tournee
+
+  // envoi des points gardés hors connexion, au retour du réseau ou à la demande
+  const envoyerAttente = useCallback(async () => {
+    if (!pointsEnAttente(id).length) return
+    setSynchro(true)
+    try {
+      const { envoyes, refuses } = await synchroniser()
+      if (envoyes) toast.success(`${envoyes} point${envoyes > 1 ? 's' : ''} envoyé${envoyes > 1 ? 's' : ''}`)
+      if (refuses.length) toast.error(`${refuses.length} point${refuses.length > 1 ? 's' : ''} refusé${refuses.length > 1 ? 's' : ''} par le serveur (tournée modifiée entre-temps)`)
+    } finally {
+      setAttente(pointsEnAttente(id).length)
+      setSynchro(false)
+      recharger({ silencieux: true })
+    }
+  }, [id, recharger])
+
+  useEffect(() => {
+    envoyerAttente()
+    window.addEventListener('online', envoyerAttente)
+    return () => window.removeEventListener('online', envoyerAttente)
+  }, [envoyerAttente])
+
+  const marquer = async (s) => {
+    setOccupe(s.id)
+    try {
+      tournee.setDonnees(avecPointsEnAttente(await marquerPoint(c.id, s.id)))
+      toast.success(`Point ${s.ordre} collecté`)
+    } catch (err) {
+      if (!erreurReseau(err)) return toast.error(messageErreur(err))
+      mettreEnAttente(c.id, s.id)
+      setAttente(pointsEnAttente(id).length)
+      tournee.setDonnees(avecPointsEnAttente(c))
+      toast(`Pas de réseau : point ${s.ordre} gardé sur le téléphone, il sera envoyé automatiquement.`, { icon: '📶' })
+    } finally {
+      setOccupe(null)
+    }
+  }
 
   const prochain = useMemo(() => c?.signalements.find((s) => !s.collecte_fait) ?? null, [c])
   const etapes = useMemo(() => c?.signalements.map((s) => ({ ...s, active: c.statut === 'en_cours' && s.id === prochain?.id })) ?? [], [c, prochain])
@@ -67,6 +122,18 @@ export default function DetailTournee() {
       </div>
 
       {c.notes && <p className="mb-4 rounded-xl bg-ambre-50 px-4 py-3 text-sm text-ambre-700">Consigne de l’agent : {c.notes}</p>}
+      {(horsLigne || attente > 0) && (
+        <div className="mb-4 flex flex-col gap-3 rounded-xl border border-ambre/40 bg-ambre-50 px-4 py-3 text-sm text-ambre-700 sm:flex-row sm:items-center sm:justify-between" role="status">
+          <p className="flex items-center gap-2">
+            <CloudOff className="h-4 w-4 shrink-0" />
+            {horsLigne ? 'Hors connexion : dernière version enregistrée sur le téléphone. ' : ''}
+            {attente > 0 && `${attente} point${attente > 1 ? 's' : ''} en attente d’envoi.`}
+          </p>
+          <button type="button" className="btn-secondaire min-h-[36px] shrink-0" disabled={synchro} onClick={() => (attente ? envoyerAttente() : recharger())}>
+            {synchro ? <Spinner className="h-4 w-4" /> : <RefreshCw className="h-4 w-4" />} Réessayer
+          </button>
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         {/* Carte et progression */}
@@ -143,10 +210,11 @@ export default function DetailTournee() {
               )}
               {enCours && (
                 <>
-                  <button type="button" className="btn-principal" disabled={!tousFaits} onClick={() => setFin(true)}>
+                  <button type="button" className="btn-principal" disabled={!tousFaits || attente > 0} onClick={() => setFin(true)}>
                     <CheckCircle2 className="h-4 w-4" /> Terminer la tournée
                   </button>
                   {!tousFaits && <p className="mt-2 text-xs text-encre-doux">Terminez la tournée une fois tous les points collectés.</p>}
+                  {tousFaits && attente > 0 && <p className="mt-2 text-xs text-ambre-700">Les points gardés hors connexion doivent d’abord être envoyés.</p>}
                 </>
               )}
               {c.statut === 'terminee' && (
@@ -179,7 +247,7 @@ export default function DetailTournee() {
                       </p>
                       <p className="text-xs">
                         Statut :{' '}
-                        <span className={s.collecte_fait ? 'font-semibold text-vert' : 'font-semibold text-ambre-700'}>{s.collecte_fait ? 'Collecté' : 'À collecter'}</span>
+                        <span className={s.collecte_fait ? 'font-semibold text-vert' : 'font-semibold text-ambre-700'}>{s.en_attente_envoi ? 'Collecté (envoi en attente)' : s.collecte_fait ? 'Collecté' : 'À collecter'}</span>
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2">
@@ -191,7 +259,7 @@ export default function DetailTournee() {
                           <a href={guidage(s)} target="_blank" rel="noreferrer" className="btn-discret min-h-[36px] px-2" title="Guidage GPS" aria-label={`Guidage vers le point ${s.ordre}`}>
                             <Navigation className="h-4 w-4" />
                           </a>
-                          <button type="button" className="btn-secondaire min-h-[36px] px-3" disabled={occupe === s.id} onClick={() => agir(s.id, () => marquerPoint(c.id, s.id), `Point ${s.ordre} collecté`)}>
+                          <button type="button" className="btn-secondaire min-h-[36px] px-3" disabled={occupe === s.id} onClick={() => marquer(s)}>
                             {occupe === s.id ? <Spinner className="h-4 w-4" /> : 'Marquer'}
                           </button>
                         </div>

@@ -12,7 +12,7 @@ import { CartePoints } from './citoyen/Dashboard'
 import { dateCourte, ROLES } from '../utils/format'
 
 export default function Compte() {
-  const { deconnecter } = useAuth()
+  const { user: moiSession, deconnecter, majUser } = useAuth()
   const navigate = useNavigate()
   const moi = useDonnees(profil, [])
   const [ancien, setAncien] = useState('')
@@ -26,6 +26,7 @@ export default function Compte() {
     try {
       await changerMotDePasse(ancien, nouveau)
       toast.success('Mot de passe modifié')
+      majUser({ mdp_provisoire: false })
       setAncien('')
       setNouveau('')
     } catch (err) {
@@ -68,6 +69,9 @@ export default function Compte() {
           {u.role === 'citoyen' && <CartePoints points={u.points_eco ?? 0} />}
           <form onSubmit={changer} className="carte space-y-4 p-5">
             <h2 className="text-lg font-semibold">Changer de mot de passe</h2>
+            {moiSession?.mdp_provisoire && (
+              <p className="rounded-xl bg-ambre-50 px-4 py-3 text-sm text-ambre-700">Votre mot de passe actuel est provisoire (donné par l’administrateur). Saisissez-le, puis choisissez le vôtre.</p>
+            )}
             <Champ libelle="Mot de passe actuel">
               {(id) => <input id={id} type="password" className="champ" autoComplete="current-password" value={ancien} onChange={(e) => setAncien(e.target.value)} required />}
             </Champ>

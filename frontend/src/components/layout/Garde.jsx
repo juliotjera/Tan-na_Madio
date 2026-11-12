@@ -67,6 +67,7 @@ const TITRES = [
   [/^\/admin\/camions/, 'Camions'],
   [/^\/admin\/zones/, 'Zones de collecte'],
   [/^\/admin\/stats/, 'Statistiques'],
+  [/^\/admin\/journal/, 'Journal d’activité'],
   [/^\/admin/, 'Administration'],
 ]
 

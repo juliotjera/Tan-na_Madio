@@ -2,7 +2,8 @@
 const db = require('../config/db')
 
 const CHAMPS = `s.id, s.statut, s.urgence, s.description, s.adresse, s.photo_url, s.created_at, s.updated_at,
-  s.date_validation, s.zone_id, s.citoyen_id,
+  s.date_validation, s.zone_id, s.citoyen_id, s.motif_rejet,
+  (SELECT count(*) FROM signalement_soutiens ss WHERE ss.signalement_id = s.id)::int AS nb_soutiens,
   ST_Y(s.localisation::geometry) AS latitude, ST_X(s.localisation::geometry) AS longitude,
   z.nom AS zone_nom, u.prenom || ' ' || u.nom AS citoyen_nom`
 const JOINTURES = 'FROM signalements s LEFT JOIN zones z ON z.id = s.zone_id LEFT JOIN utilisateurs u ON u.id = s.citoyen_id'
@@ -54,18 +55,40 @@ async function creer({ citoyen_id, latitude, longitude, description, adresse, ur
   return rows[0].id
 }
 
-async function changerStatut(id, statut, agentId, executer = db) {
+async function changerStatut(id, statut, agentId, executer = db, motif = null) {
   const { rows } = await executer.query(
     `UPDATE signalements
         SET statut = $2::statut_signalement,
             valide_par = CASE WHEN $2::statut_signalement IN ('valide', 'rejete') THEN $3::uuid ELSE valide_par END,
-            date_validation = CASE WHEN $2::statut_signalement IN ('valide', 'rejete') THEN NOW() ELSE date_validation END
+            date_validation = CASE WHEN $2::statut_signalement IN ('valide', 'rejete') THEN NOW() ELSE date_validation END,
+            motif_rejet = CASE WHEN $2::statut_signalement = 'rejete' THEN $4::varchar ELSE NULL END
       WHERE id = $1 RETURNING id, statut, citoyen_id`,
-    [id, statut, agentId],
+    [id, statut, agentId, motif],
   )
   return rows[0] ?? null
 }
 
+// Signalements encore ouverts à moins de `rayon` mètres (index GIST) : détection des doublons
+async function proximite({ latitude, longitude, rayon = 50, citoyenId }) {
+  const { rows } = await db.query(
+    `SELECT ${CHAMPS},
+            ST_Distance(s.localisation, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography)::int AS distance_m,
+            EXISTS (SELECT 1 FROM signalement_soutiens ss WHERE ss.signalement_id = s.id AND ss.citoyen_id = $4) AS deja_soutenu
+       ${JOINTURES}
+      WHERE s.statut IN ('en_attente', 'valide', 'en_cours')
+        AND ST_DWithin(s.localisation, ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3)
+      ORDER BY distance_m LIMIT 5`,
+    [latitude, longitude, rayon, citoyenId ?? null],
+  )
+  return rows.map(numeriser)
+}
+
+async function soutenir(id, citoyenId) {
+  await db.query('INSERT INTO signalement_soutiens (signalement_id, citoyen_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [id, citoyenId])
+  const { rows } = await db.query('SELECT count(*)::int AS n FROM signalement_soutiens WHERE signalement_id = $1', [id])
+  return rows[0].n
+}
+
 const supprimer = async (id) => (await db.query('DELETE FROM signalements WHERE id = $1 RETURNING id, photo_url', [id])).rows[0] ?? null
 
-module.exports = { lister, carte, parId, creer, changerStatut, supprimer }
+module.exports = { lister, carte, parId, creer, changerStatut, proximite, soutenir, supprimer }

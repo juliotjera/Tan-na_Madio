@@ -34,6 +34,7 @@ const Utilisateurs = page(() => import('./pages/admin/Utilisateurs'))
 const GestionCamions = page(() => import('./pages/admin/GestionCamions'))
 const Zones = page(() => import('./pages/admin/Zones'))
 const Stats = page(() => import('./pages/admin/Stats'))
+const Journal = page(() => import('./pages/admin/Journal'))
 
 const AGENTS = ['agent_municipal', 'administrateur']
 
@@ -79,6 +80,7 @@ export default function App() {
               <Route path="/admin/camions" element={<GestionCamions />} />
               <Route path="/admin/zones" element={<Zones />} />
               <Route path="/admin/stats" element={<Stats />} />
+              <Route path="/admin/journal" element={<Journal />} />
             </Route>
           </Route>
         </Route>

@@ -212,4 +212,18 @@ export const MALAGASY = {
   'Modifier le mot de passe': 'Hanova ny teny miafina',
   'Inscrit le': 'Nisoratra tamin’ny',
   Rôle: 'Anjara',
+  // doublons et « Moi aussi »
+  'Ce dépôt a peut-être déjà été signalé': 'Mety efa nisy nanao tatitra ity fako ity',
+  'Si c’est le même, confirmez-le : il sera ramassé plus vite, sans doublon.': 'Raha io ihany, hamafiso : haingana kokoa ny fanangonana azy, tsy misy tatitra miverina.',
+  'Moi aussi': 'Izaho koa',
+  'Déjà confirmé': 'Efa nohamafisinao',
+  'Votre signalement': 'Tatitrao',
+  'Dépôt signalé': 'Fako voatatitra',
+  'Dépôt déjà signalé': 'Fako efa voatatitra',
+  'à {n} m': '{n} m miala',
+  'Merci ! Votre confirmation fait remonter ce dépôt dans la planification.': 'Misaotra! Ny fanamafisanao dia mampiakatra ity fako ity amin’ny fandaminana.',
+  // mot de passe provisoire
+  'Vous utilisez un mot de passe provisoire. Choisissez le vôtre pour sécuriser votre compte.': 'Teny miafina vonjimaika no ampiasainao. Mifidiana ny anao mba hiarovana ny kaontinao.',
+  'Changer mon mot de passe': 'Hanova ny teny miafiko',
+  'Journal d’activité': 'Tantaran’ny asa',
 }

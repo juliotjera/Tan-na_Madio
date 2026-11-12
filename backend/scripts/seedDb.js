@@ -287,6 +287,29 @@ async function seed({ journal = console.log } = {}) {
                    + CASE WHEN s.statut = 'collecte' THEN 10 ELSE 0 END)
         FROM signalements s WHERE s.citoyen_id = c.id), 0)`)
 
+  // Motifs des signalements rejetés, et quelques « Moi aussi » d'habitants voisins
+  await db.query(`UPDATE signalements SET motif_rejet = 'Doublon d’un autre signalement' WHERE statut = 'rejete'`)
+  await db.query(`
+    INSERT INTO signalement_soutiens (signalement_id, citoyen_id, created_at)
+    SELECT s.id, c.id, s.created_at + interval '3 hours'
+      FROM (SELECT id, citoyen_id, created_at FROM signalements WHERE statut IN ('en_attente', 'valide') AND urgence IN ('eleve', 'critique') ORDER BY created_at LIMIT 4) s
+      JOIN LATERAL (SELECT u.id FROM utilisateurs u WHERE u.role = 'citoyen' AND u.id <> s.citoyen_id ORDER BY u.email LIMIT 2) c ON TRUE
+    ON CONFLICT DO NOTHING`)
+
+  // Journal d'activité reconstitué à partir de l'historique (déclarations, validations, tournées)
+  await db.query(`
+    INSERT INTO logs_activite (user_id, action, entite, entite_id, details, created_at)
+    SELECT citoyen_id, 'creation', 'signalement', id, jsonb_build_object('urgence', urgence), created_at FROM signalements
+    UNION ALL
+    SELECT valide_par, 'changement_statut', 'signalement', id,
+           jsonb_strip_nulls(jsonb_build_object('de', 'en_attente', 'vers', CASE WHEN statut = 'rejete' THEN 'rejete' ELSE 'valide' END, 'motif', motif_rejet)),
+           date_validation FROM signalements WHERE valide_par IS NOT NULL
+    UNION ALL
+    SELECT agent_id, 'creation', 'collecte', id, NULL, created_at FROM collectes
+    UNION ALL
+    SELECT cam.chauffeur_id, 'fin', 'collecte', c.id, jsonb_build_object('points_collectes', c.nb_signalements_traites, 'poids_collecte_kg', c.poids_collecte_kg), c.date_fin
+      FROM collectes c JOIN camions cam ON cam.id = c.camion_id WHERE c.statut = 'terminee' AND c.date_fin IS NOT NULL`)
+
   journal('36 signalements, 5 collectes (4 terminées, 1 planifiée pour demain)')
 }
 

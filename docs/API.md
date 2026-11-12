@@ -9,11 +9,11 @@ Erreurs : `{ "message": "…", "code": "CODE" }` avec les statuts 400 (données 
 | Méthode | Route | Accès | Description |
 | --- | --- | --- | --- |
 | POST | `/register` | public | Inscription **citoyen** : `{ nom, prenom, email, mot_de_passe, telephone?, extras: { quartier? } }` → `{ token, refreshToken, user }`. Tout autre rôle → 403 `ROLE_NON_AUTORISE`. |
-| POST | `/login` | public | `{ email, mot_de_passe }` → `{ token, refreshToken, user }` (20 essais / 15 min / adresse IP) |
+| POST | `/login` | public | `{ email, mot_de_passe }` → `{ token, refreshToken, user }` (20 essais / 15 min / adresse IP). `user.mdp_provisoire` : mot de passe donné par l’administrateur, à changer. |
 | POST | `/refresh` | public | `{ refreshToken }` → `{ token, refreshToken }` : l’ancien jeton est révoqué (rotation) |
 | POST | `/logout` | connecté | `{ refreshToken? }` : révoque ce jeton, ou toutes les sessions |
 | GET | `/profil` | connecté | Profil complet (points éco, matricule, camion…) |
-| PATCH | `/mot-de-passe` | connecté | `{ ancien, nouveau }` : ferme les autres sessions |
+| PATCH | `/mot-de-passe` | connecté | `{ ancien, nouveau }` (différent de l’ancien) : ferme les autres sessions, lève `mdp_provisoire` |
 
 Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 
@@ -24,9 +24,12 @@ Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 | GET | `/` | connecté | Filtres `statut`, `urgence`, `zone_id`, `page`, `limit` (≤ 100). Urgences critiques en tête. Un citoyen ne reçoit que les siens. → `{ signalements, total, page, limit }` |
 | GET | `/carte` | connecté | Signalements non rejetés (vue `signalements_carte`) ; `citoyen_nom` réservé au personnel |
 | GET | `/mes` | citoyen | Signalements du citoyen connecté |
-| GET | `/:id` | connecté | Détail (un citoyen : seulement les siens) |
-| POST | `/` | citoyen | multipart : `latitude`, `longitude`, `urgence` (faible, moyen, eleve, critique), `description?`, `adresse?`, `photo?` (JPEG/PNG/WebP, 5 Mo). Photo ou description obligatoire. Zone affectée par trigger PostGIS. +2 points. |
-| PATCH | `/:id/statut` | agent, admin | `{ statut }` : en_attente ↔ valide ↔ rejete. Validation : +5 points (une seule fois). |
+| GET | `/proximite` | connecté | `latitude`, `longitude`, `rayon?` (10 à 200 m, 50 par défaut) : signalements encore ouverts à proximité, avec `distance_m`, `nb_soutiens`, `deja_soutenu` (index GIST, `ST_DWithin`) |
+| GET | `/motifs-rejet` | connecté | Motifs de rejet proposés aux agents |
+| GET | `/:id` | connecté | Détail (un citoyen : seulement les siens), `nb_soutiens`, `motif_rejet` |
+| POST | `/:id/soutien` | citoyen | « Moi aussi » : confirme le dépôt signalé par un autre habitant (une fois par personne, pas sur le sien). À urgence égale, les dépôts les plus confirmés passent d’abord dans la sélection des tournées. |
+| POST | `/` | citoyen | multipart : `latitude`, `longitude`, `urgence` (faible, moyen, eleve, critique), `description?`, `adresse?`, `photo?` (JPEG/PNG/WebP, 5 Mo, contenu vérifié par signature). Photo ou description obligatoire. Zone affectée par trigger PostGIS. +2 points. |
+| PATCH | `/:id/statut` | agent, admin | `{ statut, motif? }` : en_attente ↔ valide ↔ rejete. Validation : +5 points (une seule fois). Le motif de rejet est montré au citoyen. |
 | DELETE | `/:id` | citoyen (le sien, en attente), admin | Supprime le signalement et sa photo |
 
 ## Collectes — `/api/collectes`
@@ -70,6 +73,9 @@ Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 | GET | `/public` | public | Chiffres globaux, points anonymes (statut, urgence, position arrondie), meilleure tournée |
 | GET | `/dashboard` | agent, admin | Compteurs, `taux_reussite`, `delai_moyen_heures`, poids et distance totaux |
 | GET | `/zones` | agent, admin | Vue `statistiques_zones` |
+| GET | `/points-noirs` | agent, admin | `jours` (7 à 365, 90 par défaut) : signalements regroupés sur une grille d’environ 200 m (`ST_SnapToGrid`), cases d’au moins 2 signalements, avec `total`, `ouverts`, `urgents`, zone et date du dernier |
+| GET | `/top-citoyens` | connecté | 5 meilleurs citoyens (prénom et initiale, points éco) |
+| GET | `/camions` | agent, admin | Performance des camions (collectes, km, kg, efficacité) |
 | GET | `/periode` | admin | `debut`, `fin` (30 derniers jours par défaut) : séries par jour (par semaine au-delà de 90 jours) et répartition des urgences |
 
 ## Utilisateurs — `/api/utilisateurs`
@@ -77,11 +83,13 @@ Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 | Méthode | Route | Accès | Description |
 | --- | --- | --- | --- |
 | GET | `/` | admin | Filtres `role`, `q` (recherche), `page`, `limit` |
-| GET | `/journal` | admin | Journal d’activité (`logs_activite`) |
+| GET | `/journal` | admin | Journal d’activité : filtres `action`, `entite`, `q` (auteur), `page` → `{ logs, total, actions }` |
 | POST | `/` | admin | Création d’un compte de tout rôle : `extras.matricule` (agent), `extras.numero_permis` et `extras.camion_id?` (chauffeur) |
 | GET | `/:id` | admin | Profil complet |
 | PUT | `/:id` | admin, ou l’utilisateur lui-même | `nom`, `prenom`, `telephone`, `quartier` ; `zone_id` (admin) |
 | PATCH | `/:id/activer` | admin | `{ actif }` : un compte désactivé est déconnecté immédiatement |
+| POST | `/:id/mot-de-passe` | admin | Mot de passe oublié : génère un mot de passe provisoire (renvoyé une seule fois), ferme les sessions ; la personne devra le changer |
+| DELETE | `/:id` | admin | Compte sans historique uniquement (sinon : désactiver), jamais le sien |
 
 ## Notifications — `/api/notifications`
 

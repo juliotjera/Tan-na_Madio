@@ -2,12 +2,12 @@
 // (activer ou désactiver, modifier, supprimer), création du personnel
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Pencil, Plus, Search, Shield, ShieldOff, Trash2 } from 'lucide-react'
-import { activerUtilisateur, creerUtilisateur, listerCamions, listerUtilisateurs, listerZones, modifierUtilisateur, supprimerUtilisateur } from '../../api'
+import { Copy, KeyRound, Pencil, Plus, Search, Shield, ShieldOff, Trash2 } from 'lucide-react'
+import { activerUtilisateur, creerUtilisateur, listerCamions, listerUtilisateurs, listerZones, modifierUtilisateur, reinitialiserMotDePasse, supprimerUtilisateur } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useAuth } from '../../hooks/useAuth'
 import { useDonnees } from '../../hooks/useDonnees'
-import { Champ, Chargement, Compteur, EnTete, Erreur, Modal, Pagination, Segments, Spinner } from '../../components/common/ui'
+import { Champ, Chargement, Compteur, Confirmation, EnTete, Erreur, Modal, Pagination, Segments, Spinner } from '../../components/common/ui'
 import { ROLES } from '../../utils/format'
 
 const FILTRES = [{ valeur: '', libelle: 'Tous' }, ...Object.entries(ROLES).map(([valeur, libelle]) => ({ valeur, libelle: `${libelle}s` }))]
@@ -219,6 +219,9 @@ export default function Utilisateurs() {
   const [edition, setEdition] = useState(null)
   const [suppression, setSuppression] = useState(null)
   const [suppr, setSuppr] = useState(false)
+  const [aReinit, setAReinit] = useState(null)
+  const [reinit, setReinit] = useState(false)
+  const [provisoire, setProvisoire] = useState(null) // { nom, mot_de_passe } affiché une seule fois
   const liste = useDonnees(() => listerUtilisateurs({ role: role || undefined, q: recherche || undefined, page, limit: 15 }), [role, recherche, page])
 
   // recherche lancée après une courte pause de frappe
@@ -240,6 +243,29 @@ export default function Utilisateurs() {
       toast.error(messageErreur(err))
     } finally {
       setBascule(null)
+    }
+  }
+
+  const reinitialiser = async () => {
+    setReinit(true)
+    try {
+      const { mot_de_passe } = await reinitialiserMotDePasse(aReinit.id)
+      setProvisoire({ nom: `${aReinit.prenom} ${aReinit.nom}`, email: aReinit.email, mot_de_passe })
+      setAReinit(null)
+      liste.recharger({ silencieux: true })
+    } catch (err) {
+      toast.error(messageErreur(err))
+    } finally {
+      setReinit(false)
+    }
+  }
+
+  const copier = async () => {
+    try {
+      await navigator.clipboard.writeText(provisoire.mot_de_passe)
+      toast.success('Mot de passe copié')
+    } catch {
+      toast.error('Copie impossible : sélectionnez le texte à la main')
     }
   }
 
@@ -356,6 +382,16 @@ export default function Utilisateurs() {
                         </button>
                         <button
                           type="button"
+                          className="rounded-lg p-1.5 text-encre-doux transition hover:bg-fond hover:text-encre disabled:opacity-40"
+                          disabled={soiMeme}
+                          onClick={() => setAReinit(u)}
+                          title="Réinitialiser le mot de passe"
+                          aria-label={`Réinitialiser le mot de passe de ${nomComplet}`}
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
                           className="rounded-lg p-1.5 text-alerte transition hover:bg-red-50 disabled:opacity-40"
                           disabled={soiMeme}
                           onClick={() => setSuppression(u)}
@@ -408,6 +444,32 @@ export default function Utilisateurs() {
             </strong>{' '}
             ? Un compte qui a déjà des signalements ou des tournées ne peut pas être supprimé : désactivez-le plutôt.
           </p>
+        )}
+      </Modal>
+
+      <Confirmation
+        ouvert={Boolean(aReinit)}
+        onFermer={() => setAReinit(null)}
+        onConfirmer={reinitialiser}
+        enCours={reinit}
+        titre={`Réinitialiser le mot de passe de ${aReinit?.prenom ?? ''} ${aReinit?.nom ?? ''} ?`}
+        texte="Un mot de passe provisoire sera créé et affiché une seule fois. Ses sessions ouvertes seront fermées et la personne devra choisir son propre mot de passe à la prochaine connexion."
+        action="Réinitialiser"
+      />
+
+      <Modal ouvert={Boolean(provisoire)} onFermer={() => setProvisoire(null)} titre="Mot de passe provisoire" pied={<button type="button" className="btn-principal" onClick={() => setProvisoire(null)}>J’ai transmis le mot de passe</button>}>
+        {provisoire && (
+          <div className="space-y-4">
+            <p className="text-encre-doux">
+              Transmettez ce mot de passe à <strong className="text-ardoise">{provisoire.nom}</strong> ({provisoire.email}). Il ne sera plus affiché ensuite.
+            </p>
+            <div className="flex items-center gap-2 rounded-xl border border-vert-300 bg-vert-50 p-3">
+              <code className="flex-1 select-all text-center font-mono text-xl font-semibold tracking-wider text-ardoise">{provisoire.mot_de_passe}</code>
+              <button type="button" className="btn-secondaire min-h-[38px]" onClick={copier}>
+                <Copy className="h-4 w-4" /> Copier
+              </button>
+            </div>
+          </div>
         )}
       </Modal>
 

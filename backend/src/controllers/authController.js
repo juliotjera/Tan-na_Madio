@@ -17,7 +17,7 @@ function verifierMotDePasse(mdp) {
   }
 }
 
-const publicUser = (u) => ({ id: u.id, nom: u.nom, prenom: u.prenom, email: u.email, role: u.role, telephone: u.telephone ?? null })
+const publicUser = (u) => ({ id: u.id, nom: u.nom, prenom: u.prenom, email: u.email, role: u.role, telephone: u.telephone ?? null, mdp_provisoire: Boolean(u.mdp_provisoire) })
 
 // Jeton d'accès court (15 min) + jeton de renouvellement (7 j) dont seule l'empreinte est stockée
 async function emettreJetons(user) {
@@ -99,7 +99,8 @@ const changerMotDePasse = asyncHandler(async (req, res) => {
   const user = await User.parEmail(req.user.email)
   if (!(await bcrypt.compare(String(ancien), user.mot_de_passe))) throw new ErreurApi(401, 'Mot de passe actuel incorrect', 'IDENTIFIANTS_INVALIDES')
   verifierMotDePasse(nouveau)
-  await db.query('UPDATE utilisateurs SET mot_de_passe = $2 WHERE id = $1', [user.id, await bcrypt.hash(nouveau, TOURS_BCRYPT)])
+  if (String(nouveau) === String(ancien)) throw new ErreurApi(422, 'Choisissez un mot de passe différent de l’actuel', 'MOT_DE_PASSE_IDENTIQUE')
+  await db.query('UPDATE utilisateurs SET mot_de_passe = $2, mdp_provisoire = FALSE WHERE id = $1', [user.id, await bcrypt.hash(nouveau, TOURS_BCRYPT)])
   await db.query('DELETE FROM refresh_tokens WHERE user_id = $1', [user.id])
   await journaliser(req, 'changement_mot_de_passe', 'utilisateur', user.id)
   res.json({ message: 'Mot de passe modifié. Reconnectez-vous sur vos autres appareils.' })
