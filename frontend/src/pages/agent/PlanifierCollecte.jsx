@@ -4,7 +4,7 @@
 // 3. Aperçu : itinéraire Dijkstra par les rues sur la carte, ordre de passage, gain
 // 4. Confirmation : récapitulatif, signalements inclus, consignes pour le chauffeur
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, Clock, ImageOff, Info, List, Map as IconeCarte, MapPin, MessageCircle, Phone, Sparkles, Truck } from 'lucide-react'
@@ -86,9 +86,10 @@ function CaseRecap({ libelle, valeur, ton }) {
 
 export default function PlanifierCollecte() {
   const navigate = useNavigate()
+  const lieu = useLocation()
   const [etape, setEtape] = useState(0)
   const [camionId, setCamionId] = useState('')
-  const [zoneId, setZoneId] = useState('')
+  const [zoneId, setZoneId] = useState(() => lieu.state?.zoneId ?? '') // zone choisie depuis le tableau de bord
   const [mode, setMode] = useState('mono') // 'mono' (Dijkstra, un camion) | 'multi' (glouton, plusieurs camions)
   const [date, setDate] = useState(demainMatin)
   const [selection, setSelection] = useState([])

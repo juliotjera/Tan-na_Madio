@@ -1,5 +1,6 @@
 // Notifications (citoyen, agent, chauffeur) et exports CSV du personnel
 const { app, request, db, preparer, connecter, PNG } = require('./aide')
+const { Notification } = require('../src/models')
 
 let citoyen, agent, chauffeur, camion
 beforeAll(async () => {
@@ -93,4 +94,33 @@ describe('exports CSV', () => {
   test('réservé au personnel', async () => {
     expect((await request(app).get('/api/exports/signalements.csv').set(citoyen.entete)).status).toBe(403)
   })
+})
+
+test('flux temps réel : une notification arrive aussitôt sur le flux de son destinataire', async () => {
+  const http = require('http')
+  const serveur = app.listen(0)
+  const port = serveur.address().port
+  const conducteur = await connecter('chauffeur@tananamadio.mg')
+  const recu = new Promise((resoudre, rejeter) => {
+    const req = http.get({ port, path: '/api/notifications/flux', headers: { Authorization: `Bearer ${conducteur.token}` } }, (res) => {
+      expect(res.headers['content-type']).toMatch(/text\/event-stream/)
+      let tampon = ''
+      res.on('data', (morceau) => {
+        tampon += morceau
+        if (tampon.includes('retry:') && !tampon.includes('event: notification')) {
+          Notification.notifier(conducteur.user.id, { type: 'tournee_affectee', titre: 'Test temps réel' })
+        }
+        const m = tampon.match(/event: notification\ndata: (.+)\n\n/)
+        if (m) {
+          req.destroy()
+          resoudre(JSON.parse(m[1]))
+        }
+      })
+    })
+    req.on('error', (e) => e.code !== 'ECONNRESET' && rejeter(e))
+  })
+  const n = await recu
+  expect(n).toMatchObject({ type: 'tournee_affectee', titre: 'Test temps réel', lu: false })
+  expect(n.user_id).toBeUndefined()
+  await new Promise((r) => serveur.close(r))
 })

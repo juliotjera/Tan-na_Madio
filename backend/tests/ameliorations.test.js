@@ -91,6 +91,18 @@ test('photo : un faux PNG (texte renommé) est refusé, un vrai PNG accepté', a
   expect(vrai.status).toBe(201)
 })
 
+test('zones : dernier ramassage, dépôts à planifier et retard sur la fréquence prévue', async () => {
+  const r = await request(app).get('/api/stats/zones').set(agent.entete)
+  expect(r.status).toBe(200)
+  for (const z of r.body.zones) {
+    expect(typeof z.a_planifier).toBe('number')
+    expect(typeof z.en_retard).toBe('boolean')
+    if (z.en_retard) expect(z.a_planifier).toBeGreaterThan(0)
+    if (z.en_retard && z.jours_depuis_collecte !== null) expect(z.jours_depuis_collecte).toBeGreaterThan(z.frequence_collecte_jours)
+  }
+  expect(r.body.zones.some((z) => z.derniere_collecte)).toBe(true)
+})
+
 test('journal : filtre par action et total', async () => {
   const r = await request(app).get('/api/utilisateurs/journal').query({ action: 'soutien' }).set(admin.entete)
   expect(r.status).toBe(200)

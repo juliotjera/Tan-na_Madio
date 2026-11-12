@@ -25,7 +25,7 @@ jobs:
       - run: npm test
 
   frontend:
-    name: Interface (ESLint + compilation)
+    name: Interface (ESLint + tests Vitest + compilation)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,4 +39,5 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm test
       - run: npm run build

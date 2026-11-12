@@ -1,13 +1,13 @@
-// Agent municipal : ce qui attend une décision, la carte de la ville, les tournées du jour
+// Agent municipal : ce qui attend une décision, les zones en retard de collecte, la carte de la ville, les tournées du jour
 import { Link } from 'react-router-dom'
-import { AlertTriangle, ClipboardCheck, Route, Truck } from 'lucide-react'
-import { carteSignalements, listerCollectes, listerSignalements, listerZones, tableauDeBord } from '../../api'
+import { AlertTriangle, CalendarClock, ClipboardCheck, Route, Truck } from 'lucide-react'
+import { carteSignalements, listerCollectes, listerSignalements, listerZones, statsZones, tableauDeBord } from '../../api'
 import { useAuth } from '../../hooks/useAuth'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Carte, LegendeUrgences, MarqueurSignalement, Zones } from '../../components/map/Carte'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chiffre, EnTete, Erreur } from '../../components/common/ui'
-import { ilYa, jourHeure, km } from '../../utils/format'
+import { ilYa, jourHeure, km, pluriel } from '../../utils/format'
 
 export default function AgentDashboard() {
   const { user } = useAuth()
@@ -16,6 +16,8 @@ export default function AgentDashboard() {
   const zones = useDonnees(listerZones, [])
   const urgents = useDonnees(() => listerSignalements({ statut: 'en_attente', limit: 5 }), [], { intervalle: 60000 })
   const tournees = useDonnees(() => listerCollectes({ statut: 'planifiee', limit: 4 }), [])
+  const suivi = useDonnees(statsZones, [], { intervalle: 300000 })
+  const enRetard = suivi.donnees?.zones.filter((z) => z.en_retard) ?? []
   const s = stats.donnees
 
   return (
@@ -36,6 +38,31 @@ export default function AgentDashboard() {
         <Chiffre icone={Route} ton="vert" valeur={s?.valides ?? '—'} libelle="Prêts à planifier" detail="Validés, sans tournée" />
         <Chiffre icone={Truck} ton="bleu" valeur={s ? `${s.camions_disponibles}/${s.camions}` : '—'} libelle="Camions disponibles" />
       </div>
+
+      {enRetard.length > 0 && (
+        <section className="carte border-ambre/40 p-5">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <CalendarClock className="h-5 w-5 text-ambre" /> Zones à desservir
+          </h2>
+          <p className="text-sm text-encre-doux">Des dépôts validés y attendent et le camion n’est pas passé depuis plus longtemps que la fréquence prévue.</p>
+          <ul className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {enRetard.map((z) => (
+              <li key={z.id} className="flex items-center justify-between gap-3 rounded-xl bg-ambre-50/60 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-ardoise">{z.nom}</p>
+                  <p className="text-xs text-encre-doux">
+                    {pluriel(z.a_planifier, 'dépôt validé', 'dépôts validés')} ·{' '}
+                    {z.jours_depuis_collecte === null ? 'jamais desservie' : `dernier passage il y a ${pluriel(z.jours_depuis_collecte, 'jour')}`} (prévu tous les {z.frequence_collecte_jours} j)
+                  </p>
+                </div>
+                <Link to="/agent/planifier" state={{ zoneId: z.id }} className="btn-secondaire min-h-[36px] shrink-0 px-3">
+                  Planifier
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         <section>

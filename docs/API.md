@@ -72,7 +72,7 @@ Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 | --- | --- | --- | --- |
 | GET | `/public` | public | Chiffres globaux, points anonymes (statut, urgence, position arrondie), meilleure tournée |
 | GET | `/dashboard` | agent, admin | Compteurs, `taux_reussite`, `delai_moyen_heures`, poids et distance totaux |
-| GET | `/zones` | agent, admin | Vue `statistiques_zones` |
+| GET | `/zones` | agent, admin | Vue `statistiques_zones`, plus `a_planifier`, `derniere_collecte`, `jours_depuis_collecte` et `en_retard` (fréquence de passage dépassée avec des dépôts validés en attente) |
 | GET | `/points-noirs` | agent, admin | `jours` (7 à 365, 90 par défaut) : signalements regroupés sur une grille d’environ 200 m (`ST_SnapToGrid`), cases d’au moins 2 signalements, avec `total`, `ouverts`, `urgents`, zone et date du dernier |
 | GET | `/top-citoyens` | connecté | 5 meilleurs citoyens (prénom et initiale, points éco) |
 | GET | `/camions` | agent, admin | Performance des camions (collectes, km, kg, efficacité) |
@@ -96,6 +96,7 @@ Mot de passe : 8 caractères minimum, au moins une lettre et un chiffre.
 | Méthode | Route | Accès | Description |
 | --- | --- | --- | --- |
 | GET | `/` | connecté | `limit` (≤ 50), `non_lues=true` → `{ notifications, non_lues }` |
+| GET | `/flux` | connecté | Flux temps réel (Server-Sent Events) : événement `notification` à chaque nouvelle notification, commentaire `ping` toutes les 25 s |
 | PATCH | `/:id/lu` | connecté | Marque une notification comme lue (seulement les siennes) |
 | PATCH | `/tout-lu` | connecté | Marque tout comme lu |
 

@@ -1,16 +1,19 @@
 // Notifications dans l'application (cloche de l'en-tête)
 const db = require('../config/db')
+const { bus, canal } = require('../utils/evenements')
 
 // Envoi à un ou plusieurs utilisateurs. Comme le journal, ne bloque jamais l'action qui la déclenche.
 async function notifier(destinataires, { type, titre, message = null, lien = null }) {
   const ids = [...new Set([destinataires].flat().filter(Boolean))]
   if (!ids.length) return
   try {
-    await db.query(
+    const { rows } = await db.query(
       `INSERT INTO notifications (user_id, type, titre, message, lien)
-       SELECT unnest($1::uuid[]), $2, $3, $4, $5`,
+       SELECT unnest($1::uuid[]), $2, $3, $4, $5
+       RETURNING id, user_id, type, titre, message, lien, lu, created_at`,
       [ids, type, titre, message, lien],
     )
+    for (const { user_id: userId, ...n } of rows) bus.emit(canal(userId), n)
   } catch (erreur) {
     console.warn('notification :', erreur.message)
   }

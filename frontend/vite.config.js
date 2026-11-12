@@ -13,6 +13,10 @@ export default defineConfig({
       '/uploads': API,
     },
   },
+  // tests unitaires (Vitest) : navigateur simulé pour localStorage
+  test: {
+    environment: 'jsdom',
+  },
   build: {
     rollupOptions: {
       output: {

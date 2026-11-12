@@ -1,10 +1,13 @@
-// Cloche de notifications : nombre de non lues, liste déroulante, lien vers l'élément concerné
+// Cloche de notifications : nombre de non lues, liste déroulante, lien vers l'élément concerné.
+// Les nouvelles notifications arrivent en temps réel (flux SSE) ; un rafraîchissement lent reste en secours.
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle, Bell, CheckCheck, CheckCircle2, Route, Truck, XCircle } from 'lucide-react'
 import { lireNotification, listerNotifications, toutLire } from '../../api'
 import { useDonnees } from '../../hooks/useDonnees'
+import { useFluxNotifications } from '../../hooks/useFluxNotifications'
 import { ilYa } from '../../utils/format'
 import { useLangue } from '../../context/LangueContext'
 
@@ -23,9 +26,14 @@ export default function Cloche({ sombre = false, alignement = 'droite' }) {
   const navigate = useNavigate()
   const [ouvert, setOuvert] = useState(false)
   const boite = useRef(null)
-  const { donnees, setDonnees, recharger } = useDonnees(() => listerNotifications({ limit: 15 }), [], { intervalle: 60000 })
+  const { donnees, setDonnees, recharger } = useDonnees(() => listerNotifications({ limit: 15 }), [], { intervalle: 300000 })
   const nonLues = donnees?.non_lues ?? 0
   const { t } = useLangue()
+
+  useFluxNotifications((n) => {
+    setDonnees((d) => (d ? { ...d, non_lues: d.non_lues + 1, notifications: [n, ...d.notifications.filter((x) => x.id !== n.id)].slice(0, 15) } : d))
+    toast(n.titre, { icon: '🔔', id: n.id })
+  })
 
   // Alt+N : ouvrir ou fermer les notifications
   useEffect(() => {

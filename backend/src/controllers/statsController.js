@@ -80,12 +80,34 @@ const camions = asyncHandler(async (req, res) => {
   })
 })
 
+// Par zone : volumes, délai moyen, et suivi de la fréquence de passage prévue :
+// une zone est « en retard » si des dépôts validés y attendent et que le dernier ramassage
+// date de plus longtemps que sa fréquence de collecte
 const zones = asyncHandler(async (req, res) => {
   const { rows } = await db.query(
-    `SELECT id, nom, total_signalements::int, en_attente::int, collectes::int, urgents::int, delai_moyen_heures::float
-       FROM statistiques_zones ORDER BY total_signalements DESC, nom`,
+    `SELECT sz.id, sz.nom, sz.total_signalements::int, sz.en_attente::int, sz.collectes::int, sz.urgents::int, sz.delai_moyen_heures::float,
+            z.frequence_collecte_jours, z.actif,
+            (SELECT count(*) FROM signalements s WHERE s.zone_id = sz.id AND s.statut = 'valide')::int AS a_planifier,
+            (SELECT max(c.date_fin) FROM collectes c
+               JOIN collecte_signalements cs ON cs.collecte_id = c.id
+               JOIN signalements s ON s.id = cs.signalement_id
+              WHERE s.zone_id = sz.id AND c.statut = 'terminee' AND cs.collecte_fait) AS derniere_collecte
+       FROM statistiques_zones sz JOIN zones z ON z.id = sz.id
+      ORDER BY sz.total_signalements DESC, sz.nom`,
   )
-  res.json({ zones: rows.map((z) => ({ ...z, delai_moyen_heures: arrondi(z.delai_moyen_heures) })) })
+  const maintenant = Date.now()
+  res.json({
+    zones: rows.map((z) => {
+      const jours = z.derniere_collecte ? Math.floor((maintenant - new Date(z.derniere_collecte)) / 86400000) : null
+      const frequence = z.frequence_collecte_jours ?? 7
+      return {
+        ...z,
+        delai_moyen_heures: arrondi(z.delai_moyen_heures),
+        jours_depuis_collecte: jours,
+        en_retard: z.actif && z.a_planifier > 0 && (jours === null || jours > frequence),
+      }
+    }),
+  })
 })
 
 // Évolution jour par jour (ou semaine par semaine au-delà de 90 jours) entre deux dates

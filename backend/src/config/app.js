@@ -30,7 +30,9 @@ function creerApp() {
       },
     }),
   )
-  app.use(compression()) // réponses compressées : pages et données plus rapides sur réseau mobile
+  // réponses compressées : pages et données plus rapides sur réseau mobile (sauf le flux temps réel,
+  // qui doit partir sans attendre que le tampon de compression soit plein)
+  app.use(compression({ filter: (req, res) => !req.path.endsWith('/notifications/flux') && compression.filter(req, res) }))
   app.use(cors({ origin: config.corsOrigins, credentials: true }))
 
   // journal des requêtes de l'API (hors tests) : méthode, adresse, statut, durée
