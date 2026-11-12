@@ -11,5 +11,6 @@ router.get('/journal', c.journal)
 router.post('/', requis('nom', 'prenom', 'email', 'mot_de_passe', 'role'), c.creer)
 router.get('/:id', uuidParam('id'), c.detail)
 router.patch('/:id/activer', uuidParam('id'), c.activer)
+router.delete('/:id', uuidParam('id'), c.supprimer)
 
 module.exports = router

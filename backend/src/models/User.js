@@ -56,7 +56,7 @@ async function lister({ role, recherche, limit, offset }) {
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
   const total = (await db.query(`SELECT count(*)::int AS n FROM utilisateurs u ${where}`, params)).rows[0].n
   const { rows } = await db.query(
-    `SELECT ${CHAMPS}, c.points_eco, a.matricule, ch.numero_permis
+    `SELECT ${CHAMPS}, c.points_eco, a.matricule, a.zone_id, ch.numero_permis
        FROM utilisateurs u
        LEFT JOIN citoyens c ON c.id = u.id
        LEFT JOIN agents_municipaux a ON a.id = u.id

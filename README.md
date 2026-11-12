@@ -15,7 +15,7 @@ Les citoyens signalent un dépôt (photo, position GPS, urgence) ; les agents mu
 | **Citoyen** | Actions rapides · carte des signalements (filtres statut et urgence, rafraîchissement automatique, « Me géolocaliser ») · signaler un problème (description, adresse, urgence, latitude/longitude par GPS, carte ou recherche d’adresse, photo réduite avant l’envoi) · historique en photos · suivi étape par étape · points éco et paliers (+2 envoi, +5 validation, +10 ramassage) · **classement Top Citoyens Écologiques** |
 | **Agent municipal** | Tableau de bord · valider / rejeter les signalements · **planifier une collecte en 4 étapes** : sélection (camion, chauffeur joignable par **WhatsApp ou appel**, zone et nombre de signalements disponibles, **mode mono-tournée Dijkstra ou plusieurs tournées gloutonnes**, date) → signalements (photo, adresse, déclarant, sélection automatique selon la capacité) → aperçu de la route (récapitulatif, carte légendée, gain) → confirmation · suivre et annuler les collectes · état de la flotte |
 | **Chauffeur** | Tableau de bord (4 compteurs, tournée du jour, dernières tournées) · mes tournées (compteurs, filtres, en cours / historique) · **exécution de la tournée** : carte légendée avec tracé et arrêts numérotés, prochain arrêt mis en évidence, guidage GPS, « Marquer », progression X/N, fin de tournée avec poids |
-| **Administrateur** | Actions rapides, **priorité du mois**, 5 indicateurs avec tendance et mini-graphique, signalements par statut, performance mensuelle, derniers signalements et collectes · comptes (compteurs, création du personnel, activation) · camions (CRUD, affectation des chauffeurs) · zones (tracé du contour, activation) · statistiques par période (évolution, zones, **performance des camions**) · exports CSV · journal d’activité |
+| **Administrateur** | Actions rapides, **priorité du mois**, 5 indicateurs avec tendance et mini-graphique, signalements par statut, performance mensuelle, derniers signalements et collectes · comptes (compteurs, création du personnel, modification, activation, suppression des comptes sans historique) · camions (CRUD, affectation des chauffeurs) · zones (cartes, tracé du contour dans une fenêtre, activation) · statistiques par période (évolution, zones, **performance des camions**) · exports CSV · journal d’activité |
 
 Pour tous : interface **en français ou en malagasy**, barre latérale repliable (**Alt+M**), notifications (**Alt+N**), fil d’Ariane, **notifications** dans l’application (signalement validé, rejeté, programmé, ramassé ; tournée confiée, terminée, annulée ; urgence critique), **application installable** sur téléphone et ouverture **hors ligne**, recherche d’adresse pour placer un signalement, exports CSV (ouvrables dans Excel) pour le personnel.
 
@@ -39,7 +39,7 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 - **Application installable (PWA)** : manifeste, icônes, service worker (interface disponible sans réseau ; données toujours lues en direct).
 - **Production** : compression des réponses, cache long des fichiers versionnés, journal des requêtes, migrations de base automatiques.
 - **Qualité** : ESLint (frontend et backend), intégration continue GitHub Actions (vérification du code, tests, compilation à chaque envoi).
-- **Tests** : Jest + Supertest (69 tests : algorithmes, authentification, signalements, collectes, notifications et exports, fonctionnalités de la version d’origine, base de données).
+- **Tests** : Jest + Supertest (70 tests : algorithmes, authentification, signalements, collectes, notifications et exports, fonctionnalités de la version d’origine, base de données).
 
 ## Démarrage rapide
 
@@ -93,7 +93,7 @@ backend/
   src/middleware/     auth (JWT), validate (rôles, UUID, champs), upload (photos), erreurs
   src/models/         accès SQL paramétré
   scripts/            seedDb, resetDb, syncDb, createAdmin, updateAdminPassword
-  tests/              5 fichiers Jest
+  tests/              7 fichiers Jest
 frontend/
   src/pages/          LandingPage, auth/, citoyen/, agent/, chauffeur/, admin/
   src/components/     map/ (carte, itinéraire, zones), layout/, common/

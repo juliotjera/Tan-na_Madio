@@ -1,5 +1,4 @@
 // Gestion de la flotte : ajout, modification, affectation du chauffeur, suppression
-import { Plaque } from '../../components/layout/Logo'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Pencil, Plus, Trash2, Truck } from 'lucide-react'
@@ -7,8 +6,8 @@ import { creerCamion, listerCamions, listerUtilisateurs, modifierCamion, supprim
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
 import { StatutBadge } from '../../components/common/Badge'
-import { Champ, Chargement, Confirmation, EnTete, Erreur, Modal, Spinner, Vide } from '../../components/common/ui'
-import { dateCourte, kg, STATUTS_CAMION } from '../../utils/format'
+import { Champ, Chargement, Confirmation, Erreur, Modal, Spinner, Vide } from '../../components/common/ui'
+import { STATUTS_CAMION } from '../../utils/format'
 
 const VIDE = { immatriculation: '', modele: '', capacite_kg: '', statut: 'disponible', chauffeur_id: '', derniere_maintenance: '' }
 
@@ -138,15 +137,15 @@ export default function GestionCamions() {
 
   return (
     <div>
-      <EnTete
-        titre="Camions"
-        texte="La flotte de la commune et l’affectation des chauffeurs."
-        actions={
-          <button type="button" className="btn-principal" onClick={() => setEdition({})}>
-            <Plus className="h-4 w-4" /> Ajouter un camion
-          </button>
-        }
-      />
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-[28px]">Gestion des Camions</h1>
+          <p className="mt-1 text-encre-doux">Gérez la flotte de collecte</p>
+        </div>
+        <button type="button" className="btn-principal px-5" onClick={() => setEdition({})}>
+          <Plus className="h-5 w-5" /> Ajouter un camion
+        </button>
+      </div>
       {camions.erreur && <Erreur message={camions.erreur} onReessayer={camions.recharger} />}
       {camions.chargement && !camions.donnees && <Chargement />}
       {camions.donnees?.length === 0 && (
@@ -156,41 +155,39 @@ export default function GestionCamions() {
       )}
       {camions.donnees?.length > 0 && (
         <div className="carte overflow-x-auto">
-          <table className="tableau min-w-[720px]">
+          <table className="tableau min-w-[760px]">
             <thead>
               <tr>
-                <th>Camion</th>
-                <th>Capacité</th>
+                <th>Immatriculation</th>
+                <th>Modèle</th>
+                <th>Capacité (kg)</th>
+                <th>Statut</th>
                 <th>Chauffeur</th>
-                <th>Entretien</th>
-                <th>État</th>
-                <th className="text-right">Actions</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {camions.donnees.map((c) => (
                 <tr key={c.id}>
-                  <td>
-                    <Plaque numero={c.immatriculation} />
-                    <p className="mt-1 text-xs text-encre-pale">{c.modele}</p>
-                  </td>
-                  <td className="tabular-nums">{kg(c.capacite_kg)}</td>
-                  <td>{c.chauffeur_nom ?? <span className="text-ambre-700">Non affecté</span>}</td>
-                  <td className="text-encre-doux">{dateCourte(c.derniere_maintenance)}</td>
+                  <td className="font-semibold text-ardoise">{c.immatriculation}</td>
+                  <td className="text-encre-doux">{c.modele ?? '-'}</td>
+                  <td className="tabular-nums text-encre-doux">{c.capacite_kg.toFixed(2)}</td>
                   <td>
                     <StatutBadge statut={c.statut} type="camion" />
                   </td>
+                  <td className="text-encre-doux">{c.chauffeur_nom ?? '-'}</td>
                   <td>
-                    <div className="flex justify-end gap-1">
-                      <button type="button" className="btn-discret min-h-[36px] px-2.5" onClick={() => setEdition(c)} aria-label={`Modifier ${c.immatriculation}`}>
+                    <div className="flex gap-1">
+                      <button type="button" className="btn-discret min-h-[34px] px-2" onClick={() => setEdition(c)} aria-label={`Modifier ${c.immatriculation}`} title="Modifier">
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         type="button"
-                        className="btn-discret min-h-[36px] px-2.5 hover:text-alerte-700"
+                        className="btn min-h-[34px] px-2 text-alerte hover:bg-alerte-50"
                         onClick={() => setASupprimer(c)}
                         disabled={c.statut === 'en_tournee'}
                         aria-label={`Supprimer ${c.immatriculation}`}
+                        title={c.statut === 'en_tournee' ? 'Impossible pendant une tournée' : 'Supprimer'}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

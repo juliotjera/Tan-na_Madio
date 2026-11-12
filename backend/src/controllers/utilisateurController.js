@@ -61,6 +61,28 @@ const activer = asyncHandler(async (req, res) => {
   res.json(u)
 })
 
+// Suppression d'un compte sans historique ; un compte qui a des signalements ou des tournées est
+// conservé pour la traçabilité : il faut alors le désactiver
+const supprimer = asyncHandler(async (req, res) => {
+  if (req.params.id === req.user.id) throw new ErreurApi(422, 'Vous ne pouvez pas supprimer votre propre compte', 'AUTO_SUPPRESSION')
+  const u = await User.profil(req.params.id)
+  if (!u) throw new ErreurApi(404, 'Utilisateur introuvable', 'UTILISATEUR_INTROUVABLE')
+  const { rows } = await db.query(
+    `SELECT (SELECT count(*) FROM signalements WHERE citoyen_id = $1)::int AS signalements,
+            (SELECT count(*) FROM collectes WHERE agent_id = $1)::int AS collectes`,
+    [u.id],
+  )
+  if (rows[0].signalements || rows[0].collectes) {
+    throw new ErreurApi(422, 'Ce compte a un historique (signalements ou tournées) : désactivez-le plutôt', 'COMPTE_AVEC_HISTORIQUE')
+  }
+  await db.transaction(async (tx) => {
+    await tx.query('UPDATE camions SET chauffeur_id = NULL WHERE chauffeur_id = $1', [u.id])
+    await tx.query('DELETE FROM utilisateurs WHERE id = $1', [u.id])
+  })
+  await journaliser(req, 'suppression', 'utilisateur', null, { email: u.email, role: u.role })
+  res.json({ message: 'Compte supprimé' })
+})
+
 // Journal d'activité (traçabilité)
 const journal = asyncHandler(async (req, res) => {
   const { page, limit, offset } = pagination(req.query)
@@ -74,4 +96,4 @@ const journal = asyncHandler(async (req, res) => {
   res.json({ logs: rows, page, limit })
 })
 
-module.exports = { lister, detail, creer, modifier, activer, journal }
+module.exports = { lister, detail, creer, modifier, activer, supprimer, journal }

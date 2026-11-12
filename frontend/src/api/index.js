@@ -64,6 +64,7 @@ export const listerUtilisateurs = (params) => api.get('/utilisateurs', { params 
 export const creerUtilisateur = (champs) => api.post('/utilisateurs', champs).then(donnees)
 export const modifierUtilisateur = (id, champs) => api.put(`/utilisateurs/${id}`, champs).then(donnees)
 export const activerUtilisateur = (id, actif) => api.patch(`/utilisateurs/${id}/activer`, { actif }).then(donnees)
+export const supprimerUtilisateur = (id) => api.delete(`/utilisateurs/${id}`).then(donnees)
 export const journal = (params) => api.get('/utilisateurs/journal', { params }).then(donnees)
 
 // ── Notifications

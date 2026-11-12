@@ -107,7 +107,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
       {detail && <p className="mt-1 text-xs text-encre-pale">{detail}</p>}
       <MiniCourbe valeurs={serie} couleur={t.trait} />
       {Icone && (
-        <span className={`absolute ${serie ? 'bottom-5' : 'top-5'} right-5 flex h-11 w-11 items-center justify-center rounded-xl ${t.icone}`}>
+        <span className={`absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-xl ${t.icone}`}>
           <Icone className="h-5 w-5" />
         </span>
       )}
@@ -165,9 +165,12 @@ export function Segments({ options, valeur, onChange, libelle }) {
 
 export function Modal({ ouvert, onFermer, titre, children, pied, large = false }) {
   const boite = useRef(null)
+  // dernière fonction de fermeture : l'effet ne se relance pas (et ne vole pas le focus) à chaque rendu du parent
+  const fermer = useRef(onFermer)
+  fermer.current = onFermer
   useEffect(() => {
     if (!ouvert) return undefined
-    const surTouche = (e) => e.key === 'Escape' && onFermer()
+    const surTouche = (e) => e.key === 'Escape' && fermer.current()
     document.addEventListener('keydown', surTouche)
     const precedent = document.activeElement
     boite.current?.querySelector('input, select, textarea, button')?.focus()
@@ -175,7 +178,7 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
       document.removeEventListener('keydown', surTouche)
       precedent?.focus?.()
     }
-  }, [ouvert, onFermer])
+  }, [ouvert])
 
   return createPortal(
     <AnimatePresence>
@@ -187,7 +190,7 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
             role="dialog"
             aria-modal="true"
             aria-label={titre}
-            className={`relative flex max-h-[92vh] w-full flex-col rounded-t-3xl bg-white shadow-flotte sm:rounded-3xl ${large ? 'sm:max-w-2xl' : 'sm:max-w-lg'}`}
+            className={`relative flex max-h-[92vh] w-full flex-col rounded-t-3xl bg-white shadow-flotte sm:rounded-3xl ${large === 'xl' ? 'sm:max-w-5xl' : large ? 'sm:max-w-2xl' : 'sm:max-w-lg'}`}
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}

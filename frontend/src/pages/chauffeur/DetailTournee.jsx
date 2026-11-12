@@ -1,27 +1,29 @@
-// Exécution d'une tournée par le chauffeur : itinéraire, arrêts numérotés, « Marquer collecté », fin de tournée
-import { Plaque } from '../../components/layout/Logo'
+// Détail de la tournée (version d'origine) : carte légendée et progression à gauche ;
+// statut, camion, zone, date et bouton « Terminer la tournée » à droite ; points à collecter avec « Marquer »
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Check, Navigation, Play, Flag } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Navigation, Play, Truck } from 'lucide-react'
 import { collecte as chargerCollecte, demarrerCollecte, marquerPoint, terminerCollecte } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Cadrer, Carte, Itineraire } from '../../components/map/Carte'
-import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
+import { StatutBadge } from '../../components/common/Badge'
 import { Champ, Chargement, Erreur, Modal, Spinner } from '../../components/common/ui'
-import { duree, jourHeure, kg, km } from '../../utils/format'
+import { kg, km } from '../../utils/format'
 
 // Lien vers l'application de navigation du téléphone
 const guidage = (s) => `https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}&travelmode=driving`
+const dateFr = (d) => (d ? new Date(d).toLocaleDateString('fr-FR') : '—')
 
 export default function DetailTournee() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const tournee = useDonnees(() => chargerCollecte(id), [id])
   const [occupe, setOccupe] = useState(null)
   const [fin, setFin] = useState(false)
   const [poids, setPoids] = useState('')
-  const [cible, setCible] = useState(null) // arrêt affiché sur la carte
+  const [cible, setCible] = useState(null) // arrêt centré sur la carte
   const c = tournee.donnees
 
   const prochain = useMemo(() => c?.signalements.find((s) => !s.collecte_fait) ?? null, [c])
@@ -50,132 +52,157 @@ export default function DetailTournee() {
   const faits = c.nb_faits
   const total = c.nb_points
   const tousFaits = faits === total
+  const enCours = c.statut === 'en_cours'
 
   return (
-    <div className="space-y-5">
-      <Link to="/chauffeur/tournees" className="btn-discret -ml-3">
-        <ArrowLeft className="h-4 w-4" /> Mes tournées
-      </Link>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="rounded-carte border border-trait/60 bg-white/40 p-4 sm:p-6">
+      <div className="mb-6 flex items-start gap-4">
+        <button type="button" onClick={() => navigate('/chauffeur/tournees')} className="btn-discret mt-1 min-h-0 p-2" aria-label="Retour à mes tournées">
+          <ArrowLeft className="h-5 w-5" />
+        </button>
         <div>
-          <div className="flex items-center gap-2">
-            <StatutBadge statut={c.statut} type="collecte" />
-            <Plaque numero={c.camion_immatriculation} />
+          <h1 className="text-[26px]">Détail de la tournée</h1>
+          <p className="text-encre-doux">Collecte du {dateFr(c.date_planifiee)}</p>
+        </div>
+      </div>
+
+      {c.notes && <p className="mb-4 rounded-xl bg-ambre-50 px-4 py-3 text-sm text-ambre-700">Consigne de l’agent : {c.notes}</p>}
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+        {/* Carte et progression */}
+        <div className="space-y-4">
+          <div className="carte relative p-5">
+            <Carte className="h-[340px] lg:h-[440px]" zoom={15}>
+              <Itineraire trace={c.itineraire?.trace} etapes={etapes} depart={c.itineraire?.depart} onEtape={setCible} />
+              <Cadrer points={cadre} max={17} />
+            </Carte>
+            <div className="absolute bottom-8 left-8 z-[500] rounded-xl bg-white px-4 py-3 text-sm shadow-carte">
+              <p className="font-semibold">Légende</p>
+              <p className="mt-1.5 flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-vert-500" /> ✓ Collecté
+              </p>
+              <p className="mt-1 flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full bg-encre-pale" /> Ordre de collecte
+              </p>
+            </div>
           </div>
-          <h1 className="mt-2 text-[26px] font-semibold sm:text-[30px]">{jourHeure(c.date_planifiee)}</h1>
-          <p className="text-encre-doux">
-            {c.zone_nom ?? 'Plusieurs zones'} · {km(c.distance_km)} · {duree(c.itineraire?.duree_estimee_min)} environ
-          </p>
-        </div>
-        {c.statut === 'planifiee' && (
-          <button type="button" className="btn-principal min-h-[52px] px-6 text-base" disabled={occupe === 'demarrer'} onClick={() => agir('demarrer', () => demarrerCollecte(c.id), 'Tournée démarrée. Bonne route !')}>
-            {occupe === 'demarrer' ? <Spinner className="h-5 w-5 text-white" /> : <Play className="h-5 w-5" />}
-            Démarrer la tournée
-          </button>
-        )}
-      </div>
 
-      {c.notes && <p className="rounded-xl bg-ambre-50 px-4 py-3 text-sm text-ambre-700">Consigne de l’agent : {c.notes}</p>}
-
-      {/* Progression X/N */}
-      <div className="carte p-4">
-        <div className="flex items-center justify-between text-sm">
-          <span>
-            <span className="block font-titre text-lg font-bold text-ardoise">Progression</span>
-            <span className="text-encre-doux">
-              {faits} / {total} points collectés
-            </span>
-          </span>
-          <span className="text-right">
-            <span className="block text-encre-doux">Distance estimée</span>
-            <span className="chiffre text-lg text-ardoise">{km(c.distance_km)}</span>
-          </span>
-        </div>
-        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-vert-100" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
-          <div className="h-full rounded-full bg-vert-500 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
-        </div>
-        {tousFaits && c.statut === 'en_cours' && (
-          <p className="mt-3 rounded-xl border border-vert-300 bg-vert-50 px-4 py-3 text-sm text-vert-700">Tous les points collectés ! Vous pouvez terminer la tournée.</p>
-        )}
-      </div>
-
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_400px]">
-        <div className="relative">
-          <Carte className="h-[340px] lg:h-[560px]" zoom={15}>
-            <Itineraire trace={c.itineraire?.trace} etapes={etapes} depart={c.itineraire?.depart} onEtape={setCible} />
-            <Cadrer points={cadre} max={17} />
-          </Carte>
-          {/* Légende */}
-          <div className="absolute bottom-3 left-3 z-[500] rounded-xl bg-white/95 px-4 py-3 text-sm shadow-carte">
-            <p className="font-semibold">Légende</p>
-            <p className="mt-1 flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-vert-500" /> ✓ Collecté
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-[#4B5563]" /> Ordre de collecte
-            </p>
-            <p className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-ambre" /> Prochain arrêt
-            </p>
+          <div className="carte p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-titre text-lg font-bold">Progression</p>
+                <p className="text-sm text-encre-doux">
+                  {faits} / {total} Points Collecté{faits > 1 ? 's' : ''}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-encre-doux">Distance estimée</p>
+                <p className="font-semibold">{km(c.distance_km)}</p>
+              </div>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-fond" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
+              <div className="h-full rounded-full bg-vert-500 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
+            </div>
+            {enCours && tousFaits && (
+              <p className="mt-4 rounded-xl border border-vert-300 bg-vert-50 px-4 py-3 text-sm text-vert-700">🎉 Tous les points collectés ! Vous pouvez terminer la tournée.</p>
+            )}
           </div>
         </div>
 
-        <section className="carte p-4 sm:p-5">
-          <h2 className="mb-3 text-lg font-semibold">Arrêts dans l’ordre</h2>
-          <ol className="space-y-2">
-            {c.signalements.map((s) => {
-              const actif = c.statut === 'en_cours' && s.id === prochain?.id
-              return (
-                <li key={s.id} className={`rounded-xl border p-3 transition ${actif ? 'border-ambre bg-ambre-50/60' : s.collecte_fait ? 'border-trait bg-vert-50/50' : 'border-trait'}`}>
-                  <div className="flex items-start gap-3">
-                    <button type="button" onClick={() => setCible(s)} className={`etape shrink-0 border-0 shadow-none ${s.collecte_fait ? 'bg-menthe text-ardoise' : actif ? 'bg-ambre text-ardoise' : 'bg-ardoise text-white'}`} aria-label={`Voir l’arrêt ${s.ordre} sur la carte`}>
-                      {s.collecte_fait ? <Check className="h-4 w-4" /> : s.ordre}
+        {/* Informations et points */}
+        <div className="space-y-4">
+          <div className="carte p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-encre-doux">Statut</p>
+                <div className="mt-1">
+                  <StatutBadge statut={c.statut} type="collecte" />
+                </div>
+              </div>
+              <Truck className="h-6 w-6 text-encre-pale" />
+            </div>
+            <dl className="mt-4 space-y-3">
+              <div>
+                <dt className="text-sm text-encre-doux">Camion</dt>
+                <dd className="font-semibold">{c.camion_immatriculation}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-encre-doux">Zone</dt>
+                <dd className="font-semibold">{c.zone_nom ?? 'Plusieurs zones'}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-encre-doux">Date planifiée</dt>
+                <dd className="font-semibold">{dateFr(c.date_planifiee)}</dd>
+              </div>
+            </dl>
+            <div className="mt-5 border-t border-trait pt-5">
+              {c.statut === 'planifiee' && (
+                <button type="button" className="btn-principal w-full" disabled={occupe === 'demarrer'} onClick={() => agir('demarrer', () => demarrerCollecte(c.id), 'Tournée démarrée. Bonne route !')}>
+                  {occupe === 'demarrer' ? <Spinner className="h-4 w-4 text-white" /> : <Play className="h-4 w-4" />} Démarrer la tournée
+                </button>
+              )}
+              {enCours && (
+                <>
+                  <button type="button" className="btn-principal" disabled={!tousFaits} onClick={() => setFin(true)}>
+                    <CheckCircle2 className="h-4 w-4" /> Terminer la tournée
+                  </button>
+                  {!tousFaits && <p className="mt-2 text-xs text-encre-doux">Terminez la tournée une fois tous les points collectés.</p>}
+                </>
+              )}
+              {c.statut === 'terminee' && (
+                <p className="text-sm text-vert-700">
+                  Tournée terminée : {faits}/{total} points{c.poids_collecte_kg != null && `, ${kg(c.poids_collecte_kg)} collectés`}.
+                </p>
+              )}
+              {c.statut === 'annulee' && <p className="text-sm text-encre-doux">Cette tournée a été annulée.</p>}
+            </div>
+          </div>
+
+          <div className="carte p-5">
+            <h2 className="text-xl">Points à collecter</h2>
+            <ol className="mt-4 max-h-[520px] space-y-3 overflow-y-auto pr-1">
+              {c.signalements.map((s) => (
+                <li key={s.id} className={`rounded-xl border p-3 ${enCours && s.id === prochain?.id ? 'border-ambre bg-ambre-50/40' : 'border-trait'}`}>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setCible(s)}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-vert-100 text-sm font-bold text-vert-700"
+                      aria-label={`Voir le point ${s.ordre} sur la carte`}
+                    >
+                      {s.ordre}
                     </button>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-sm font-medium ${s.collecte_fait ? 'text-encre-pale line-through' : ''}`}>{s.description ?? 'Dépôt signalé'}</p>
-                      {s.adresse && <p className="text-xs text-encre-pale">{s.adresse}</p>}
-                      <div className="mt-1.5">
-                        <UrgenceBadge urgence={s.urgence} compact />
-                      </div>
+                      <p className="font-medium">{s.description ?? s.adresse ?? 'Signalement'}</p>
+                      <p className="text-xs text-encre-pale">
+                        {s.latitude.toFixed(6)}, {s.longitude.toFixed(6)}
+                      </p>
+                      <p className="text-xs">
+                        Statut :{' '}
+                        <span className={s.collecte_fait ? 'font-semibold text-vert' : 'font-semibold text-ambre-700'}>{s.collecte_fait ? 'Collecté' : 'À collecter'}</span>
+                      </p>
                     </div>
-                    {s.photo_url && <img src={s.photo_url} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" loading="lazy" />}
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.collecte_fait ? 'bg-vert-100 text-vert-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {s.collecte_fait ? 'Collecté' : 'À collecter'}
+                      </span>
+                      {enCours && !s.collecte_fait && (
+                        <div className="flex gap-1.5">
+                          <a href={guidage(s)} target="_blank" rel="noreferrer" className="btn-discret min-h-[36px] px-2" title="Guidage GPS" aria-label={`Guidage vers le point ${s.ordre}`}>
+                            <Navigation className="h-4 w-4" />
+                          </a>
+                          <button type="button" className="btn-secondaire min-h-[36px] px-3" disabled={occupe === s.id} onClick={() => agir(s.id, () => marquerPoint(c.id, s.id), `Point ${s.ordre} collecté`)}>
+                            {occupe === s.id ? <Spinner className="h-4 w-4" /> : 'Marquer'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {c.statut === 'en_cours' && !s.collecte_fait && (
-                    <div className="mt-3 flex gap-2">
-                      <a href={guidage(s)} target="_blank" rel="noreferrer" className="btn-secondaire min-h-[44px] flex-1">
-                        <Navigation className="h-4 w-4" /> Guidage
-                      </a>
-                      <button
-                        type="button"
-                        className={`${actif ? 'btn-accent' : 'btn-secondaire'} min-h-[44px] flex-[1.4]`}
-                        disabled={occupe === s.id}
-                        onClick={() => agir(s.id, () => marquerPoint(c.id, s.id), `Arrêt ${s.ordre} collecté`)}
-                      >
-                        {occupe === s.id ? <Spinner className="h-4 w-4 text-current" /> : <Check className="h-4 w-4" />}
-                        Marquer collecté
-                      </button>
-                    </div>
-                  )}
                 </li>
-              )
-            })}
-          </ol>
-
-          {c.statut === 'en_cours' && (
-            <div className="mt-4 border-t border-trait pt-4">
-              <button type="button" className={`${tousFaits ? 'btn-principal' : 'btn-secondaire'} min-h-[50px] w-full text-base`} onClick={() => setFin(true)}>
-                <Flag className="h-5 w-5" /> Terminer la tournée
-              </button>
-              {!tousFaits && <p className="mt-2 text-center text-xs text-encre-pale">Les arrêts non collectés seront reproposés pour une prochaine tournée.</p>}
-            </div>
-          )}
-          {c.statut === 'terminee' && (
-            <p className="mt-4 rounded-xl bg-vert-50 px-4 py-3 text-sm text-ardoise">
-              Tournée terminée : {faits}/{total} arrêts{c.poids_collecte_kg != null && `, ${kg(c.poids_collecte_kg)} collectés`}.
-            </p>
-          )}
-        </section>
+              ))}
+            </ol>
+          </div>
+        </div>
       </div>
 
       <Modal
@@ -185,7 +212,7 @@ export default function DetailTournee() {
         pied={
           <>
             <button type="button" className="btn-secondaire" onClick={() => setFin(false)}>
-              Continuer la tournée
+              Annuler
             </button>
             <button
               type="button"
@@ -202,9 +229,7 @@ export default function DetailTournee() {
           </>
         }
       >
-        <p className="text-encre-doux">
-          {tousFaits ? 'Tous les arrêts sont collectés.' : `${total - faits} arrêt(s) non collecté(s) : ils seront reproposés aux agents.`} Le camion redeviendra disponible.
-        </p>
+        <p className="text-encre-doux">Tous les points sont collectés. Le camion redeviendra disponible.</p>
         <Champ libelle="Poids collecté (kg)" aide="Facultatif : relevé à la pesée" className="mt-4">
           {(idChamp) => <input id={idChamp} type="number" min="0" inputMode="numeric" className="champ" value={poids} onChange={(e) => setPoids(e.target.value)} />}
         </Champ>

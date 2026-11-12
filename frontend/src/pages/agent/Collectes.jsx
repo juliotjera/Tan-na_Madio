@@ -1,9 +1,9 @@
-// Collectes : toutes les tournées, leur avancement, et l'annulation d'une tournée pas encore partie
-import { Plaque } from '../../components/layout/Logo'
+// Gestion des collectes (version d'origine) : filtres par statut, liste « Collecte du … » avec camion et distance,
+// boutons Annuler (tournée pas encore partie) et Détails
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { ListChecks, Route } from 'lucide-react'
+import { ListChecks, Route, Ruler, Truck } from 'lucide-react'
 import { annulerCollecte, collecte as chargerCollecte, listerCollectes } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useDonnees } from '../../hooks/useDonnees'
@@ -11,15 +11,18 @@ import BoutonExport from '../../components/common/BoutonExport'
 import { Cadrer, Carte, Itineraire } from '../../components/map/Carte'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, Confirmation, EnTete, Erreur, Modal, Pagination, Segments, Vide } from '../../components/common/ui'
-import { dateHeure, duree, jourHeure, kg, km } from '../../utils/format'
+import { duree, kg } from '../../utils/format'
 
 const FILTRES = [
   { valeur: '', libelle: 'Toutes' },
-  { valeur: 'planifiee', libelle: 'Planifiées' },
+  { valeur: 'planifiee', libelle: 'Planifiée' },
   { valeur: 'en_cours', libelle: 'En cours' },
-  { valeur: 'terminee', libelle: 'Terminées' },
-  { valeur: 'annulee', libelle: 'Annulées' },
+  { valeur: 'terminee', libelle: 'Terminée' },
+  { valeur: 'annulee', libelle: 'Annulée' },
 ]
+
+const dateFr = (d) => new Date(d).toLocaleDateString('fr-FR')
+const distance = (v) => `${Number(v ?? 0).toFixed(2)} km`
 
 export function Avancement({ faits, total }) {
   const part = total ? faits / total : 0
@@ -40,7 +43,7 @@ export default function Collectes() {
   const [statut, setStatut] = useState('')
   const [page, setPage] = useState(1)
   const [ouverte, setOuverte] = useState(lieu.state?.ouverte ?? null)
-  const [aAnnuler, setAAnnuler] = useState(false)
+  const [aAnnuler, setAAnnuler] = useState(null) // id de la tournée à annuler
   const [annulation, setAnnulation] = useState(false)
   const liste = useDonnees(() => listerCollectes({ statut: statut || undefined, page, limit: 15 }), [statut, page], { intervalle: 30000 })
   const detail = useDonnees(() => (ouverte ? chargerCollecte(ouverte) : null), [ouverte])
@@ -49,9 +52,9 @@ export default function Collectes() {
   const annuler = async () => {
     setAnnulation(true)
     try {
-      await annulerCollecte(c.id)
+      await annulerCollecte(aAnnuler)
       toast.success('Tournée annulée : les signalements sont de nouveau à planifier')
-      setAAnnuler(false)
+      setAAnnuler(null)
       detail.recharger({ silencieux: true })
       liste.recharger({ silencieux: true })
     } catch (err) {
@@ -64,8 +67,8 @@ export default function Collectes() {
   return (
     <div>
       <EnTete
-        titre="Collectes"
-        texte="Les tournées planifiées, en cours et passées."
+        titre="Gestion des Collectes"
+        texte="Planifiez et suivez les collectes"
         actions={
           <>
             <BoutonExport ressource="collectes" params={{ statut: statut || undefined }} />
@@ -95,53 +98,48 @@ export default function Collectes() {
       )}
 
       {liste.donnees?.collectes.length > 0 && (
-        <div className="carte overflow-x-auto">
-          <table className="tableau min-w-[720px]">
-            <thead>
-              <tr>
-                <th>Départ</th>
-                <th>Camion</th>
-                <th>Zone</th>
-                <th>Avancement</th>
-                <th>Distance</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {liste.donnees.collectes.map((x) => (
-                <tr key={x.id} className="cursor-pointer" onClick={() => setOuverte(x.id)}>
-                  <td className="font-medium">
-                    <button type="button" className="text-left hover:underline" onClick={() => setOuverte(x.id)}>
-                      {jourHeure(x.date_planifiee)}
-                    </button>
-                  </td>
-                  <td>
-                    <Plaque numero={x.camion_immatriculation} />
-                  </td>
-                  <td>{x.zone_nom ?? 'Toute la ville'}</td>
-                  <td>
-                    <Avancement faits={x.nb_faits} total={x.nb_points} />
-                  </td>
-                  <td className="tabular-nums">{km(x.distance_km)}</td>
-                  <td>
-                    <StatutBadge statut={x.statut} type="collecte" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ul className="carte divide-y divide-trait">
+          {liste.donnees.collectes.map((x) => (
+            <li key={x.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="flex flex-wrap items-center gap-2 font-semibold text-ardoise">
+                  Collecte du {dateFr(x.date_planifiee)} <StatutBadge statut={x.statut} type="collecte" />
+                </p>
+                <p className="mt-1 flex items-center gap-2 text-sm text-encre-doux">
+                  <Truck className="h-4 w-4" /> {x.camion_immatriculation ?? 'Camion non assigné'}
+                  {x.zone_nom && <span className="text-encre-pale">· {x.zone_nom}</span>}
+                </p>
+                <p className="mt-0.5 flex items-center gap-2 text-sm text-encre-doux">
+                  <Ruler className="h-4 w-4" /> Distance : {distance(x.distance_km)}
+                </p>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <span className="text-sm text-encre-doux">
+                  {x.nb_faits}/{x.nb_points} signalements
+                </span>
+                {x.statut === 'planifiee' && (
+                  <button type="button" className="btn min-h-[38px] bg-alerte text-white hover:bg-red-700" onClick={() => setAAnnuler(x.id)}>
+                    Annuler
+                  </button>
+                )}
+                <button type="button" className="btn-secondaire min-h-[38px]" onClick={() => setOuverte(x.id)}>
+                  Détails
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
       {liste.donnees && <Pagination page={page} total={liste.donnees.total} limit={15} onChange={setPage} />}
 
       <Modal
         ouvert={Boolean(ouverte)}
         onFermer={() => setOuverte(null)}
-        titre={c ? `Tournée du ${dateHeure(c.date_planifiee)}` : 'Tournée'}
+        titre="Détails de la collecte"
         large
         pied={
           c?.statut === 'planifiee' && (
-            <button type="button" className="btn-danger" onClick={() => setAAnnuler(true)}>
+            <button type="button" className="btn-danger" onClick={() => setAAnnuler(c.id)}>
               Annuler la tournée
             </button>
           )
@@ -150,19 +148,29 @@ export default function Collectes() {
         {detail.chargement && <Chargement />}
         {c && (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatutBadge statut={c.statut} type="collecte" />
-              <span className="text-sm text-encre-doux">
-                {c.camion_immatriculation} · {c.zone_nom ?? 'Toute la ville'} · planifiée par {c.agent_nom}
-              </span>
-            </div>
+            <dl className="grid gap-4 sm:grid-cols-2">
+              {[
+                ['Date', dateFr(c.date_planifiee)],
+                ['Camion', c.camion_immatriculation ?? 'Non assigné'],
+                ['Zone', c.zone_nom ?? 'Non définie'],
+                ['Statut', <StatutBadge key="s" statut={c.statut} type="collecte" />],
+                ['Signalements traités', c.nb_faits],
+                ['Distance', distance(c.distance_km)],
+              ].map(([k, v]) => (
+                <div key={k}>
+                  <dt className="text-sm text-encre-doux">{k}</dt>
+                  <dd className="mt-0.5 text-lg text-ardoise">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="text-sm text-encre-doux">Planifiée par {c.agent_nom}</p>
             <Carte className="h-[300px]">
               <Itineraire trace={c.itineraire?.trace} etapes={c.signalements} depart={c.itineraire?.depart} anime={false} />
               <Cadrer points={c.itineraire?.trace?.length ? c.itineraire.trace : c.signalements.map((s) => [s.latitude, s.longitude])} />
             </Carte>
             <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
               {[
-                ['Distance', km(c.distance_km)],
+                ['Points', `${c.nb_points}`],
                 ['Durée estimée', duree(c.itineraire?.duree_estimee_min)],
                 ['Gain', c.itineraire?.gain_pourcent != null ? `−${Math.round(c.itineraire.gain_pourcent)} %` : '—'],
                 ['Collecté', c.poids_collecte_kg != null ? kg(c.poids_collecte_kg) : `${c.nb_faits}/${c.nb_points} points`],
@@ -188,8 +196,8 @@ export default function Collectes() {
       </Modal>
 
       <Confirmation
-        ouvert={aAnnuler}
-        onFermer={() => setAAnnuler(false)}
+        ouvert={Boolean(aAnnuler)}
+        onFermer={() => setAAnnuler(null)}
         onConfirmer={annuler}
         enCours={annulation}
         danger

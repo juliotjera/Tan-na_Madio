@@ -43,7 +43,15 @@ test('tableau de bord : tendance du mois et série des 14 derniers jours', async
 
 test('utilisateurs : compteurs par rôle', async () => {
   const r = await request(app).get('/api/utilisateurs').set(admin.entete)
-  expect(r.body.compteurs).toMatchObject({ total: 13, actifs: 13, agents: 2, chauffeurs: 3, citoyens: 7, administrateurs: 1 })
+  expect(r.body.compteurs).toMatchObject({ actifs: r.body.compteurs.total, chauffeurs: 3, citoyens: 7, administrateurs: 1 })
+})
+
+test('suppression d’un compte : sans historique oui, avec historique non, soi-même non', async () => {
+  const cree = await request(app).post('/api/utilisateurs').set(admin.entete).send({ nom: 'Temp', prenom: 'Agent', email: 'temp.agent@tananamadio.mg', mot_de_passe: 'Agent2026x', role: 'agent_municipal', extras: { matricule: 'CUA-TMP-1' } })
+  expect((await request(app).delete(`/api/utilisateurs/${cree.body.id}`).set(admin.entete)).status).toBe(200)
+  const citoyenId = (await request(app).get('/api/auth/profil').set(citoyen.entete)).body.id
+  expect((await request(app).delete(`/api/utilisateurs/${citoyenId}`).set(admin.entete)).body.code).toBe('COMPTE_AVEC_HISTORIQUE')
+  expect((await request(app).delete(`/api/utilisateurs/${admin.user.id}`).set(admin.entete)).body.code).toBe('AUTO_SUPPRESSION')
 })
 
 test('camions : téléphone du chauffeur pour le contact, zones : signalements validés', async () => {

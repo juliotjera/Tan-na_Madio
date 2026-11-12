@@ -1,15 +1,23 @@
-// Gestion des comptes : recherche, filtre par rôle, création du personnel, activation
+// Gestion des utilisateurs (version d'origine) : compteurs, tableau Nom / Email / Rôle / Statut / Actions
+// (activer ou désactiver, modifier, supprimer), création du personnel
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Search, UserPlus } from 'lucide-react'
-import { activerUtilisateur, creerUtilisateur, listerCamions, listerUtilisateurs, listerZones } from '../../api'
+import { Pencil, Plus, Search, Shield, ShieldOff, Trash2 } from 'lucide-react'
+import { activerUtilisateur, creerUtilisateur, listerCamions, listerUtilisateurs, listerZones, modifierUtilisateur, supprimerUtilisateur } from '../../api'
 import { messageErreur } from '../../api/axiosConfig'
 import { useAuth } from '../../hooks/useAuth'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Champ, Chargement, Compteur, EnTete, Erreur, Modal, Pagination, Segments, Spinner } from '../../components/common/ui'
-import { dateCourte, ROLES } from '../../utils/format'
+import { ROLES } from '../../utils/format'
 
 const FILTRES = [{ valeur: '', libelle: 'Tous' }, ...Object.entries(ROLES).map(([valeur, libelle]) => ({ valeur, libelle: `${libelle}s` }))]
+// couleur de la puce de rôle, comme dans la version d'origine
+const PUCE_ROLE = {
+  administrateur: 'bg-red-50 text-red-700',
+  citoyen: 'bg-vert-50 text-vert-700',
+  agent_municipal: 'bg-sky-50 text-sky-700',
+  chauffeur: 'bg-violet-50 text-violet-700',
+}
 const VIDE = { prenom: '', nom: '', email: '', telephone: '', role: 'agent_municipal', mot_de_passe: '', matricule: '', zone_id: '', numero_permis: '', camion_id: '' }
 
 function FormulaireCompte({ ouvert, onFermer, onCree }) {
@@ -126,6 +134,80 @@ function FormulaireCompte({ ouvert, onFermer, onCree }) {
   )
 }
 
+function FormulaireModification({ compte, onFermer, onModifie }) {
+  const [f, setF] = useState({ prenom: '', nom: '', telephone: '', zone_id: '' })
+  const [envoi, setEnvoi] = useState(false)
+  const zones = useDonnees(() => (compte?.role === 'agent_municipal' ? listerZones() : []), [compte?.id])
+  useEffect(() => {
+    if (compte) setF({ prenom: compte.prenom, nom: compte.nom, telephone: compte.telephone ?? '', zone_id: compte.zone_id ?? '' })
+  }, [compte])
+  const maj = (cle) => (e) => setF({ ...f, [cle]: e.target.value })
+
+  const soumettre = async (e) => {
+    e.preventDefault()
+    setEnvoi(true)
+    try {
+      const champs = { prenom: f.prenom.trim(), nom: f.nom.trim(), telephone: f.telephone.trim() || null }
+      if (compte.role === 'agent_municipal') champs.zone_id = f.zone_id || null
+      await modifierUtilisateur(compte.id, champs)
+      toast.success('Compte modifié')
+      onModifie()
+    } catch (err) {
+      toast.error(messageErreur(err))
+    } finally {
+      setEnvoi(false)
+    }
+  }
+
+  return (
+    <Modal
+      ouvert={Boolean(compte)}
+      onFermer={onFermer}
+      titre="Modifier l’utilisateur"
+      pied={
+        <>
+          <button type="button" className="btn-secondaire" onClick={onFermer}>
+            Annuler
+          </button>
+          <button type="submit" form="modifier-compte" className="btn-principal" disabled={envoi}>
+            {envoi && <Spinner className="h-4 w-4 text-white" />}
+            Enregistrer
+          </button>
+        </>
+      }
+    >
+      {compte && (
+        <form id="modifier-compte" onSubmit={soumettre} className="space-y-4">
+          <p className="text-sm text-encre-doux">
+            {compte.email} · {ROLES[compte.role]}
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Champ libelle="Prénom">{(id) => <input id={id} className="champ" value={f.prenom} onChange={maj('prenom')} required />}</Champ>
+            <Champ libelle="Nom">{(id) => <input id={id} className="champ" value={f.nom} onChange={maj('nom')} required />}</Champ>
+          </div>
+          <Champ libelle="Téléphone" aide="Facultatif">
+            {(id) => <input id={id} type="tel" className="champ" value={f.telephone} onChange={maj('telephone')} />}
+          </Champ>
+          {compte.role === 'agent_municipal' && (
+            <Champ libelle="Zone">
+              {(id) => (
+                <select id={id} className="champ" value={f.zone_id} onChange={maj('zone_id')}>
+                  <option value="">Aucune</option>
+                  {zones.donnees?.map((z) => (
+                    <option key={z.id} value={z.id}>
+                      {z.nom}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </Champ>
+          )}
+        </form>
+      )}
+    </Modal>
+  )
+}
+
 export default function Utilisateurs() {
   const { user: moi } = useAuth()
   const [role, setRole] = useState('')
@@ -134,6 +216,9 @@ export default function Utilisateurs() {
   const [page, setPage] = useState(1)
   const [creation, setCreation] = useState(false)
   const [bascule, setBascule] = useState(null)
+  const [edition, setEdition] = useState(null)
+  const [suppression, setSuppression] = useState(null)
+  const [suppr, setSuppr] = useState(false)
   const liste = useDonnees(() => listerUtilisateurs({ role: role || undefined, q: recherche || undefined, page, limit: 15 }), [role, recherche, page])
 
   // recherche lancée après une courte pause de frappe
@@ -158,14 +243,28 @@ export default function Utilisateurs() {
     }
   }
 
+  const supprimer = async () => {
+    setSuppr(true)
+    try {
+      await supprimerUtilisateur(suppression.id)
+      toast.success(`Compte de ${suppression.prenom} ${suppression.nom} supprimé`)
+      setSuppression(null)
+      liste.recharger({ silencieux: true })
+    } catch (err) {
+      toast.error(messageErreur(err))
+    } finally {
+      setSuppr(false)
+    }
+  }
+
   return (
     <div>
       <EnTete
-        titre="Utilisateurs"
-        texte="Les citoyens s’inscrivent eux-mêmes ; les agents, chauffeurs et administrateurs sont créés ici."
+        titre="Gestion des Utilisateurs"
+        texte="Gérez les comptes et les accès"
         actions={
           <button type="button" className="btn-principal" onClick={() => setCreation(true)}>
-            <UserPlus className="h-4 w-4" /> Nouveau compte
+            <Plus className="h-4 w-4" /> Ajouter un utilisateur
           </button>
         }
       />
@@ -204,10 +303,10 @@ export default function Utilisateurs() {
             <thead>
               <tr>
                 <th>Nom</th>
+                <th>Email</th>
                 <th>Rôle</th>
-                <th>Détail</th>
-                <th>Inscrit le</th>
-                <th className="text-right">Accès</th>
+                <th>Statut</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -218,45 +317,99 @@ export default function Utilisateurs() {
                   </td>
                 </tr>
               )}
-              {liste.donnees.utilisateurs.map((u) => (
-                <tr key={u.id} className={u.actif ? '' : 'opacity-60'}>
-                  <td>
-                    <p className="font-medium">
-                      {u.prenom} {u.nom}
-                    </p>
-                    <p className="text-xs text-encre-pale">{u.email}</p>
-                  </td>
-                  <td>{ROLES[u.role]}</td>
-                  <td className="text-encre-doux">
-                    {u.role === 'citoyen' && `${u.points_eco ?? 0} points éco`}
-                    {u.role === 'agent_municipal' && u.matricule}
-                    {u.role === 'chauffeur' && `Permis ${u.numero_permis}`}
-                  </td>
-                  <td className="text-encre-doux">{dateCourte(u.created_at)}</td>
-                  <td className="text-right">
-                    {u.id === moi.id ? (
-                      <span className="text-xs text-encre-pale">Vous</span>
-                    ) : (
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={u.actif}
-                        aria-label={`${u.actif ? 'Désactiver' : 'Activer'} le compte de ${u.prenom} ${u.nom}`}
-                        disabled={bascule === u.id}
-                        onClick={() => activer(u)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${u.actif ? 'bg-vert-500' : 'bg-slate-300'}`}
-                      >
-                        <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${u.actif ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {liste.donnees.utilisateurs.map((u) => {
+                const soiMeme = u.id === moi.id
+                const nomComplet = `${u.prenom} ${u.nom}`
+                return (
+                  <tr key={u.id}>
+                    <td className="font-medium">
+                      {nomComplet}
+                      {soiMeme && <span className="ml-2 text-xs font-normal text-encre-pale">(vous)</span>}
+                    </td>
+                    <td className="text-encre-doux">{u.email}</td>
+                    <td>
+                      <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${PUCE_ROLE[u.role]}`}>{ROLES[u.role]}</span>
+                    </td>
+                    <td>
+                      <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${u.actif ? 'bg-vert-50 text-vert-700' : 'bg-slate-100 text-slate-500'}`}>{u.actif ? 'Actif' : 'Inactif'}</span>
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          className="rounded-lg p-1.5 text-encre-doux transition hover:bg-fond hover:text-encre disabled:opacity-40"
+                          disabled={soiMeme || bascule === u.id}
+                          onClick={() => activer(u)}
+                          title={u.actif ? 'Désactiver le compte' : 'Activer le compte'}
+                          aria-label={`${u.actif ? 'Désactiver' : 'Activer'} le compte de ${nomComplet}`}
+                        >
+                          {bascule === u.id ? <Spinner className="h-4 w-4" /> : u.actif ? <Shield className="h-4 w-4" /> : <ShieldOff className="h-4 w-4" />}
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded-lg p-1.5 text-encre-doux transition hover:bg-fond hover:text-encre"
+                          onClick={() => setEdition(u)}
+                          title="Modifier"
+                          aria-label={`Modifier le compte de ${nomComplet}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded-lg p-1.5 text-alerte transition hover:bg-red-50 disabled:opacity-40"
+                          disabled={soiMeme}
+                          onClick={() => setSuppression(u)}
+                          title="Supprimer"
+                          aria-label={`Supprimer le compte de ${nomComplet}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
       )}
       {liste.donnees && <Pagination page={page} total={liste.donnees.total} limit={15} onChange={setPage} />}
+
+      <FormulaireModification
+        compte={edition}
+        onFermer={() => setEdition(null)}
+        onModifie={() => {
+          setEdition(null)
+          liste.recharger({ silencieux: true })
+        }}
+      />
+
+      <Modal
+        ouvert={Boolean(suppression)}
+        onFermer={() => setSuppression(null)}
+        titre="Supprimer l’utilisateur"
+        pied={
+          <>
+            <button type="button" className="btn-secondaire" onClick={() => setSuppression(null)}>
+              Annuler
+            </button>
+            <button type="button" className="btn-principal bg-alerte hover:bg-red-700" disabled={suppr} onClick={supprimer}>
+              {suppr && <Spinner className="h-4 w-4 text-white" />}
+              Supprimer
+            </button>
+          </>
+        }
+      >
+        {suppression && (
+          <p className="text-encre-doux">
+            Supprimer définitivement le compte de{' '}
+            <strong className="text-encre">
+              {suppression.prenom} {suppression.nom}
+            </strong>{' '}
+            ? Un compte qui a déjà des signalements ou des tournées ne peut pas être supprimé : désactivez-le plutôt.
+          </p>
+        )}
+      </Modal>
 
       <FormulaireCompte
         ouvert={creation}
