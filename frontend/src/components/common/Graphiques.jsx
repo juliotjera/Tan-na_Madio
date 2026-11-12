@@ -33,7 +33,7 @@ export function CourbeEvolution({ series, hauteur = 280, couleur = '#10B981' }) 
         <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={false} minTickGap={28} />
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip {...infobulle} />
-        <Area type="monotone" dataKey="signalements" name="Signalements" stroke={couleur} strokeWidth={2.25} fill="url(#degrade-evolution)" activeDot={{ r: 5 }} />
+        <Area type="linear" dataKey="signalements" name="Signalements" stroke={couleur} strokeWidth={2.25} fill="url(#degrade-evolution)" dot={false} activeDot={{ r: 5 }} />
       </AreaChart>
     </ResponsiveContainer>
   )

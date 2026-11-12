@@ -33,7 +33,7 @@ function Pastilles({ options, valeur, onChange, libelle }) {
           role="radio"
           aria-checked={valeur === v}
           onClick={() => onChange(v)}
-          className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${valeur === v ? 'bg-vert-500 text-white' : 'bg-fond text-encre-doux hover:bg-vert-50 hover:text-vert'}`}
+          className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${valeur === v ? 'bg-vert text-white' : 'bg-fond text-encre-doux hover:bg-vert-50 hover:text-vert'}`}
         >
           {t(l)}
         </button>

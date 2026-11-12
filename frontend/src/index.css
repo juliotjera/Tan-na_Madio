@@ -42,13 +42,13 @@
       disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-principal {
-    @apply btn bg-vert-500 text-white shadow-sm shadow-vert-500/20 hover:bg-vert active:scale-[0.98];
+    @apply btn bg-vert text-white shadow-sm shadow-vert/20 hover:bg-vert-700 active:scale-[0.98];
   }
   .btn-accent {
     @apply btn bg-vert text-white hover:bg-vert-700 active:scale-[0.98];
   }
   .btn-secondaire {
-    @apply btn border-[1.5px] border-vert-500 bg-white text-vert hover:bg-vert-50;
+    @apply btn border-[1.5px] border-vert bg-white text-vert hover:bg-vert-50;
   }
   .btn-discret {
     @apply btn text-encre-doux hover:bg-vert-50 hover:text-vert;

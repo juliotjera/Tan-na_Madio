@@ -1,7 +1,7 @@
 // Tableau de bord du chauffeur (version d'origine) : bandeau d'accueil, 4 compteurs,
 // tournée du jour, dernières tournées effectuées
 import { Link } from 'react-router-dom'
-import { ArrowRight, CalendarDays, CheckCircle2, Hand, MapPin, Route, Truck } from 'lucide-react'
+import { ArrowRight, CalendarDays, CheckCircle2, MapPin, Route, Truck } from 'lucide-react'
 import { isSameDay, isSameMonth } from 'date-fns'
 import { listerCollectes, profil } from '../../api'
 import { useAuth } from '../../hooks/useAuth'
@@ -40,11 +40,11 @@ export default function ChauffeurDashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-carte bg-gradient-to-r from-vert-500 to-vert p-6 text-white shadow-sm sm:p-7">
-        <p className="flex items-center gap-2 text-sm text-white/85">
-          {t('Bonjour')}, {user.prenom} {user.nom} <Hand className="h-4 w-4 text-ambre-100" />
-        </p>
-        <p className="mt-1 font-titre text-[28px] font-bold">{t('Chauffeur')}</p>
+      <section className="rounded-carte bg-gradient-to-r from-vert to-vert-700 p-6 text-white shadow-flotte sm:p-7">
+        <p className="text-sm text-white/85">{t('Chauffeur')}</p>
+        <h1 className="mt-1 text-[28px] text-white">
+          {t('Bonjour')} {user.prenom}
+        </h1>
         {moi.donnees?.camion_immatriculation && (
           <p className="mt-1 text-sm text-white/85">
             {t('Votre camion')} : <span className="font-semibold text-white">{moi.donnees.camion_immatriculation}</span>

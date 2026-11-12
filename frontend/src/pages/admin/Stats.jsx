@@ -79,7 +79,7 @@ export default function Stats() {
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="carte p-6">
           <h2 className="text-xl">Évolution des signalements</h2>
-          <div className="mt-4 rounded-xl bg-fond/60 p-3">{periode.donnees ? <CourbeEvolution series={periode.donnees.series} hauteur={260} /> : <Chargement lignes={1} />}</div>
+          <div className="mt-4">{periode.donnees ? <CourbeEvolution series={periode.donnees.series} hauteur={260} /> : <Chargement lignes={1} />}</div>
         </section>
         <section className="carte p-6">
           <h2 className="text-xl">Répartition par zone</h2>

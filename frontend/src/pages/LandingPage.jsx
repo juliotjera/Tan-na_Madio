@@ -162,10 +162,10 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            <span className="absolute -right-3 top-6 flex animate-flotter items-center gap-1.5 rounded-full bg-vert-500 px-4 py-2 text-sm font-semibold text-white shadow-lg">
+            <span className="absolute -right-3 top-6 flex animate-flotter items-center gap-1.5 rounded-full bg-vert px-4 py-2 text-sm font-semibold text-white shadow-lg">
               <span className="h-2 w-2 animate-clignoter rounded-full bg-white" /> {t('En direct')}
             </span>
-            <span className="absolute -left-3 bottom-10 animate-flotter-lent rounded-full bg-blue-500 px-4 py-2 text-sm font-semibold text-white shadow-lg">
+            <span className="absolute -left-3 bottom-10 animate-flotter-lent rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg">
               {donnees ? `${donnees.zones} ${t('zones')}` : t('zones')}
             </span>
           </div>

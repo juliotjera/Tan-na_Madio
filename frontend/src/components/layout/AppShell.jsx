@@ -330,7 +330,7 @@ export default function AppShell() {
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${l.principal ? 'bg-vert-500 text-white' : isActive ? 'bg-vert-50' : ''}`}>
+                      <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${l.principal ? 'bg-vert text-white' : isActive ? 'bg-vert-50' : ''}`}>
                         <Icone className="h-5 w-5" />
                       </span>
                       <span className="max-w-full truncate">{t(l.libelle)}</span>

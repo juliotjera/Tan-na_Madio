@@ -153,7 +153,7 @@ export function Segments({ options, valeur, onChange, libelle }) {
           aria-checked={valeur === o.valeur}
           onClick={() => onChange(o.valeur)}
           className={`shrink-0 whitespace-nowrap rounded-lg border-[1.5px] px-3.5 py-1.5 text-sm font-semibold transition ${
-            valeur === o.valeur ? 'border-vert-500 bg-vert-500 text-white shadow-sm' : 'border-vert-300 bg-white text-vert hover:bg-vert-50'
+            valeur === o.valeur ? 'border-vert bg-vert text-white shadow-sm' : 'border-vert-300 bg-white text-vert hover:bg-vert-50'
           }`}
         >
           {o.libelle}
