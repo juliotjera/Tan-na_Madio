@@ -40,6 +40,10 @@ module.exports = {
     dossier: process.env.UPLOAD_DIR || require('path').join(__dirname, '../../uploads'),
     maxMo: Number(process.env.UPLOAD_MAX_MB) || 5,
   },
+  // Photos : « base » (table photos de PostgreSQL) en production sur un vrai serveur, sinon « disque »
+  photos: {
+    stockage: process.env.PHOTOS_STOCKAGE || (production && mode === 'postgres' ? 'base' : 'disque'),
+  },
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').map((o) => o.trim()),
   algorithmes: {
     rayonRechercheM: Number(process.env.RAYON_RECHERCHE_M) || 500,

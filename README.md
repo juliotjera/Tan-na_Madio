@@ -23,7 +23,7 @@ Pour tous : interface **en français ou en malagasy**, barre latérale repliable
 
 Le cœur du projet est dans [`backend/src/algorithms`](backend/src/algorithms) et [`backend/src/services`](backend/src/services) :
 
-1. **Réseau routier** : un graphe pondéré orienté (tables `noeuds_graphe` / `aretes_graphe`, rues à sens unique comprises).
+1. **Réseau routier** : un graphe pondéré orienté (tables `noeuds_graphe` / `aretes_graphe`) construit à partir des **vraies rues d’Antananarivo** (OpenStreetMap, script [`importerOsm.js`](backend/scripts/importerOsm.js)) : rues praticables par un camion, découpées aux carrefours, sens uniques respectés, forme de chaque rue gardée pour que le tracé affiché suive les courbes.
 2. **Dijkstra avec tas binaire** (`dijkstra.js`, O((V + E) log V)) : depuis chaque point de la tournée, distance la plus courte par les rues vers tous les autres → matrice des distances réelles et tracés.
 3. **Ordre de visite** (`glouton.js`) : plus proche voisin (glouton), puis amélioration **2-opt** ; le résultat n’est jamais plus long que l’ordre de sélection, et le **gain** est mesuré et affiché.
 4. **Sélection par capacité** (glouton) : les signalements les plus urgents d’abord (à urgence égale, les plus confirmés par les habitants), sans dépasser la charge du camion.
@@ -34,6 +34,7 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 ## Technologies
 
 - **Backend** : Node.js, Express 4, PostgreSQL + **PostGIS** (géométries, trigger d’affectation de zone, vues), JWT (accès 15 min + renouvellement 7 j), bcrypt, Multer, Helmet, limitation de débit.
+- **Photos** : sur le disque en développement, dans PostgreSQL en production (`PHOTOS_STOCKAGE=base`) pour survivre aux redémarrages d’un hébergement gratuit.
 - **Base de développement** : **PGlite** (PostgreSQL 18 + PostGIS 3.6 compilés en WebAssembly) : le projet démarre **sans installer PostgreSQL**. En production, la même base SQL tourne sur un vrai serveur PostgreSQL/PostGIS.
 - **Frontend** : React 18, Vite 5, Tailwind CSS 3, Leaflet / React-Leaflet (fond OpenStreetMap), Recharts, Axios, React Router 6, Framer Motion.
 - **Identité visuelle** : vert émeraude (#10B981), fond menthe, cartes blanches, police Inter avec taille optique (coupe « Display » pour les grands titres), logo rond à épingle ; accueil sur une carte sombre animée d’Antananarivo, parcours « du signalement au ramassage » et vues de la ville en photo ; le rouge est réservé à l’urgence critique. Photos libres de droits (Unsplash), détaillées dans [`CREDITS.md`](CREDITS.md) ; les signalements de démonstration ont aussi leurs photos.
@@ -62,7 +63,7 @@ Comptes de démonstration (mot de passe `Admin2025!`, à changer hors démonstra
 | Chauffeur | chauffeur@tananamadio.mg (camion 123DT, tournée prévue demain) |
 | Administrateur | admin@tananamadio.mg |
 
-Les données de démonstration comprennent 5 zones (Analakely, Isotry, Ampefiloha, Ambohipo, Andravoahangy), un réseau routier de 239 carrefours, 3 camions, 13 comptes, 36 signalements et un historique de tournées.
+Les données de démonstration comprennent 5 zones (Analakely, Isotry, Ampefiloha, Ambohipo, Andravoahangy), le **réseau routier réel du centre d’Antananarivo** (1 761 carrefours, 2 141 tronçons importés d’OpenStreetMap, sens uniques compris), 3 camions, 13 comptes, 36 signalements et un historique de tournées.
 
 ### Avec un vrai PostgreSQL + PostGIS
 

@@ -18,5 +18,7 @@ services:
         generateValue: true
       - key: JWT_REFRESH_SECRET
         generateValue: true
+      - key: PHOTOS_STOCKAGE
+        value: base
       - key: CORS_ORIGINS
         value: https://tanana-madio.onrender.com

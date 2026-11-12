@@ -1,10 +1,7 @@
 // Signalements : déclaration par les citoyens, validation par les agents
-const fs = require('fs')
-const path = require('path')
-const config = require('../config/env')
 const db = require('../config/db')
 const { Signalement, User, Notification, journaliser } = require('../models')
-const { urlPhoto } = require('../middleware/upload')
+const stockagePhotos = require('../services/stockagePhotos')
 const { ErreurApi, asyncHandler, pagination, POINTS_ECO } = require('../utils/helpers')
 const { latitudeValide, longitudeValide } = require('../utils/geoUtils')
 
@@ -16,11 +13,6 @@ function filtre(valeur, autorisees, nom) {
   if (valeur === undefined || valeur === '') return undefined
   if (!autorisees.includes(valeur)) throw new ErreurApi(400, `Valeur de ${nom} inconnue`, 'FILTRE_INVALIDE')
   return valeur
-}
-
-function supprimerPhoto(url) {
-  if (!url?.startsWith('/uploads/')) return
-  fs.promises.unlink(path.join(config.upload.dossier, path.basename(url))).catch(() => {})
 }
 
 const lister = asyncHandler(async (req, res) => {
@@ -75,7 +67,7 @@ const creer = asyncHandler(async (req, res) => {
 
     const id = await db.transaction(async (tx) => {
       const nouvel = await Signalement.creer(
-        { citoyen_id: req.user.id, latitude, longitude, description, adresse: req.body.adresse?.trim().slice(0, 255), urgence, photo_url: req.file ? urlPhoto(req.file) : null },
+        { citoyen_id: req.user.id, latitude, longitude, description, adresse: req.body.adresse?.trim().slice(0, 255), urgence, photo_url: req.photoUrl ?? null },
         tx,
       )
       await User.ajouterPointsEco(req.user.id, POINTS_ECO.soumis, tx)
@@ -94,7 +86,7 @@ const creer = asyncHandler(async (req, res) => {
     }
     res.status(201).json({ ...cree, points_gagnes: POINTS_ECO.soumis })
   } catch (erreur) {
-    if (req.file) supprimerPhoto(urlPhoto(req.file)) // pas de photo orpheline si l'enregistrement échoue
+    if (req.photoUrl) await stockagePhotos.supprimer(req.photoUrl) // pas de photo orpheline si l'enregistrement échoue
     throw erreur
   }
 })
@@ -167,7 +159,7 @@ const supprimer = asyncHandler(async (req, res) => {
   if (req.user.role !== 'administrateur' && !auteur) throw new ErreurApi(403, 'Suppression non autorisée', 'ACCES_REFUSE')
   if (['en_cours'].includes(s.statut)) throw new ErreurApi(422, 'Signalement inclus dans une tournée en cours', 'SIGNALEMENT_EN_TOURNEE')
   await Signalement.supprimer(s.id)
-  supprimerPhoto(s.photo_url)
+  await stockagePhotos.supprimer(s.photo_url)
   await journaliser(req, 'suppression', 'signalement', s.id)
   res.json({ message: 'Signalement supprimé' })
 })

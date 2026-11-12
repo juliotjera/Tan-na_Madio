@@ -11,11 +11,29 @@ async function chargerGraphe() {
   const noeuds = (
     await db.query(`SELECT id, ST_Y(position::geometry) AS lat, ST_X(position::geometry) AS lng FROM noeuds_graphe`)
   ).rows.map((n) => ({ ...n, lat: Number(n.lat), lng: Number(n.lng) }))
-  const aretes = (await db.query(`SELECT noeud_source, noeud_dest, distance_m, bidirectionnel FROM aretes_graphe`)).rows
+  const aretes = (await db.query(`SELECT noeud_source, noeud_dest, distance_m, bidirectionnel, trace FROM aretes_graphe`)).rows
   const graphe = construireGraphe(
     aretes.map((a) => ({ source: a.noeud_source, dest: a.noeud_dest, poids: Number(a.distance_m) / 1000, bidirectionnel: a.bidirectionnel })),
   )
-  return { noeuds, parId: new Map(noeuds.map((n) => [n.id, n])), graphe }
+  // forme de chaque tronçon dans les deux sens, pour dessiner le chemin le long des rues
+  const formes = new Map()
+  for (const a of aretes) {
+    if (!a.trace?.length) continue
+    formes.set(`${a.noeud_source}>${a.noeud_dest}`, a.trace)
+    if (a.bidirectionnel) formes.set(`${a.noeud_dest}>${a.noeud_source}`, [...a.trace].reverse())
+  }
+  return { noeuds, parId: new Map(noeuds.map((n) => [n.id, n])), graphe, formes }
+}
+
+// suite de carrefours → points à dessiner, avec la forme des rues entre deux carrefours
+function dessiner(etapes, parId, formes) {
+  const points = []
+  etapes.forEach((id, i) => {
+    if (i > 0) points.push(...(formes.get(`${etapes[i - 1]}>${id}`) ?? []))
+    const n = parId.get(id)
+    points.push([n.lat, n.lng])
+  })
+  return points
 }
 
 const plusProche = (p, noeuds) =>
@@ -26,7 +44,7 @@ const plusProche = (p, noeuds) =>
 
 // points : [{ lat, lng }] → matrice des distances (km) et tracés entre chaque paire
 async function matriceDistances(points) {
-  const { noeuds, parId, graphe } = await chargerGraphe()
+  const { noeuds, parId, graphe, formes } = await chargerGraphe()
   const n = points.length
   const matrice = Array.from({ length: n }, () => new Array(n).fill(0))
   const traces = Array.from({ length: n }, () => new Array(n).fill(null))
@@ -58,7 +76,7 @@ async function matriceDistances(points) {
       const etapes = chemin(precedent, acces[i].noeud.id, acces[j].noeud.id) ?? []
       traces[i][j] = [
         [points[i].lat, points[i].lng],
-        ...etapes.map((id) => [parId.get(id).lat, parId.get(id).lng]),
+        ...dessiner(etapes, parId, formes),
         [points[j].lat, points[j].lng],
       ]
     }

@@ -5,7 +5,7 @@
 const fs = require('fs')
 const path = require('path')
 const bcrypt = require('bcryptjs')
-const config = require('../src/config/env')
+const stockagePhotos = require('../src/services/stockagePhotos')
 const db = require('../src/config/db')
 const { haversine, polygoneWkt, carre } = require('../src/utils/geoUtils')
 const { optimiser } = require('../src/services/collecteService')
@@ -82,15 +82,14 @@ const PHOTOS = {
   'Gros dépôt près de l’arrêt de taxi-be': 'depot-05.jpg',
 }
 
-// Copie les photos de démonstration dans le dossier des envois et les rattache aux signalements
+// Enregistre les photos de démonstration (disque ou base) et les rattache aux signalements
 async function photosDemo() {
   const source = path.join(__dirname, 'photos-demo')
-  fs.mkdirSync(config.upload.dossier, { recursive: true })
   for (const [description, fichier] of Object.entries(PHOTOS)) {
     const origine = path.join(source, fichier)
     if (!fs.existsSync(origine)) continue
-    fs.copyFileSync(origine, path.join(config.upload.dossier, `demo-${fichier}`))
-    await db.query('UPDATE signalements SET photo_url = $2 WHERE description = $1', [description, `/uploads/demo-${fichier}`])
+    const url = await stockagePhotos.enregistrer(fs.readFileSync(origine), 'image/jpeg', `demo-${fichier}`)
+    await db.query('UPDATE signalements SET photo_url = $2 WHERE description = $1', [description, url])
   }
 }
 
@@ -158,6 +157,17 @@ function reseauRoutier(alea) {
   return { noeuds: noeuds.filter((n) => gardes.has(n.index)), aretes: aretes.filter((a) => gardes.has(a.source) && gardes.has(a.dest)) }
 }
 
+// Rues réelles du centre d'Antananarivo (scripts/importerOsm.js, © contributeurs OpenStreetMap)
+function reseauOsm() {
+  const fichier = path.join(__dirname, 'donnees', 'reseau-tana.json')
+  if (process.env.RESEAU_DEMO === 'quadrillage' || !fs.existsSync(fichier)) return null
+  const reseau = JSON.parse(fs.readFileSync(fichier, 'utf8'))
+  return {
+    noeuds: reseau.noeuds.map(([lat, lng], index) => ({ index, nom: null, lat, lng })),
+    aretes: reseau.aretes.map(([source, dest, distance_m, temps_min, bidirectionnel, forme]) => ({ source, dest, distance_m, temps_min, bidirectionnel, forme })),
+  }
+}
+
 const jours = (n) => new Date(Date.now() - n * 86400000)
 
 async function seed({ journal = console.log } = {}) {
@@ -178,8 +188,8 @@ async function seed({ journal = console.log } = {}) {
   }
   journal(`${ZONES.length} zones`)
 
-  // Réseau routier (insertion groupée)
-  const { noeuds, aretes } = reseauRoutier(alea)
+  // Réseau routier (insertion groupée) : rues réelles d'OpenStreetMap si le fichier est présent
+  const { noeuds, aretes } = reseauOsm() ?? reseauRoutier(alea)
   const idsNoeuds = (
     await db.query(
       `INSERT INTO noeuds_graphe (nom, position)
@@ -190,9 +200,16 @@ async function seed({ journal = console.log } = {}) {
   ).rows.map((r) => r.id)
   const idParIndex = new Map(noeuds.map((n, i) => [n.index, idsNoeuds[i]]))
   await db.query(
-    `INSERT INTO aretes_graphe (noeud_source, noeud_dest, distance_m, temps_min, bidirectionnel)
-     SELECT * FROM unnest($1::uuid[], $2::uuid[], $3::numeric[], $4::numeric[], $5::boolean[])`,
-    [aretes.map((a) => idParIndex.get(a.source)), aretes.map((a) => idParIndex.get(a.dest)), aretes.map((a) => a.distance_m), aretes.map((a) => a.temps_min), aretes.map((a) => a.bidirectionnel)],
+    `INSERT INTO aretes_graphe (noeud_source, noeud_dest, distance_m, temps_min, bidirectionnel, trace)
+     SELECT s, d, m, t, b, NULLIF(f, 'null')::jsonb FROM unnest($1::uuid[], $2::uuid[], $3::numeric[], $4::numeric[], $5::boolean[], $6::text[]) AS x(s, d, m, t, b, f)`,
+    [
+      aretes.map((a) => idParIndex.get(a.source)),
+      aretes.map((a) => idParIndex.get(a.dest)),
+      aretes.map((a) => a.distance_m),
+      aretes.map((a) => a.temps_min),
+      aretes.map((a) => a.bidirectionnel),
+      aretes.map((a) => JSON.stringify(a.forme?.length ? a.forme : null)),
+    ],
   )
   await db.query(`UPDATE noeuds_graphe n SET zone_id = z.id FROM zones z WHERE ST_Within(n.position::geometry, z.geometrie::geometry)`)
   journal(`réseau routier : ${noeuds.length} carrefours, ${aretes.length} tronçons`)

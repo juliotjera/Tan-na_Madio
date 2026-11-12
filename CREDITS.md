@@ -16,3 +16,7 @@ Photos libres de droits publiées sur [Unsplash](https://unsplash.com) sous la [
 ## Données de démonstration (`backend/scripts/photos-demo`)
 
 Photos de dépôts illustrant les signalements fictifs : https://unsplash.com/photos/WIaH0i7vZ-8, https://unsplash.com/photos/luQxzp9KiKk, https://unsplash.com/photos/r1s7Y8bTUTY, https://unsplash.com/photos/kl7kNS-zubk, https://unsplash.com/photos/5eNdjyfm8Gk, https://unsplash.com/photos/WZ6Z6x4zLV4, https://unsplash.com/photos/oZSkXxtLke0, https://unsplash.com/photos/kxTwgF_uHow, https://unsplash.com/photos/uhfEvlqreT4, https://unsplash.com/photos/qsVWEGNnIrM.
+
+## Réseau routier (`backend/scripts/donnees/reseau-tana.json`)
+
+Rues du centre d’Antananarivo © contributeurs [OpenStreetMap](https://www.openstreetmap.org/copyright), sous licence [ODbL](https://opendatacommons.org/licenses/odbl/). Extrait avec l’API Overpass par `backend/scripts/importerOsm.js`. Fonds de carte : tuiles OpenStreetMap.

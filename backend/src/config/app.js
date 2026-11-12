@@ -7,6 +7,7 @@ const helmet = require('helmet')
 const compression = require('compression')
 const { rateLimit } = require('express-rate-limit')
 const config = require('./env')
+const stockagePhotos = require('../services/stockagePhotos')
 const db = require('./db')
 const routes = require('../routes')
 const { routeIntrouvable, gestionErreurs } = require('../middleware/erreurs')
@@ -69,7 +70,20 @@ function creerApp() {
   app.use('/api', routes)
   app.use('/api', routeIntrouvable)
 
-  app.use('/uploads', express.static(config.upload.dossier, { maxAge: '7d', index: false }))
+  // photos : lues dans la base (PHOTOS_STOCKAGE=base) ou servies depuis le disque
+  if (stockagePhotos.enBase()) {
+    app.get('/uploads/:nom', async (req, res, next) => {
+      try {
+        const photo = await stockagePhotos.lire(req.params.nom)
+        if (!photo) return res.status(404).end()
+        res.set('Cache-Control', 'public, max-age=604800, immutable').type(photo.type).send(photo.contenu)
+      } catch (erreur) {
+        next(erreur)
+      }
+    })
+  } else {
+    app.use('/uploads', express.static(config.upload.dossier, { maxAge: '7d', index: false }))
+  }
 
   // une seule adresse en production : le frontend React est servi par l'API
   if (fs.existsSync(FRONTEND)) {

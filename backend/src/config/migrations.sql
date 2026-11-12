@@ -41,3 +41,17 @@ FROM signalements s
 LEFT JOIN zones z ON z.id = s.zone_id
 LEFT JOIN utilisateurs u ON u.id = s.citoyen_id
 WHERE s.statut != 'rejete';
+
+-- Photos gardées dans la base (PHOTOS_STOCKAGE=base) : indispensable sur un hébergement
+-- dont le disque est effacé à chaque redémarrage
+CREATE TABLE IF NOT EXISTS photos (
+  nom        VARCHAR(80) PRIMARY KEY,
+  type       VARCHAR(30) NOT NULL,
+  contenu    BYTEA NOT NULL,
+  taille     INTEGER NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Forme réelle de la rue entre deux carrefours ([[lat, lng], …], réseau OpenStreetMap) :
+-- le tracé affiché suit les courbes au lieu d'aller en ligne droite d'un carrefour à l'autre
+ALTER TABLE aretes_graphe ADD COLUMN IF NOT EXISTS trace JSONB;
