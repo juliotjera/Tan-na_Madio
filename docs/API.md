@@ -10,7 +10,7 @@ Erreurs : `{ "message": "…", "code": "CODE" }` avec les statuts 400 (données 
 | --- | --- | --- | --- |
 | POST | `/register` | public | Inscription **citoyen** : `{ nom, prenom, email, mot_de_passe, telephone?, extras: { quartier? } }` → `{ token, refreshToken, user }`. Tout autre rôle → 403 `ROLE_NON_AUTORISE`. |
 | POST | `/login` | public | `{ email, mot_de_passe }` → `{ token, refreshToken, user }` (20 essais / 15 min / adresse IP). `user.mdp_provisoire` : mot de passe donné par l’administrateur, à changer. |
-| POST | `/refresh` | public | `{ refreshToken }` → `{ token, refreshToken }` : l’ancien jeton est révoqué (rotation) |
+| POST | `/refresh` | public | Cookie httpOnly `tm_refresh` (ou `{ refreshToken }`) → `{ token, refreshToken, user }` : l’ancien jeton est révoqué (rotation), nouveau cookie posé |
 | POST | `/logout` | connecté | `{ refreshToken? }` : révoque ce jeton, ou toutes les sessions |
 | GET | `/profil` | connecté | Profil complet (points éco, matricule, camion…) |
 | PATCH | `/mot-de-passe` | connecté | `{ ancien, nouveau }` (différent de l’ancien) : ferme les autres sessions, lève `mdp_provisoire` |

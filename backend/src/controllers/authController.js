@@ -28,6 +28,26 @@ async function emettreJetons(user) {
   return { token, refreshToken }
 }
 
+// Le jeton de renouvellement voyage dans un cookie httpOnly : illisible par un script de la page,
+// envoyé seulement aux routes /api/auth. Il reste accepté dans le corps de la requête (clients API, tests).
+const COOKIE = 'tm_refresh'
+const optionsCookie = () => ({ httpOnly: true, secure: config.production, sameSite: 'strict', path: '/api/auth' })
+
+function lireCookie(req) {
+  for (const morceau of (req.headers.cookie ?? '').split(';')) {
+    const [cle, ...valeur] = morceau.trim().split('=')
+    if (cle === COOKIE) return decodeURIComponent(valeur.join('='))
+  }
+  return null
+}
+
+async function ouvrirSession(res, user) {
+  const jetons = await emettreJetons(user)
+  const { exp } = jwt.decode(jetons.refreshToken)
+  res.cookie(COOKIE, jetons.refreshToken, { ...optionsCookie(), maxAge: exp * 1000 - Date.now() })
+  return jetons
+}
+
 // Inscription publique : uniquement des citoyens. Agents et chauffeurs sont créés par un administrateur.
 const register = asyncHandler(async (req, res) => {
   const { nom, prenom, email, mot_de_passe, telephone, extras = {} } = req.body
@@ -49,7 +69,7 @@ const register = asyncHandler(async (req, res) => {
   })
   req.user = user
   await journaliser(req, 'inscription', 'utilisateur', user.id)
-  res.status(201).json({ ...(await emettreJetons(user)), user: publicUser(user) })
+  res.status(201).json({ ...(await ouvrirSession(res, user)), user: publicUser(user) })
 })
 
 const login = asyncHandler(async (req, res) => {
@@ -62,12 +82,12 @@ const login = asyncHandler(async (req, res) => {
   if (!user.actif) throw new ErreurApi(403, 'Ce compte a été désactivé', 'COMPTE_INACTIF')
   req.user = user
   await journaliser(req, 'connexion', 'utilisateur', user.id)
-  res.json({ ...(await emettreJetons(user)), user: publicUser(user) })
+  res.json({ ...(await ouvrirSession(res, user)), user: publicUser(user) })
 })
 
 // Renouvellement avec rotation : l'ancien jeton est supprimé, un nouveau est émis
 const refresh = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.body
+  const refreshToken = req.body?.refreshToken || lireCookie(req)
   let charge
   try {
     charge = jwt.verify(refreshToken, config.jwt.refreshSecret)
@@ -78,11 +98,12 @@ const refresh = asyncHandler(async (req, res) => {
   if (!rows[0] || rows[0].user_id !== charge.id) throw new ErreurApi(401, 'Session expirée, reconnectez-vous', 'REFRESH_INVALIDE')
   const user = await User.profil(charge.id)
   if (!user?.actif) throw new ErreurApi(403, 'Ce compte a été désactivé', 'COMPTE_INACTIF')
-  res.json(await emettreJetons(user))
+  res.json({ ...(await ouvrirSession(res, user)), user: publicUser(user) })
 })
 
 const logout = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.body ?? {}
+  const refreshToken = req.body?.refreshToken || lireCookie(req)
+  res.clearCookie(COOKIE, optionsCookie())
   if (refreshToken) await db.query('DELETE FROM refresh_tokens WHERE token = $1', [empreinte(refreshToken)])
   else await db.query('DELETE FROM refresh_tokens WHERE user_id = $1', [req.user.id])
   await journaliser(req, 'deconnexion', 'utilisateur', req.user.id)

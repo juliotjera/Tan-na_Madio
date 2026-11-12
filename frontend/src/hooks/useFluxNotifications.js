@@ -1,7 +1,7 @@
 // Notifications en temps réel : écoute du flux SSE de l'API (fetch + lecture en continu, pour
 // pouvoir envoyer le jeton dans l'en-tête). Reconnexion automatique après une coupure.
 import { useEffect, useRef } from 'react'
-import { session } from '../api/axiosConfig'
+import { renouveler, session } from '../api/axiosConfig'
 import { listerNotifications } from '../api'
 
 const ATTENTE_MS = 5000
@@ -17,12 +17,12 @@ export function useFluxNotifications(surNotification) {
     let minuterie = null
 
     const ecouter = async () => {
-      const s = session.lire()
-      if (!actif || !s?.token) return
+      if (!actif || !session.lire()) return
       controleur = new AbortController()
       try {
+        const jeton = session.jeton() ?? (await renouveler())
         const r = await fetch('/api/notifications/flux', {
-          headers: { Authorization: `Bearer ${s.token}`, Accept: 'text/event-stream' },
+          headers: { Authorization: `Bearer ${jeton}`, Accept: 'text/event-stream' },
           signal: controleur.signal,
         })
         // jeton expiré : un appel ordinaire le fait renouveler par l'intercepteur, puis on se reconnecte

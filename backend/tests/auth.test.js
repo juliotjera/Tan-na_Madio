@@ -123,3 +123,17 @@ describe('rôles et comptes', () => {
     expect(r.body.logs.map((l) => l.action)).toEqual(expect.arrayContaining(['connexion', 'inscription', 'desactivation']))
   })
 })
+
+test('le jeton de renouvellement est posé dans un cookie httpOnly et suffit à renouveler la session', async () => {
+  const r = await request(app).post('/api/auth/login').send({ email: 'agent@tananamadio.mg', mot_de_passe: 'Admin2025!' })
+  const cookie = r.headers['set-cookie'].find((c) => c.startsWith('tm_refresh='))
+  expect(cookie).toMatch(/HttpOnly/)
+  expect(cookie).toMatch(/SameSite=Strict/)
+  expect(cookie).toMatch(/Path=\/api\/auth/)
+  const renouvele = await request(app).post('/api/auth/refresh').set('Cookie', cookie.split(';')[0])
+  expect(renouvele.status).toBe(200)
+  expect(renouvele.body.token).toBeDefined()
+  expect(renouvele.body.user.email).toBe('agent@tananamadio.mg')
+  // rotation : l'ancien cookie ne sert plus
+  expect((await request(app).post('/api/auth/refresh').set('Cookie', cookie.split(';')[0])).status).toBe(401)
+})
