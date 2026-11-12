@@ -41,7 +41,7 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 - **Application installable (PWA)** : manifeste, icônes, service worker (interface disponible sans réseau ; données toujours lues en direct).
 - **Production** : compression des réponses, cache long des fichiers versionnés, journal des requêtes, migrations de base automatiques.
 - **Qualité** : ESLint (frontend et backend), intégration continue GitHub Actions (vérification du code, tests de l’API et de l’interface, compilation à chaque envoi).
-- **Tests** : Vitest côté interface (13 tests : mode hors ligne, formats, paliers) et Jest + Supertest côté API (80 tests : algorithmes, authentification, signalements, collectes, notifications et exports, fonctionnalités de la version d’origine, base de données).
+- **Tests** : Vitest côté interface (13 tests : mode hors ligne, formats, paliers), Jest + Supertest côté API (85 tests : algorithmes, authentification, signalements, collectes, notifications, photos, exports, base de données) et **Playwright de bout en bout** (12 parcours réels dans un navigateur : citoyen qui signale, agent qui valide et rejette, chauffeur qui fait sa tournée, administrateur, téléphone, hors connexion).
 
 ## Démarrage rapide
 
@@ -83,6 +83,12 @@ npm test
 ```
 
 Chaque fichier de test démarre sa propre base PGlite en mémoire avec les données de démonstration : rien à configurer.
+
+```bash
+npm run build --prefix frontend
+npm run e2e --prefix frontend      # parcours complets dans Chromium (Playwright)
+npm run demo --prefix frontend     # enregistre une vidéo de démonstration (test-results/)
+```
 
 ## Structure
 

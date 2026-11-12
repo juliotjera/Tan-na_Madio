@@ -16,6 +16,7 @@ export default defineConfig({
   // tests unitaires (Vitest) : navigateur simulé pour localStorage
   test: {
     environment: 'jsdom',
+    include: ['src/**/*.test.js'], // les parcours Playwright (e2e/) ont leur propre lanceur
   },
   build: {
     rollupOptions: {

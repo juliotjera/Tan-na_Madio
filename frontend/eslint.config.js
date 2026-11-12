@@ -5,7 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
+  { ignores: ['dist', 'test-results', 'playwright-report'] },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
@@ -28,5 +28,5 @@ export default [
     },
   },
   { files: ['public/sw.js'], languageOptions: { globals: globals.serviceworker } },
-  { files: ['*.config.js'], languageOptions: { globals: globals.node } },
+  { files: ['*.config.js', 'e2e/**/*.js'], languageOptions: { globals: globals.node } },
 ]
