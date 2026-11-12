@@ -1,8 +1,16 @@
-// Petits composants d'interface partagés
+// Petits composants d'interface partagés. Les textes reçus sont traduits ici (français ou malagasy),
+// ce qui traduit d'un coup les titres, champs, filtres et fenêtres de tous les écrans.
 import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle, Loader2, X } from 'lucide-react'
+import { useLangue } from '../../context/LangueContext'
+
+// traduit un texte simple, laisse passer les éléments React et les valeurs vides
+function useTraduire() {
+  const { t } = useLangue()
+  return (v) => (typeof v === 'string' ? t(v) : v)
+}
 
 export function Spinner({ className = 'h-5 w-5' }) {
   return <Loader2 className={`animate-spin text-vert-500 ${className}`} aria-label="Chargement" />
@@ -10,9 +18,10 @@ export function Spinner({ className = 'h-5 w-5' }) {
 
 // Chargement : la forme du contenu à venir (squelette) plutôt qu'une roue qui tourne
 export function Chargement({ texte = 'Chargement…', lignes = 3 }) {
+  const tr = useTraduire()
   return (
     <div className="space-y-3 py-4" role="status" aria-live="polite">
-      <span className="sr-only">{texte}</span>
+      <span className="sr-only">{tr(texte)}</span>
       {Array.from({ length: lignes }, (_, i) => (
         <div key={i} className="flex animate-pulse items-center gap-4 rounded-carte border border-trait bg-white p-4" aria-hidden>
           <div className="h-10 w-10 shrink-0 rounded-lg bg-fond" />
@@ -27,13 +36,14 @@ export function Chargement({ texte = 'Chargement…', lignes = 3 }) {
 }
 
 export function Erreur({ message, onReessayer }) {
+  const tr = useTraduire()
   return (
     <div className="carte flex flex-col items-start gap-3 border-alerte/20 bg-alerte-50/60 p-5 sm:flex-row sm:items-center" role="alert">
       <AlertTriangle className="h-5 w-5 shrink-0 text-alerte-700" />
-      <p className="flex-1 text-sm text-alerte-700">{message}</p>
+      <p className="flex-1 text-sm text-alerte-700">{tr(message)}</p>
       {onReessayer && (
         <button type="button" className="btn-secondaire" onClick={() => onReessayer()}>
-          Réessayer
+          {tr('Réessayer')}
         </button>
       )}
     </div>
@@ -42,6 +52,7 @@ export function Erreur({ message, onReessayer }) {
 
 // Écran vide : dire quoi faire, pas seulement « rien »
 export function Vide({ icone: Icone, titre, texte, action }) {
+  const tr = useTraduire()
   return (
     <div className="flex flex-col items-center px-6 py-14 text-center">
       {Icone && (
@@ -49,19 +60,20 @@ export function Vide({ icone: Icone, titre, texte, action }) {
           <Icone className="h-6 w-6" />
         </span>
       )}
-      <p className="font-titre text-lg font-semibold text-ardoise">{titre}</p>
-      {texte && <p className="mt-1 max-w-sm text-sm text-encre-doux">{texte}</p>}
+      <p className="font-titre text-lg font-semibold text-ardoise">{tr(titre)}</p>
+      {texte && <p className="mt-1 max-w-sm text-sm text-encre-doux">{tr(texte)}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   )
 }
 
 export function EnTete({ titre, texte, actions }) {
+  const tr = useTraduire()
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="text-[26px] font-semibold leading-tight sm:text-[30px]">{titre}</h1>
-        {texte && <p className="mt-1 max-w-2xl text-encre-doux">{texte}</p>}
+        <h1 className="text-[26px] font-semibold leading-tight sm:text-[30px]">{tr(titre)}</h1>
+        {texte && <p className="mt-1 max-w-2xl text-encre-doux">{tr(texte)}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
@@ -93,19 +105,20 @@ function MiniCourbe({ valeurs, couleur }) {
 
 export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', tendance, serie }) {
   const t = TONS[ton] ?? TONS.blanc
+  const tr = useTraduire()
   const hausse = tendance != null && tendance >= 0
   return (
     <div className="carte relative flex min-h-[132px] flex-col p-5">
-      <p className="pr-12 text-sm font-medium text-encre-doux">{libelle}</p>
+      <p className="pr-12 text-sm font-medium text-encre-doux">{tr(libelle)}</p>
       <p className="chiffre mt-2 text-[32px] leading-none text-ardoise">{valeur}</p>
       {tendance != null && (
         <p className={`mt-1 inline-flex items-center gap-1 text-sm font-semibold ${hausse ? 'text-vert' : 'text-alerte-700'}`}>
           <span aria-hidden>{hausse ? '↗' : '↘'}</span>
           {hausse ? '+' : ''}
-          {tendance.toLocaleString('fr-FR')} % ce mois
+          {tendance.toLocaleString('fr-FR')} % {tr('ce mois')}
         </p>
       )}
-      {detail && <p className="mt-1 text-xs text-encre-pale">{detail}</p>}
+      {detail && <p className="mt-1 text-xs text-encre-pale">{tr(detail)}</p>}
       <MiniCourbe valeurs={serie} couleur={t.trait} />
       {Icone && (
         <span className={`absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-xl ${t.icone}`}>
@@ -119,32 +132,35 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
 // Compteur centré (« 40 Total », « 4 En attente »…) comme sur la version d'origine
 const COULEURS_COMPTEUR = { vert: 'text-vert-500', ambre: 'text-ambre', bleu: 'text-blue-500', violet: 'text-violet-500', ardoise: 'text-ardoise' }
 export function Compteur({ valeur, libelle, couleur = 'vert' }) {
+  const tr = useTraduire()
   return (
     <div className="carte flex flex-col items-center justify-center px-4 py-5 text-center">
       <p className={`chiffre text-[30px] leading-none ${COULEURS_COMPTEUR[couleur]}`}>{valeur}</p>
-      <p className="mt-2 text-sm text-encre-doux">{libelle}</p>
+      <p className="mt-2 text-sm text-encre-doux">{tr(libelle)}</p>
     </div>
   )
 }
 
 export function Champ({ libelle, aide, erreur, children, className = '' }) {
   const id = useId()
+  const tr = useTraduire()
   const enfant = typeof children === 'function' ? children(id) : children
   return (
     <div className={className}>
       <label htmlFor={id} className="etiquette">
-        {libelle}
+        {tr(libelle)}
       </label>
       {enfant}
-      {erreur ? <p className="mt-1 text-xs text-alerte-700">{erreur}</p> : aide && <p className="mt-1 text-xs text-encre-pale">{aide}</p>}
+      {erreur ? <p className="mt-1 text-xs text-alerte-700">{tr(erreur)}</p> : aide && <p className="mt-1 text-xs text-encre-pale">{tr(aide)}</p>}
     </div>
   )
 }
 
 // Segments (filtres) : boutons radio visuels
 export function Segments({ options, valeur, onChange, libelle }) {
+  const tr = useTraduire()
   return (
-    <div role="radiogroup" aria-label={libelle} className="inline-flex max-w-full gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none]">
+    <div role="radiogroup" aria-label={tr(libelle)} className="inline-flex max-w-full gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none]">
       {options.map((o) => (
         <button
           key={o.valeur}
@@ -156,7 +172,7 @@ export function Segments({ options, valeur, onChange, libelle }) {
             valeur === o.valeur ? 'border-vert bg-vert text-white shadow-sm' : 'border-vert-300 bg-white text-vert hover:bg-vert-50'
           }`}
         >
-          {o.libelle}
+          {tr(o.libelle)}
           {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-white/80' : 'text-vert/60'}`}>{o.nombre}</span>}
         </button>
       ))}
@@ -166,6 +182,7 @@ export function Segments({ options, valeur, onChange, libelle }) {
 
 export function Modal({ ouvert, onFermer, titre, children, pied, large = false }) {
   const boite = useRef(null)
+  const tr = useTraduire()
   // dernière fonction de fermeture : l'effet ne se relance pas (et ne vole pas le focus) à chaque rendu du parent
   const fermer = useRef(onFermer)
   fermer.current = onFermer
@@ -190,7 +207,7 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
             ref={boite}
             role="dialog"
             aria-modal="true"
-            aria-label={titre}
+            aria-label={tr(titre)}
             className={`relative flex max-h-[92vh] w-full flex-col rounded-t-3xl bg-white shadow-flotte sm:rounded-3xl ${large === 'xl' ? 'sm:max-w-5xl' : large ? 'sm:max-w-2xl' : 'sm:max-w-lg'}`}
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -198,8 +215,8 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           >
             <div className="flex items-center justify-between gap-4 border-b border-trait px-6 py-4">
-              <h2 className="text-lg font-semibold">{titre}</h2>
-              <button type="button" onClick={onFermer} className="btn-discret -mr-2 min-h-0 p-2" aria-label="Fermer">
+              <h2 className="text-lg font-semibold">{tr(titre)}</h2>
+              <button type="button" onClick={onFermer} className="btn-discret -mr-2 min-h-0 p-2" aria-label={tr('Fermer')}>
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -215,6 +232,7 @@ export function Modal({ ouvert, onFermer, titre, children, pied, large = false }
 
 // Confirmation d'une action qui ne se défait pas
 export function Confirmation({ ouvert, onFermer, onConfirmer, titre, texte, action = 'Confirmer', danger = false, enCours = false }) {
+  const tr = useTraduire()
   return (
     <Modal
       ouvert={ouvert}
@@ -223,34 +241,35 @@ export function Confirmation({ ouvert, onFermer, onConfirmer, titre, texte, acti
       pied={
         <>
           <button type="button" className="btn-secondaire" onClick={onFermer}>
-            Retour
+            {tr('Retour')}
           </button>
           <button type="button" className={danger ? 'btn bg-alerte text-white hover:bg-alerte-700' : 'btn-principal'} onClick={onConfirmer} disabled={enCours}>
             {enCours && <Spinner className="h-4 w-4 text-current" />}
-            {action}
+            {tr(action)}
           </button>
         </>
       }
     >
-      <p className="text-encre-doux">{texte}</p>
+      <p className="text-encre-doux">{tr(texte)}</p>
     </Modal>
   )
 }
 
 export function Pagination({ page, total, limit, onChange }) {
   const pages = Math.max(1, Math.ceil(total / limit))
+  const tr = useTraduire()
   if (pages <= 1) return null
   return (
     <div className="flex items-center justify-between gap-3 px-1 pt-4 text-sm text-encre-doux">
       <span>
-        Page {page} sur {pages}
+        {tr('Page')} {page} {tr('sur')} {pages}
       </span>
       <div className="flex gap-2">
         <button type="button" className="btn-secondaire min-h-[36px]" disabled={page <= 1} onClick={() => onChange(page - 1)}>
-          Précédente
+          {tr('Précédente')}
         </button>
         <button type="button" className="btn-secondaire min-h-[36px]" disabled={page >= pages} onClick={() => onChange(page + 1)}>
-          Suivante
+          {tr('Suivante')}
         </button>
       </div>
     </div>
