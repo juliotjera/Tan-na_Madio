@@ -69,14 +69,15 @@ export function EnTete({ titre, texte, actions }) {
 }
 
 // Chiffre clé : le nombre d'abord, l'étiquette ensuite
-// Carte d'indicateur de la version d'origine : libellé, grand chiffre, tendance, mini-graphique, icône
+// Carte d'indicateur : libellé, grand chiffre, tendance, mini-graphique. Fond blanc pour tous ;
+// la couleur ne porte que sur l'icône et la courbe, pour que le chiffre reste le premier repère.
 const TONS = {
-  vert: { carte: 'border-vert-300/60 bg-gradient-to-br from-vert-50 to-white', icone: 'bg-vert-100 text-vert-500', trait: '#10B981' },
-  ambre: { carte: 'border-ambre/40 bg-gradient-to-br from-ambre-50 to-white', icone: 'bg-ambre-100 text-ambre-700', trait: '#F59E0B' },
-  bleu: { carte: 'border-blue-200 bg-gradient-to-br from-blue-50 to-white', icone: 'bg-blue-100 text-blue-500', trait: '#3B82F6' },
-  violet: { carte: 'border-violet-200 bg-gradient-to-br from-violet-50 to-white', icone: 'bg-violet-100 text-violet-500', trait: '#8B5CF6' },
-  alerte: { carte: 'border-alerte/30 bg-gradient-to-br from-alerte-50 to-white', icone: 'bg-alerte-100 text-alerte-700', trait: '#DC2626' },
-  blanc: { carte: 'border-trait/80 bg-white', icone: 'bg-vert-50 text-vert-500', trait: '#10B981' },
+  vert: { icone: 'bg-vert-50 text-vert', trait: '#10B981' },
+  ambre: { icone: 'bg-ambre-50 text-ambre-700', trait: '#F59E0B' },
+  bleu: { icone: 'bg-sky-50 text-sky-700', trait: '#0EA5E9' },
+  violet: { icone: 'bg-violet-50 text-violet-700', trait: '#8B5CF6' },
+  alerte: { icone: 'bg-alerte-50 text-alerte-700', trait: '#DC2626' },
+  blanc: { icone: 'bg-vert-50 text-vert', trait: '#10B981' },
 }
 
 function MiniCourbe({ valeurs, couleur }) {
@@ -94,9 +95,9 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
   const t = TONS[ton] ?? TONS.blanc
   const hausse = tendance != null && tendance >= 0
   return (
-    <div className={`relative flex min-h-[150px] flex-col rounded-carte border p-5 shadow-carte ${t.carte}`}>
-      <p className="pr-12 text-sm text-encre-doux">{libelle}</p>
-      <p className="chiffre mt-1 text-[30px] leading-tight text-ardoise">{valeur}</p>
+    <div className="carte relative flex min-h-[132px] flex-col p-5">
+      <p className="pr-12 text-sm font-medium text-encre-doux">{libelle}</p>
+      <p className="chiffre mt-2 text-[32px] leading-none text-ardoise">{valeur}</p>
       {tendance != null && (
         <p className={`mt-1 inline-flex items-center gap-1 text-sm font-semibold ${hausse ? 'text-vert' : 'text-alerte-700'}`}>
           <span aria-hidden>{hausse ? '↗' : '↘'}</span>
@@ -107,7 +108,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
       {detail && <p className="mt-1 text-xs text-encre-pale">{detail}</p>}
       <MiniCourbe valeurs={serie} couleur={t.trait} />
       {Icone && (
-        <span className={`absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-xl ${t.icone}`}>
+        <span className={`absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-xl ${t.icone}`}>
           <Icone className="h-5 w-5" />
         </span>
       )}

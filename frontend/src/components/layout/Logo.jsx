@@ -30,9 +30,9 @@ export function Logo({ clair = false, sousTitre = false, className = '' }) {
       ) : (
         <Marque className="h-9 w-9 shrink-0" />
       )}
-      <span className="leading-tight">
-        <span className={`block font-titre text-[19px] font-bold ${clair ? 'text-white' : sousTitre ? 'text-ardoise' : 'text-vert'}`}>Tanàna Madio</span>
-        {sousTitre && <span className={`block text-xs ${clair ? 'text-vert-100/70' : 'text-encre-doux'}`}>Ville Propre</span>}
+      <span className={`leading-tight ${sousTitre ? 'max-[400px]:sr-only' : ''}`}>
+        <span className={`block whitespace-nowrap font-titre text-[19px] font-bold ${clair ? 'text-white' : 'text-ardoise'}`}>Tanàna Madio</span>
+        {sousTitre && <span className={`hidden text-xs sm:block ${clair ? 'text-vert-100/70' : 'text-encre-doux'}`}>Ville Propre</span>}
       </span>
     </span>
   )

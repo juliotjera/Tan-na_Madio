@@ -2,7 +2,10 @@
 // signalements et historique de collectes. Reproductible : même tirage à chaque exécution.
 //   npm run db:seed          (base vide)
 //   npm run db:reset         (vide la base puis relance ce script)
+const fs = require('fs')
+const path = require('path')
 const bcrypt = require('bcryptjs')
+const config = require('../src/config/env')
 const db = require('../src/config/db')
 const { haversine, polygoneWkt, carre } = require('../src/utils/geoUtils')
 const { optimiser } = require('../src/services/collecteService')
@@ -65,6 +68,32 @@ const DESCRIPTIONS = [
   'Déchets dans l’escalier entre deux quartiers',
   'Gros dépôt près de l’arrêt de taxi-be',
 ]
+// Photo de démonstration associée à chaque description (photos Unsplash, voir CREDITS.md)
+const PHOTOS = {
+  'Tas d’ordures devant l’entrée du marché': 'depot-02.jpg',
+  'Bac à ordures plein qui déborde sur le trottoir': 'depot-08.jpg',
+  'Dépôt sauvage au bord du canal, odeur forte': 'depot-03.jpg',
+  'Sacs plastiques et déchets bouchant le caniveau': 'depot-06.jpg',
+  'Déchets de chantier abandonnés (gravats, sacs de ciment)': 'depot-01.jpg',
+  'Ordures ménagères brûlées sur place, fumée': 'depot-10.jpg',
+  'Déchets de légumes et de fruits après le marché': 'depot-04.jpg',
+  'Carcasses et pneus usagés au coin de la rue': 'depot-09.jpg',
+  'Poubelle publique renversée, déchets éparpillés': 'depot-07.jpg',
+  'Gros dépôt près de l’arrêt de taxi-be': 'depot-05.jpg',
+}
+
+// Copie les photos de démonstration dans le dossier des envois et les rattache aux signalements
+async function photosDemo() {
+  const source = path.join(__dirname, 'photos-demo')
+  fs.mkdirSync(config.upload.dossier, { recursive: true })
+  for (const [description, fichier] of Object.entries(PHOTOS)) {
+    const origine = path.join(source, fichier)
+    if (!fs.existsSync(origine)) continue
+    fs.copyFileSync(origine, path.join(config.upload.dossier, `demo-${fichier}`))
+    await db.query('UPDATE signalements SET photo_url = $2 WHERE description = $1', [description, `/uploads/demo-${fichier}`])
+  }
+}
+
 const RUES = ['Avenue de l’Indépendance', 'Rue Rainitovo', 'Rue Ratsimilaho', 'Lalana Andrianampoinimerina', 'Escalier Ambondrona', 'Rue Ramanantsoa', 'Lalana Rakoto Frah', 'Boulevard Ratsimandrava']
 
 // ── Réseau routier : quadrillage irrégulier, rues manquantes, quelques grands axes en diagonale ──
@@ -286,6 +315,8 @@ async function seed({ journal = console.log } = {}) {
       SELECT sum(2 + CASE WHEN s.date_validation IS NOT NULL AND s.statut <> 'rejete' THEN 5 ELSE 0 END
                    + CASE WHEN s.statut = 'collecte' THEN 10 ELSE 0 END)
         FROM signalements s WHERE s.citoyen_id = c.id), 0)`)
+
+  await photosDemo()
 
   // Motifs des signalements rejetés, et quelques « Moi aussi » d'habitants voisins
   await db.query(`UPDATE signalements SET motif_rejet = 'Doublon d’un autre signalement' WHERE statut = 'rejete'`)

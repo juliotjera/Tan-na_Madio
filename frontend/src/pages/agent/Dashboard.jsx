@@ -17,7 +17,7 @@ export default function AgentDashboard() {
   const urgents = useDonnees(() => listerSignalements({ statut: 'en_attente', limit: 5 }), [], { intervalle: 60000 })
   const tournees = useDonnees(() => listerCollectes({ statut: 'planifiee', limit: 4 }), [])
   const suivi = useDonnees(statsZones, [], { intervalle: 300000 })
-  const enRetard = suivi.donnees?.zones.filter((z) => z.en_retard) ?? []
+  const enRetard = suivi.donnees?.filter((z) => z.en_retard) ?? []
   const s = stats.donnees
 
   return (

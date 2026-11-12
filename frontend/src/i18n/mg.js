@@ -226,4 +226,18 @@ export const MALAGASY = {
   'Vous utilisez un mot de passe provisoire. Choisissez le vôtre pour sécuriser votre compte.': 'Teny miafina vonjimaika no ampiasainao. Mifidiana ny anao mba hiarovana ny kaontinao.',
   'Changer mon mot de passe': 'Hanova ny teny miafiko',
   'Journal d’activité': 'Tantaran’ny asa',
+  // accueil : du signalement au ramassage
+  'Du signalement au ramassage': 'Manomboka amin’ny tatitra ka hatramin’ny fanangonana',
+  'Trois étapes, trois acteurs, une seule application.': 'Dingana telo, mpandray anjara telo, rindranasa iray.',
+  'Un habitant signale': 'Mponina iray manao tatitra',
+  'Photo, position GPS et urgence en trente secondes. S’il est déjà signalé, il suffit de confirmer « Moi aussi ».': 'Sary, toerana GPS ary hamehana ao anatin’ny segondra telopolo. Raha efa voatatitra, ampy ny manamafy hoe « Izaho koa ».',
+  'La commune planifie': 'Ny kaominina no mandamina',
+  'L’agent valide, puis l’itinéraire est calculé par les rues avec l’algorithme de Dijkstra : moins de kilomètres pour le même travail.': 'Manamarina ny mpiasa, avy eo kajiana amin’ny alalan’ny algorithme Dijkstra ny lalana arahina : kilaometatra vitsy kokoa ho an’ny asa mitovy.',
+  'Le camion ramasse': 'Ny kamiao no manangona',
+  'Le chauffeur suit l’ordre des arrêts sur son téléphone, même sans réseau. L’habitant est prévenu dès que le dépôt est enlevé.': 'Manaraka ny filaharan’ny fijanonana amin’ny findainy ny mpamily, na tsy misy tambajotra aza. Ampahafantarina ny mponina raha vao voaangona ny fako.',
+  'Pensé pour Antananarivo': 'Natao ho an’Antananarivo',
+  'Des quartiers sur les collines, des rues étroites, un réseau mobile inégal : l’application est faite pour ces conditions.': 'Fokontany eny an-tendrombohitra, arabe tery, tambajotra finday tsy mitovy : natao ho an’ireo toe-javatra ireo ny rindranasa.',
+  'En français et en malagasy': 'Amin’ny teny frantsay sy malagasy',
+  'Utilisable avec un réseau faible ou coupé': 'Azo ampiasaina na malemy na tapaka aza ny tambajotra',
+  'Installable sur un téléphone, sans magasin d’applications': 'Azo apetraka amin’ny finday, tsy mila fivarotana rindranasa',
 }

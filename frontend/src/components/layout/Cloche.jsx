@@ -85,6 +85,7 @@ export default function Cloche({ sombre = false, alignement = 'droite' }) {
         }}
         className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition ${sombre ? 'text-vert-100 hover:bg-white/10 hover:text-white' : 'text-encre-doux hover:bg-ardoise/5 hover:text-ardoise'}`}
         aria-label={nonLues ? `Notifications, ${nonLues} non lue${nonLues > 1 ? 's' : ''}` : 'Notifications'}
+        title="Notifications (Alt+N)"
         aria-expanded={ouvert}
       >
         <Bell className="h-5 w-5" />

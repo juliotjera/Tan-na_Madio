@@ -83,6 +83,9 @@ export const NAVIGATION = {
   ],
 }
 
+// date du jour dans l'en-tête (« jeudi 12 novembre »)
+const aujourdhui = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+
 const initiales = (u) => `${u?.prenom?.[0] ?? ''}${u?.nom?.[0] ?? ''}`.toUpperCase()
 
 function lireReplie() {
@@ -196,7 +199,7 @@ export default function AppShell() {
       {/* Barre latérale (ordinateur) */}
       <aside className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-trait bg-white transition-[width] lg:flex ${largeur}`}>
         <div className={`flex h-[72px] items-center border-b border-trait ${replie ? 'justify-center' : 'px-4'}`}>
-          <Link to={accueil?.vers ?? '/'} className={`flex items-center ${replie ? '' : 'w-full rounded-2xl bg-vert-50 px-3 py-2'}`}>
+          <Link to={accueil?.vers ?? '/'} className={`flex items-center ${replie ? '' : 'w-full px-1'}`}>
             {replie ? <Marque className="h-9 w-9" /> : <Logo />}
           </Link>
         </div>
@@ -210,11 +213,10 @@ export default function AppShell() {
             onClick={basculerMenu}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-trait bg-white text-encre-doux shadow-carte transition hover:text-vert"
             aria-label={replie ? t('Agrandir le menu') : t('Réduire le menu')}
-            title="Alt+M"
+            title={`${replie ? t('Agrandir le menu') : t('Réduire le menu')} (Alt+M)`}
           >
             {replie ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
-          <span className="pointer-events-none translate-x-1 text-[11px] font-medium text-encre-pale">Alt+M</span>
         </div>
       </aside>
 
@@ -251,8 +253,7 @@ export default function AppShell() {
           </button>
           <div className="min-w-0 flex-1">
             <p className="truncate font-titre text-[17px] font-bold text-ardoise">{t(titreEnTete)}</p>
-            <p className="hidden truncate text-xs text-encre-doux sm:block">{t('Gérez vos actions en toute clarté')}</p>
-            <p className="hidden truncate text-[11px] text-encre-pale xl:block">{t('Raccourcis clavier : Alt+M pour le menu, Alt+N pour les notifications')}</p>
+            <p className="hidden truncate text-xs capitalize text-encre-doux sm:block">{aujourdhui}</p>
           </div>
           <Cloche />
           <label className="hidden sm:block">

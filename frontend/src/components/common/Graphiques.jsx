@@ -1,5 +1,5 @@
-// Graphiques Recharts aux couleurs de la version d'origine (émeraude, bleu, ambre)
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+// Graphiques Recharts aux couleurs de l'interface (émeraude, ambre) : axes discrets, grille horizontale
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -10,18 +10,31 @@ const infobulle = {
 }
 const jour = (d) => format(parseISO(d), 'd MMM', { locale: fr })
 
-// Évolution des signalements (courbe lissée, comme sur la version d'origine)
-export function CourbeEvolution({ series, hauteur = 280, couleur = '#3B82F6' }) {
+// Surface sous la courbe : dégradé de la couleur vers le transparent
+function Degrade({ id, couleur }) {
+  return (
+    <defs>
+      <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor={couleur} stopOpacity={0.28} />
+        <stop offset="100%" stopColor={couleur} stopOpacity={0} />
+      </linearGradient>
+    </defs>
+  )
+}
+
+// Évolution des signalements jour par jour
+export function CourbeEvolution({ series, hauteur = 280, couleur = '#10B981' }) {
   const donnees = series.map((p) => ({ ...p, jour: jour(p.date) }))
   return (
     <ResponsiveContainer width="100%" height={hauteur}>
-      <LineChart data={donnees} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
-        <CartesianGrid stroke="#EEF2F0" strokeDasharray="3 3" />
-        <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={{ stroke: '#E5E7EB' }} minTickGap={28} />
-        <YAxis tick={axe} tickLine={false} axisLine={{ stroke: '#E5E7EB' }} allowDecimals={false} />
+      <AreaChart data={donnees} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
+        <Degrade id="degrade-evolution" couleur={couleur} />
+        <CartesianGrid stroke="#EEF2F0" vertical={false} />
+        <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={false} minTickGap={28} />
+        <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip {...infobulle} />
-        <Line type="monotone" dataKey="signalements" name="Signalements" stroke={couleur} strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-      </LineChart>
+        <Area type="monotone" dataKey="signalements" name="Signalements" stroke={couleur} strokeWidth={2.25} fill="url(#degrade-evolution)" activeDot={{ r: 5 }} />
+      </AreaChart>
     </ResponsiveContainer>
   )
 }
@@ -44,16 +57,19 @@ export function CourbeActivite({ series, hauteur = 280 }) {
   )
 }
 
-// Performance mensuelle : courbe épurée sans axes (tableau de bord)
-export function CourbePerformance({ series, hauteur = 180 }) {
+// Performance mensuelle (tableau de bord) : signalements reçus et dépôts ramassés, jour par jour.
+// Des barres plutôt qu'une courbe : les comptes journaliers sont irréguliers et une courbe lissée les déformerait.
+export function CourbePerformance({ series, hauteur = 210 }) {
   return (
     <ResponsiveContainer width="100%" height={hauteur}>
-      <LineChart data={series.map((p) => ({ ...p, jour: jour(p.date) }))} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
-        <XAxis dataKey="jour" hide />
-        <YAxis hide domain={[0, 'dataMax + 1']} />
-        <Tooltip {...infobulle} />
-        <Line type="monotone" dataKey="signalements" name="Signalements" stroke="#10B981" strokeWidth={2.5} dot={false} />
-      </LineChart>
+      <BarChart data={series.map((p) => ({ ...p, jour: jour(p.date) }))} margin={{ top: 8, right: 4, bottom: 0, left: -22 }} barGap={1} barCategoryGap="18%">
+        <CartesianGrid stroke="#EEF2F0" vertical={false} />
+        <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={false} minTickGap={36} />
+        <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} width={40} />
+        <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
+        <Bar dataKey="signalements" name="Reçus" fill="#F59E0B" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="collectes" name="Ramassés" fill="#10B981" radius={[3, 3, 0, 0]} />
+      </BarChart>
     </ResponsiveContainer>
   )
 }

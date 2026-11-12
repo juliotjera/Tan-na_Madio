@@ -1,4 +1,5 @@
-@import '@fontsource-variable/inter';
+/* Inter avec l'axe de taille optique : les grands titres prennent automatiquement la coupe « Display » */
+@import '@fontsource-variable/inter/opsz.css';
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;
@@ -11,6 +12,7 @@
   }
   body {
     @apply bg-fond font-sans text-[15px] leading-relaxed text-encre antialiased;
+    font-optical-sizing: auto;
   }
   h1,
   h2,
@@ -19,6 +21,11 @@
   }
   h1 {
     font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+  h2 {
+    font-weight: 650;
+    letter-spacing: -0.015em;
   }
   :focus-visible {
     @apply outline-none ring-2 ring-vert-500 ring-offset-2 ring-offset-fond;
@@ -62,9 +69,9 @@
     @apply mb-1.5 block text-sm font-semibold text-encre;
   }
 
-  /* Libellé de section de la barre latérale (VUE D'ENSEMBLE, OPÉRATIONS…) */
+  /* Libellé de section de la barre latérale (Vue d'ensemble, Opérations…) */
   .section-menu {
-    @apply px-3 pb-2 pt-5 text-[11px] font-medium uppercase tracking-[0.14em] text-encre-pale;
+    @apply px-3 pb-1.5 pt-5 text-xs font-medium text-encre-pale;
   }
 
   .tableau {

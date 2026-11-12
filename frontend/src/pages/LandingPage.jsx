@@ -1,7 +1,8 @@
-// Accueil public (version d'origine) : carte sombre animée d'Antananarivo, rôles, inscription
+// Accueil public : carte sombre animée d'Antananarivo, comment ça marche (photos), pensé pour Antananarivo,
+// rôles, inscription. Photos Unsplash : voir CREDITS.md
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
-import { BarChart3, Building2, Home, Lock, Mail, MapPin, Rocket, Settings, Sprout, Truck } from 'lucide-react'
+import { Building2, Home, Languages, Lock, Mail, MapPin, Rocket, Settings, Smartphone, Sprout, Truck, WifiOff } from 'lucide-react'
 import { apercuPublic } from '../api'
 import { useAuth } from '../hooks/useAuth'
 import { useDonnees } from '../hooks/useDonnees'
@@ -11,10 +12,28 @@ import { Carte, MarqueurSignalement } from '../components/map/Carte'
 import { Logo } from '../components/layout/Logo'
 import { nombre } from '../utils/format'
 
-const PILIERS = [
-  { icone: MapPin, couleur: 'text-blue-500', titre: 'Signalez', texte: 'un déchet en 1 clic' },
-  { icone: Truck, couleur: 'text-vert-500', titre: 'Optimisez', texte: 'les tournées avec Dijkstra' },
-  { icone: BarChart3, couleur: 'text-violet-500', titre: 'Analysez', texte: 'les données en temps réel' },
+// Le parcours d'un dépôt d'ordures, du signalement au ramassage (une vraie séquence : étapes numérotées)
+const ETAPES = [
+  {
+    image: '/images/depot-rue.webp',
+    titre: 'Un habitant signale',
+    texte: 'Photo, position GPS et urgence en trente secondes. S’il est déjà signalé, il suffit de confirmer « Moi aussi ».',
+  },
+  {
+    image: '/images/camions-collecte.webp',
+    titre: 'La commune planifie',
+    texte: 'L’agent valide, puis l’itinéraire est calculé par les rues avec l’algorithme de Dijkstra : moins de kilomètres pour le même travail.',
+  },
+  {
+    image: '/images/benne.webp',
+    titre: 'Le camion ramasse',
+    texte: 'Le chauffeur suit l’ordre des arrêts sur son téléphone, même sans réseau. L’habitant est prévenu dès que le dépôt est enlevé.',
+  },
+]
+const ATOUTS = [
+  { icone: Languages, texte: 'En français et en malagasy' },
+  { icone: WifiOff, texte: 'Utilisable avec un réseau faible ou coupé' },
+  { icone: Smartphone, texte: 'Installable sur un téléphone, sans magasin d’applications' },
 ]
 const ROLES_ACCUEIL = [
   { icone: Home, titre: 'Citoyen', texte: 'Signalez les déchets dans votre quartier' },
@@ -69,10 +88,10 @@ export default function LandingPage() {
               <option value="fr">Français</option>
               <option value="mg">Malagasy</option>
             </select>
-            <Link to="/login" className="px-2 text-[15px] font-semibold text-ardoise hover:text-vert">
+            <Link to="/login" className="whitespace-nowrap px-1 text-sm font-semibold text-ardoise hover:text-vert sm:px-2 sm:text-[15px]">
               {t('Se connecter')}
             </Link>
-            <Link to="/register" className="btn-principal px-5">
+            <Link to="/register" className="btn-principal whitespace-nowrap px-4 sm:px-5">
               {t("S'inscrire")}
             </Link>
           </nav>
@@ -153,22 +172,50 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Les trois piliers */}
-      <section id="pourquoi" className="scroll-mt-20 bg-white py-20">
-        <div className="mx-auto max-w-[1180px] px-4 text-center sm:px-6">
-          <h2 className="text-[32px] font-bold sm:text-[38px]">{t('Pourquoi Tanàna Madio ?')}</h2>
-          <p className="mt-3 text-lg text-encre-doux">{t('Les trois piliers de notre système intelligent')}</p>
-          <div className="mt-12 grid gap-6 text-left md:grid-cols-3">
-            {PILIERS.map((p) => {
-              const Icone = p.icone
-              return (
-                <div key={p.titre} className="rounded-carte border border-trait/70 bg-gradient-to-br from-white to-fond/60 p-8 shadow-carte">
-                  <Icone className={`h-11 w-11 ${p.couleur}`} strokeWidth={1.75} />
-                  <h3 className="mt-6 text-2xl font-bold">{t(p.titre)}</h3>
-                  <p className="mt-1 text-lg text-encre-doux">{t(p.texte)}</p>
+      {/* Comment ça marche : du signalement au ramassage */}
+      <section id="pourquoi" className="scroll-mt-20 bg-white py-20 sm:py-24">
+        <div className="mx-auto max-w-[1180px] px-4 sm:px-6">
+          <div className="max-w-2xl">
+            <h2 className="text-[32px] font-bold leading-tight sm:text-[40px]">{t('Du signalement au ramassage')}</h2>
+            <p className="mt-3 text-lg text-encre-doux">{t('Trois étapes, trois acteurs, une seule application.')}</p>
+          </div>
+          <ol className="mt-12 grid gap-8 md:grid-cols-3">
+            {ETAPES.map((e, i) => (
+              <li key={e.titre}>
+                <div className="relative overflow-hidden rounded-carte">
+                  <img src={e.image} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                  <span className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white font-titre text-base font-bold text-vert shadow-carte">
+                    {i + 1}
+                  </span>
                 </div>
-              )
-            })}
+                <h3 className="mt-5 text-xl font-bold">{t(e.titre)}</h3>
+                <p className="mt-2 leading-relaxed text-encre-doux">{t(e.texte)}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Pensé pour Antananarivo */}
+      <section className="relative isolate overflow-hidden bg-sombre">
+        <img src="/images/tana-toits.webp" alt="" loading="lazy" className="absolute inset-0 -z-10 h-full w-full object-cover object-[50%_75%]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-sombre via-sombre/75 to-transparent" aria-hidden />
+        <div className="mx-auto max-w-[1180px] px-4 py-20 sm:px-6 sm:py-28">
+          <div className="max-w-xl">
+            <h2 className="text-[32px] font-bold leading-tight text-white sm:text-[40px]">{t('Pensé pour Antananarivo')}</h2>
+            <p className="mt-4 text-lg text-white/80">
+              {t('Des quartiers sur les collines, des rues étroites, un réseau mobile inégal : l’application est faite pour ces conditions.')}
+            </p>
+            <ul className="mt-8 space-y-3">
+              {ATOUTS.map(({ icone: Icone, texte }) => (
+                <li key={texte} className="flex items-center gap-3 text-white">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/20">
+                    <Icone className="h-4 w-4 text-menthe" />
+                  </span>
+                  {t(texte)}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
@@ -197,7 +244,7 @@ export default function LandingPage() {
             })}
           </div>
 
-          <div className="mx-auto mt-14 max-w-[1050px] rounded-carte border border-vert-300/70 bg-gradient-to-r from-vert-50 to-blue-50/60 p-10 text-center">
+          <div className="mx-auto mt-14 max-w-[1050px] rounded-carte border border-vert-300/70 bg-vert-50 p-10 text-center">
             <p className="text-lg text-encre-doux">{t('Premiers pas avec Tanàna Madio ?')}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
               <Link to="/register" className="btn-principal min-h-[60px] flex-col gap-0.5 px-8 text-base shadow-lg">
@@ -212,7 +259,7 @@ export default function LandingPage() {
       </section>
 
       {/* Pied de page */}
-      <footer className="bg-[#0F172A] text-white">
+      <footer className="bg-sombre text-white">
         <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div>
             <p className="flex items-center gap-2 font-titre text-lg font-bold">
