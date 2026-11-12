@@ -110,7 +110,7 @@ export default function DetailTournee() {
   const enCours = c.statut === 'en_cours'
 
   return (
-    <div className="rounded-carte border border-trait/60 bg-white/40 p-4 sm:p-6">
+    <div className="pb-24 sm:rounded-carte sm:border sm:border-trait/60 sm:bg-white/40 sm:p-6 lg:pb-6">
       <div className="mb-6 flex items-start gap-4">
         <button type="button" onClick={() => navigate('/chauffeur/tournees')} className="btn-discret mt-1 min-h-0 p-2" aria-label="Retour à mes tournées">
           <ArrowLeft className="h-5 w-5" />
@@ -138,12 +138,12 @@ export default function DetailTournee() {
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         {/* Carte et progression */}
         <div className="space-y-4">
-          <div className="carte relative p-5">
+          <div className="carte relative isolate p-2 sm:p-5">
             <Carte className="h-[340px] lg:h-[440px]" zoom={15}>
               <Itineraire trace={c.itineraire?.trace} etapes={etapes} depart={c.itineraire?.depart} onEtape={setCible} />
               <Cadrer points={cadre} max={17} />
             </Carte>
-            <div className="absolute bottom-8 left-8 z-[500] rounded-xl bg-white px-4 py-3 text-sm shadow-carte">
+            <div className="absolute bottom-5 left-5 z-10 rounded-xl bg-white/95 px-3 py-2 text-xs shadow-carte sm:bottom-8 sm:left-8 sm:px-4 sm:py-3 sm:text-sm">
               <p className="font-semibold">Légende</p>
               <p className="mt-1.5 flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-vert-500" /> ✓ Collecté
@@ -272,6 +272,39 @@ export default function DetailTournee() {
           </div>
         </div>
       </div>
+
+      {/* téléphone : l'action du moment toujours à portée de pouce, au-dessus de la barre de navigation */}
+      {(c.statut === 'planifiee' || enCours) && (
+        <div className="fixed inset-x-0 bottom-[calc(68px+env(safe-area-inset-bottom))] z-30 border-t border-trait bg-white/95 px-4 py-3 shadow-flotte backdrop-blur lg:hidden">
+          {c.statut === 'planifiee' && (
+            <button type="button" className="btn-principal w-full" disabled={occupe === 'demarrer'} onClick={() => agir('demarrer', () => demarrerCollecte(c.id), 'Tournée démarrée. Bonne route !')}>
+              {occupe === 'demarrer' ? <Spinner className="h-4 w-4 text-white" /> : <Play className="h-4 w-4" />} Démarrer la tournée
+            </button>
+          )}
+          {enCours && prochain && (
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ambre text-sm font-bold text-white">{prochain.ordre}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-encre-doux">
+                  Prochain arrêt · {faits}/{total}
+                </p>
+                <p className="truncate text-sm font-semibold">{prochain.description ?? prochain.adresse ?? 'Signalement'}</p>
+              </div>
+              <a href={guidage(prochain)} target="_blank" rel="noreferrer" className="btn-secondaire min-h-[42px] px-3" aria-label={`Guidage vers l’arrêt ${prochain.ordre}`}>
+                <Navigation className="h-4 w-4" />
+              </a>
+              <button type="button" className="btn-principal min-h-[42px] px-4" disabled={occupe === prochain.id} onClick={() => marquer(prochain)}>
+                {occupe === prochain.id ? <Spinner className="h-4 w-4 text-white" /> : <CheckCircle2 className="h-4 w-4" />} Marquer
+              </button>
+            </div>
+          )}
+          {enCours && !prochain && (
+            <button type="button" className="btn-principal w-full" disabled={attente > 0} onClick={() => setFin(true)}>
+              <CheckCircle2 className="h-4 w-4" /> {attente > 0 ? 'Envoi des points en attente…' : 'Terminer la tournée'}
+            </button>
+          )}
+        </div>
+      )}
 
       <Modal
         ouvert={fin}

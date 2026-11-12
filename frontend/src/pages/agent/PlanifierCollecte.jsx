@@ -368,7 +368,7 @@ export default function PlanifierCollecte() {
                 <CaseRecap libelle={tournees.length > 1 ? 'Camions' : 'Camion'} valeur={tournees.map((t) => t.camion.immatriculation).join(', ')} ton="ambre" />
               </div>
 
-              <div className="relative mt-4">
+              <div className="relative isolate mt-4">
                 <Carte className="h-[420px]">
                   {tournees.map((t, i) => (
                     <Itineraire
@@ -382,7 +382,7 @@ export default function PlanifierCollecte() {
                   ))}
                   <Cadrer points={cadre} marge={50} />
                 </Carte>
-                <div className="absolute right-3 top-3 z-[500] rounded-xl bg-white/95 px-4 py-3 text-xs shadow-carte">
+                <div className="absolute right-3 top-3 z-10 rounded-xl bg-white/95 px-4 py-3 text-xs shadow-carte">
                   <p className="mb-1 font-semibold">Légende</p>
                   {tournees.map((t, i) => (
                     <p key={t.camion.id} className="flex items-center gap-2">

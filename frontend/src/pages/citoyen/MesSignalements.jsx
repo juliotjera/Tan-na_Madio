@@ -107,7 +107,8 @@ export default function MesSignalements() {
       <ul className="grid gap-4 md:grid-cols-2">
         {liste.donnees?.signalements.map((s) => (
           <li key={s.id} className="carte flex flex-col overflow-hidden sm:flex-row">
-            <div className="h-40 shrink-0 bg-vert-50 sm:h-auto sm:w-36">
+            {/* sans photo : pas de grand cadre vide sur téléphone */}
+            <div className={`${s.photo_url ? 'h-40' : 'hidden sm:block'} shrink-0 bg-vert-50 sm:h-auto sm:w-36`}>
               {s.photo_url ? (
                 <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
               ) : (
@@ -126,6 +127,11 @@ export default function MesSignalements() {
                 <p className="mt-0.5 text-xs text-encre-pale" title={dateHeure(s.created_at)}>
                   {[s.adresse, s.zone_nom].filter(Boolean).join(' · ') || 'Hors zone de collecte'} · {ilYa(s.created_at)}
                 </p>
+                {s.nb_soutiens > 0 && (
+                  <p className="mt-1 text-xs font-semibold text-vert-700">
+                    {s.nb_soutiens} voisin{s.nb_soutiens > 1 ? 's' : ''} confirme{s.nb_soutiens > 1 ? 'nt' : ''} ce dépôt
+                  </p>
+                )}
               </div>
               <div className="mt-auto flex items-end gap-3">
                 <div className="flex-1">

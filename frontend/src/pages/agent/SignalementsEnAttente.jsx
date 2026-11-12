@@ -131,7 +131,7 @@ export default function SignalementsEnAttente() {
                   className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-vert-500' : 'hover:border-vert/30'}`}
                   onClick={() => setChoisi(s)}
                 >
-                  <div className="h-44 shrink-0 bg-vert-50 sm:h-auto sm:w-44">
+                  <div className={`${s.photo_url ? 'h-44' : 'hidden sm:block'} shrink-0 bg-vert-50 sm:h-auto sm:w-44`}>
                     {s.photo_url ? (
                       <button
                         type="button"
