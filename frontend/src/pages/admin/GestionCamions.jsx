@@ -8,6 +8,7 @@ import { useDonnees } from '../../hooks/useDonnees'
 import { StatutBadge } from '../../components/common/Badge'
 import { Champ, Chargement, Confirmation, Erreur, Modal, Spinner, Vide } from '../../components/common/ui'
 import { STATUTS_CAMION } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const VIDE = { immatriculation: '', modele: '', capacite_kg: '', statut: 'disponible', chauffeur_id: '', derniere_maintenance: '' }
 
@@ -63,11 +64,11 @@ function FormulaireCamion({ camion, ouvert, onFermer, onEnregistre }) {
       pied={
         <>
           <button type="button" className="btn-secondaire" onClick={onFermer}>
-            Annuler
+            <T>Annuler</T>
           </button>
           <button type="submit" form="camion" className="btn-principal" disabled={envoi}>
             {envoi && <Spinner className="h-4 w-4 text-white" />}
-            Enregistrer
+            <T>Enregistrer</T>
           </button>
         </>
       }
@@ -143,7 +144,7 @@ export default function GestionCamions() {
           <p className="mt-1 text-encre-doux">Gérez la flotte de collecte</p>
         </div>
         <button type="button" className="btn-principal px-5" onClick={() => setEdition({})}>
-          <Plus className="h-5 w-5" /> Ajouter un camion
+          <Plus className="h-5 w-5" /> <T>Ajouter un camion</T>
         </button>
       </div>
       {camions.erreur && <Erreur message={camions.erreur} onReessayer={camions.recharger} />}
@@ -158,12 +159,12 @@ export default function GestionCamions() {
           <table className="tableau min-w-[760px]">
             <thead>
               <tr>
-                <th>Immatriculation</th>
-                <th>Modèle</th>
-                <th>Capacité (kg)</th>
-                <th>Statut</th>
-                <th>Chauffeur</th>
-                <th>Actions</th>
+                <th><T>Immatriculation</T></th>
+                <th><T>Modèle</T></th>
+                <th><T>Capacité (kg)</T></th>
+                <th><T>Statut</T></th>
+                <th><T>Chauffeur</T></th>
+                <th><T>Actions</T></th>
               </tr>
             </thead>
             <tbody>

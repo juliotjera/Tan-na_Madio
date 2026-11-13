@@ -9,6 +9,7 @@ import { Cadrer, Carte, MarqueurSignalement, Zones } from '../../components/map/
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, EnTete, Erreur, Modal, Pagination, Segments, Spinner, Vide } from '../../components/common/ui'
 import { dateHeure, ilYa, pluriel, URGENCES } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const ONGLETS = [
   { valeur: 'en_attente', libelle: 'En attente' },
@@ -80,7 +81,7 @@ export default function SignalementsEnAttente() {
             }}
           >
             {exportEnCours ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-            Exporter en CSV
+            <T>Exporter en CSV</T>
           </button>
         }
       />
@@ -96,7 +97,7 @@ export default function SignalementsEnAttente() {
           libelle="Statut"
         />
         <select className="champ w-auto py-2" value={urgence} onChange={(e) => (setUrgence(e.target.value), setPage(1))} aria-label="Urgence">
-          <option value="">Toutes urgences</option>
+          <option value=""><T>Toutes urgences</T></option>
           {Object.entries(URGENCES).map(([k, u]) => (
             <option key={k} value={k}>
               {u.libelle}
@@ -104,7 +105,7 @@ export default function SignalementsEnAttente() {
           ))}
         </select>
         <select className="champ w-auto py-2" value={zone} onChange={(e) => (setZone(e.target.value), setPage(1))} aria-label="Zone">
-          <option value="">Toutes les zones</option>
+          <option value=""><T>Toutes les zones</T></option>
           {zones.donnees?.map((z) => (
             <option key={z.id} value={z.id}>
               {z.nom}
@@ -176,7 +177,7 @@ export default function SignalementsEnAttente() {
                         <>
                           <button type="button" className="btn-accent min-h-[38px]" disabled={action === s.id} onClick={() => decider(s, 'valide')}>
                             {action === s.id ? <Spinner className="h-4 w-4 text-current" /> : <Check className="h-4 w-4" />}
-                            Valider
+                            <T>Valider</T>
                           </button>
                           <button
                             type="button"
@@ -188,13 +189,13 @@ export default function SignalementsEnAttente() {
                               setARejeter(s)
                             }}
                           >
-                            <X className="h-4 w-4" /> Rejeter
+                            <X className="h-4 w-4" /> <T>Rejeter</T>
                           </button>
                         </>
                       )}
                       {['valide', 'rejete'].includes(s.statut) && (
                         <button type="button" className="btn-secondaire min-h-[38px]" disabled={action === s.id} onClick={() => decider(s, 'en_attente')}>
-                          <RotateCcw className="h-4 w-4" /> Remettre en attente
+                          <RotateCcw className="h-4 w-4" /> <T>Remettre en attente</T>
                         </button>
                       )}
                     </div>
@@ -239,7 +240,7 @@ export default function SignalementsEnAttente() {
         pied={
           <>
             <button type="button" className="btn-secondaire" onClick={() => setARejeter(null)}>
-              Annuler
+              <T>Annuler</T>
             </button>
             <button
               type="button"
@@ -248,7 +249,7 @@ export default function SignalementsEnAttente() {
               onClick={() => decider(aRejeter, 'rejete', motif === 'autre' ? motifLibre.trim() : motif)}
             >
               {action === aRejeter?.id && <Spinner className="h-4 w-4" />}
-              Rejeter
+              <T>Rejeter</T>
             </button>
           </>
         }

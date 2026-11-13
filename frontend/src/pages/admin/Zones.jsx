@@ -10,6 +10,7 @@ import { useDonnees } from '../../hooks/useDonnees'
 import { AuClic, Cadrer, Carte, Zones as CalqueZones } from '../../components/map/Carte'
 import { Champ, Chargement, Confirmation, EnTete, Erreur, Modal, Spinner } from '../../components/common/ui'
 import { pluriel } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const VIDE = { nom: '', description: '', frequence_collecte_jours: '7', actif: true }
 
@@ -93,7 +94,7 @@ export default function Zones() {
         texte="Définissez les secteurs de collecte"
         actions={
           <button type="button" className="btn-principal" onClick={() => ouvrir(null)}>
-            <Plus className="h-4 w-4" /> Ajouter une zone
+            <Plus className="h-4 w-4" /> <T>Ajouter une zone</T>
           </button>
         }
       />
@@ -113,11 +114,11 @@ export default function Zones() {
             {z.description && <p className="mt-2 text-sm text-encre-doux">{z.description}</p>}
             <div className="mt-3 space-y-1 border-b border-trait pb-4 text-sm">
               <p className="flex justify-between">
-                <span className="text-encre-doux">Fréquence :</span>
+                <span className="text-encre-doux"><T>Fréquence :</T></span>
                 <span className="font-semibold">Tous les {z.frequence_collecte_jours} jours</span>
               </p>
               <p className="flex justify-between">
-                <span className="text-encre-doux">Signalements :</span>
+                <span className="text-encre-doux"><T>Signalements :</T></span>
                 <span className={z.nb_a_traiter ? 'font-semibold text-ambre-700' : 'font-semibold'}>
                   {z.nb_signalements} dont {z.nb_a_traiter} à traiter
                 </span>
@@ -125,10 +126,10 @@ export default function Zones() {
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <button type="button" className="btn-secondaire min-h-[38px]" onClick={() => ouvrir(z)}>
-                <Pencil className="h-4 w-4" /> Modifier
+                <Pencil className="h-4 w-4" /> <T>Modifier</T>
               </button>
               <button type="button" className="btn min-h-[38px] text-alerte-700 hover:bg-alerte-50" onClick={() => setASupprimer(z)}>
-                <Trash2 className="h-4 w-4" /> Supprimer
+                <Trash2 className="h-4 w-4" /> <T>Supprimer</T>
               </button>
             </div>
             <button type="button" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-vert hover:underline disabled:opacity-50" disabled={bascule === z.id} onClick={() => basculerActif(z)}>
@@ -147,11 +148,11 @@ export default function Zones() {
         pied={
           <>
             <button type="button" className="btn-secondaire" onClick={() => setEdition(null)}>
-              Annuler
+              <T>Annuler</T>
             </button>
             <button type="submit" form="zone" className="btn-principal" disabled={envoi}>
               {envoi && <Spinner className="h-4 w-4 text-white" />}
-              Enregistrer
+              <T>Enregistrer</T>
             </button>
           </>
         }

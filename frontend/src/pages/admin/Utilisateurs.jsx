@@ -9,6 +9,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Champ, Chargement, Compteur, Confirmation, EnTete, Erreur, Modal, Pagination, Segments, Spinner } from '../../components/common/ui'
 import { ROLES } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const FILTRES = [{ valeur: '', libelle: 'Tous' }, ...Object.entries(ROLES).map(([valeur, libelle]) => ({ valeur, libelle: `${libelle}s` }))]
 // couleur de la puce de rôle, comme dans la version d'origine
@@ -60,11 +61,11 @@ function FormulaireCompte({ ouvert, onFermer, onCree }) {
       pied={
         <>
           <button type="button" className="btn-secondaire" onClick={onFermer}>
-            Annuler
+            <T>Annuler</T>
           </button>
           <button type="submit" form="nouveau-compte" className="btn-principal" disabled={envoi}>
             {envoi && <Spinner className="h-4 w-4 text-white" />}
-            Créer le compte
+            <T>Créer le compte</T>
           </button>
         </>
       }
@@ -167,11 +168,11 @@ function FormulaireModification({ compte, onFermer, onModifie }) {
       pied={
         <>
           <button type="button" className="btn-secondaire" onClick={onFermer}>
-            Annuler
+            <T>Annuler</T>
           </button>
           <button type="submit" form="modifier-compte" className="btn-principal" disabled={envoi}>
             {envoi && <Spinner className="h-4 w-4 text-white" />}
-            Enregistrer
+            <T>Enregistrer</T>
           </button>
         </>
       }
@@ -290,7 +291,7 @@ export default function Utilisateurs() {
         texte="Gérez les comptes et les accès"
         actions={
           <button type="button" className="btn-principal" onClick={() => setCreation(true)}>
-            <Plus className="h-4 w-4" /> Ajouter un utilisateur
+            <Plus className="h-4 w-4" /> <T>Ajouter un utilisateur</T>
           </button>
         }
       />
@@ -328,11 +329,11 @@ export default function Utilisateurs() {
           <table className="tableau min-w-[760px]">
             <thead>
               <tr>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Rôle</th>
-                <th>Statut</th>
-                <th>Actions</th>
+                <th><T>Nom</T></th>
+                <th><T>Email</T></th>
+                <th><T>Rôle</T></th>
+                <th><T>Statut</T></th>
+                <th><T>Actions</T></th>
               </tr>
             </thead>
             <tbody>
@@ -427,11 +428,11 @@ export default function Utilisateurs() {
         pied={
           <>
             <button type="button" className="btn-secondaire" onClick={() => setSuppression(null)}>
-              Annuler
+              <T>Annuler</T>
             </button>
             <button type="button" className="btn-principal bg-alerte hover:bg-red-700" disabled={suppr} onClick={supprimer}>
               {suppr && <Spinner className="h-4 w-4 text-white" />}
-              Supprimer
+              <T>Supprimer</T>
             </button>
           </>
         }
@@ -466,7 +467,7 @@ export default function Utilisateurs() {
             <div className="flex items-center gap-2 rounded-xl border border-vert-300 bg-vert-50 p-3">
               <code className="flex-1 select-all text-center font-mono text-xl font-semibold tracking-wider text-ardoise">{provisoire.mot_de_passe}</code>
               <button type="button" className="btn-secondaire min-h-[38px]" onClick={copier}>
-                <Copy className="h-4 w-4" /> Copier
+                <Copy className="h-4 w-4" /> <T>Copier</T>
               </button>
             </div>
           </div>

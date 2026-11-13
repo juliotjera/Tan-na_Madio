@@ -8,6 +8,7 @@ import { Carte, LegendeUrgences, MarqueurSignalement, Zones } from '../../compon
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chiffre, EnTete, Erreur } from '../../components/common/ui'
 import { ilYa, jourHeure, km, pluriel } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 export default function AgentDashboard() {
   const { user } = useAuth()
@@ -27,7 +28,7 @@ export default function AgentDashboard() {
         texte="Les signalements à vérifier et les tournées à venir."
         actions={
           <Link to="/agent/planifier" className="btn-principal">
-            <Route className="h-4 w-4" /> Planifier une tournée
+            <Route className="h-4 w-4" /> <T>Planifier une tournée</T>
           </Link>
         }
       />
@@ -56,7 +57,7 @@ export default function AgentDashboard() {
                   </p>
                 </div>
                 <Link to="/agent/planifier" state={{ zoneId: z.id }} className="btn-secondaire min-h-[36px] shrink-0 px-3">
-                  Planifier
+                  <T>Planifier</T>
                 </Link>
               </li>
             ))}
@@ -89,9 +90,9 @@ export default function AgentDashboard() {
         <aside className="space-y-6">
           <div className="carte p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">À vérifier en priorité</h2>
+              <h2 className="text-lg font-semibold"><T>À vérifier en priorité</T></h2>
               <Link to="/agent/signalements" className="text-sm font-semibold text-vert hover:underline">
-                Tout voir
+                <T>Tout voir</T>
               </Link>
             </div>
             {urgents.donnees?.signalements.length === 0 && <p className="mt-3 text-sm text-encre-doux">Rien en attente. Tous les signalements ont été traités.</p>}
@@ -111,9 +112,9 @@ export default function AgentDashboard() {
 
           <div className="carte p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Tournées planifiées</h2>
+              <h2 className="text-lg font-semibold"><T>Tournées planifiées</T></h2>
               <Link to="/agent/collectes" className="text-sm font-semibold text-vert hover:underline">
-                Toutes
+                <T>Toutes</T>
               </Link>
             </div>
             {tournees.donnees?.collectes.length === 0 && <p className="mt-3 text-sm text-encre-doux">Aucune tournée à venir.</p>}

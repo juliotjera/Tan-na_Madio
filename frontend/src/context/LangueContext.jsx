@@ -44,3 +44,9 @@ export function LangueProvider({ children }) {
 }
 
 export const useLangue = () => useContext(LangueContext)
+
+// <T>Valider</T> : texte traduit dans la langue choisie (pour les boutons et libellés écrits dans les pages)
+export function T({ children }) {
+  const { t } = useLangue()
+  return typeof children === 'string' ? t(children) : children
+}

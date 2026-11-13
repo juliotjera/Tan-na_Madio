@@ -13,6 +13,7 @@ import { StatutBadge } from '../../components/common/Badge'
 import { Champ, Chargement, Erreur, Modal, Spinner } from '../../components/common/ui'
 import { kg, km } from '../../utils/format'
 import { avecPointsEnAttente, erreurReseau, garderTournee, mettreEnAttente, pointsEnAttente, synchroniser, tourneeGardee } from '../../utils/horsLigne'
+import { T } from '../../context/LangueContext'
 
 // Lien vers l'application de navigation du téléphone
 const guidage = (s) => `https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}&travelmode=driving`
@@ -144,7 +145,7 @@ export default function DetailTournee() {
               <Cadrer points={cadre} max={17} />
             </Carte>
             <div className="absolute bottom-5 left-5 z-10 rounded-xl bg-white/95 px-3 py-2 text-xs shadow-carte sm:bottom-8 sm:left-8 sm:px-4 sm:py-3 sm:text-sm">
-              <p className="font-semibold">Légende</p>
+              <p className="font-semibold"><T>Légende</T></p>
               <p className="mt-1.5 flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-vert-500" /> ✓ Collecté
               </p>
@@ -157,13 +158,13 @@ export default function DetailTournee() {
           <div className="carte p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="font-titre text-lg font-bold">Progression</p>
+                <p className="font-titre text-lg font-bold"><T>Progression</T></p>
                 <p className="text-sm text-encre-doux">
                   {faits} / {total} Points Collecté{faits > 1 ? 's' : ''}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-encre-doux">Distance estimée</p>
+                <p className="text-sm text-encre-doux"><T>Distance estimée</T></p>
                 <p className="font-semibold">{km(c.distance_km)}</p>
               </div>
             </div>
@@ -181,7 +182,7 @@ export default function DetailTournee() {
           <div className="carte p-5">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-encre-doux">Statut</p>
+                <p className="text-sm text-encre-doux"><T>Statut</T></p>
                 <div className="mt-1">
                   <StatutBadge statut={c.statut} type="collecte" />
                 </div>
@@ -190,15 +191,15 @@ export default function DetailTournee() {
             </div>
             <dl className="mt-4 space-y-3">
               <div>
-                <dt className="text-sm text-encre-doux">Camion</dt>
+                <dt className="text-sm text-encre-doux"><T>Camion</T></dt>
                 <dd className="font-semibold">{c.camion_immatriculation}</dd>
               </div>
               <div>
-                <dt className="text-sm text-encre-doux">Zone</dt>
+                <dt className="text-sm text-encre-doux"><T>Zone</T></dt>
                 <dd className="font-semibold">{c.zone_nom ?? 'Plusieurs zones'}</dd>
               </div>
               <div>
-                <dt className="text-sm text-encre-doux">Date planifiée</dt>
+                <dt className="text-sm text-encre-doux"><T>Date planifiée</T></dt>
                 <dd className="font-semibold">{dateFr(c.date_planifiee)}</dd>
               </div>
             </dl>
@@ -211,7 +212,7 @@ export default function DetailTournee() {
               {enCours && (
                 <>
                   <button type="button" className="btn-principal" disabled={!tousFaits || attente > 0} onClick={() => setFin(true)}>
-                    <CheckCircle2 className="h-4 w-4" /> Terminer la tournée
+                    <CheckCircle2 className="h-4 w-4" /> <T>Terminer la tournée</T>
                   </button>
                   {!tousFaits && <p className="mt-2 text-xs text-encre-doux">Terminez la tournée une fois tous les points collectés.</p>}
                   {tousFaits && attente > 0 && <p className="mt-2 text-xs text-ambre-700">Les points gardés hors connexion doivent d’abord être envoyés.</p>}
@@ -227,7 +228,7 @@ export default function DetailTournee() {
           </div>
 
           <div className="carte p-5">
-            <h2 className="text-xl">Points à collecter</h2>
+            <h2 className="text-xl"><T>Points à collecter</T></h2>
             <ol className="mt-4 max-h-[520px] space-y-3 overflow-y-auto pr-1">
               {c.signalements.map((s) => (
                 <li key={s.id} className={`rounded-xl border p-3 ${enCours && s.id === prochain?.id ? 'border-ambre bg-ambre-50/40' : 'border-trait'}`}>
@@ -313,7 +314,7 @@ export default function DetailTournee() {
         pied={
           <>
             <button type="button" className="btn-secondaire" onClick={() => setFin(false)}>
-              Annuler
+              <T>Annuler</T>
             </button>
             <button
               type="button"
@@ -325,7 +326,7 @@ export default function DetailTournee() {
               }}
             >
               {occupe === 'terminer' && <Spinner className="h-4 w-4 text-white" />}
-              Terminer
+              <T>Terminer</T>
             </button>
           </>
         }

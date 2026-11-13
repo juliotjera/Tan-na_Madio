@@ -15,6 +15,7 @@ import { Cadrer, Carte, Itineraire } from '../../components/map/Carte'
 import { UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, Spinner } from '../../components/common/ui'
 import { dateCourte, duree, kg, km, pluriel } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const ETAPES = [
   ['Étape 1', 'Sélection'],
@@ -260,7 +261,7 @@ export default function PlanifierCollecte() {
 
               <div className="flex justify-end gap-3 border-t border-trait pt-5">
                 <button type="button" className="btn-secondaire" onClick={() => navigate('/agent')}>
-                  Annuler
+                  <T>Annuler</T>
                 </button>
                 <button type="button" className="btn-accent" disabled={!etape1Ok} onClick={() => setEtape(1)}>
                   Suivant <ChevronRight className="h-4 w-4" />
@@ -383,7 +384,7 @@ export default function PlanifierCollecte() {
                   <Cadrer points={cadre} marge={50} />
                 </Carte>
                 <div className="absolute right-3 top-3 z-10 rounded-xl bg-white/95 px-4 py-3 text-xs shadow-carte">
-                  <p className="mb-1 font-semibold">Légende</p>
+                  <p className="mb-1 font-semibold"><T>Légende</T></p>
                   {tournees.map((t, i) => (
                     <p key={t.camion.id} className="flex items-center gap-2">
                       <span className="h-1 w-5 rounded" style={{ background: COULEURS_TOURNEES[i % COULEURS_TOURNEES.length] }} /> Itinéraire {tournees.length > 1 ? t.camion.immatriculation : 'optimisé'}
@@ -451,7 +452,7 @@ export default function PlanifierCollecte() {
               </h2>
               <dl className="mt-4 grid gap-4 rounded-xl bg-fond/70 p-4 sm:grid-cols-3">
                 <div>
-                  <dt className="text-xs text-encre-pale">Zone</dt>
+                  <dt className="text-xs text-encre-pale"><T>Zone</T></dt>
                   <dd className="font-semibold">{zone?.nom ?? 'Toute la ville'}</dd>
                 </div>
                 <div>
@@ -463,7 +464,7 @@ export default function PlanifierCollecte() {
                   <dd className="font-semibold">{tournees.map((t) => t.camion.chauffeur_nom ?? 'Non assigné').join(', ')}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-encre-pale">Date planifiée</dt>
+                  <dt className="text-xs text-encre-pale"><T>Date planifiée</T></dt>
                   <dd className="font-semibold">{new Date(date).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</dd>
                 </div>
                 <div>

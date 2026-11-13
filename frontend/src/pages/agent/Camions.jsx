@@ -6,6 +6,7 @@ import { useDonnees } from '../../hooks/useDonnees'
 import { StatutBadge } from '../../components/common/Badge'
 import { Chargement, EnTete, Erreur, Vide } from '../../components/common/ui'
 import { dateCourte, kg } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 export default function Camions() {
   const camions = useDonnees(() => listerCamions(), [], { intervalle: 30000 })
@@ -37,7 +38,7 @@ export default function Camions() {
               </div>
               <div className="flex items-center gap-2.5">
                 <UserRound className="h-4 w-4 text-encre-pale" />
-                <dt className="sr-only">Chauffeur</dt>
+                <dt className="sr-only"><T>Chauffeur</T></dt>
                 <dd>{c.chauffeur_nom ?? <span className="text-ambre-700">Aucun chauffeur affecté</span>}</dd>
               </div>
               <div className="flex items-center gap-2.5">

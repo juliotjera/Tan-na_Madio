@@ -12,6 +12,7 @@ import { Cadrer, Carte, Itineraire } from '../../components/map/Carte'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, Confirmation, EnTete, Erreur, Modal, Pagination, Segments, Vide } from '../../components/common/ui'
 import { duree, kg } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const FILTRES = [
   { valeur: '', libelle: 'Toutes' },
@@ -73,7 +74,7 @@ export default function Collectes() {
           <>
             <BoutonExport ressource="collectes" params={{ statut: statut || undefined }} />
             <Link to="/agent/planifier" className="btn-principal">
-              <Route className="h-4 w-4" /> Planifier une tournée
+              <Route className="h-4 w-4" /> <T>Planifier une tournée</T>
             </Link>
           </>
         }
@@ -119,11 +120,11 @@ export default function Collectes() {
                 </span>
                 {x.statut === 'planifiee' && (
                   <button type="button" className="btn min-h-[38px] bg-alerte text-white hover:bg-red-700" onClick={() => setAAnnuler(x.id)}>
-                    Annuler
+                    <T>Annuler</T>
                   </button>
                 )}
                 <button type="button" className="btn-secondaire min-h-[38px]" onClick={() => setOuverte(x.id)}>
-                  Détails
+                  <T>Détails</T>
                 </button>
               </div>
             </li>

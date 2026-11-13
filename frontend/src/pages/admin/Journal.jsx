@@ -5,6 +5,7 @@ import { journal } from '../../api'
 import { useDonnees } from '../../hooks/useDonnees'
 import { Chargement, EnTete, Erreur, Pagination, Vide } from '../../components/common/ui'
 import { dateHeure, ROLES } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 // libellés lisibles des actions enregistrées par l'API
 const ACTIONS = {
@@ -75,7 +76,7 @@ export default function Journal() {
               setPage(1)
             }}
           >
-            <option value="">Toutes</option>
+            <option value=""><T>Toutes</T></option>
             {d?.actions?.map((a) => (
               <option key={a} value={a}>
                 {libelleAction(a)}

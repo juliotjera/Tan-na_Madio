@@ -8,6 +8,7 @@ import { CourbePerformance } from '../../components/common/Graphiques'
 import { StatutBadge } from '../../components/common/Badge'
 import { Chargement, Chiffre, Erreur } from '../../components/common/ui'
 import { dateCourte, nombre } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 const fmt = (v) => (v == null ? '—' : v.toLocaleString('fr-FR'))
 
@@ -48,13 +49,13 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-[28px]">Tableau de bord administrateur</h1>
-        <p className="mt-1 text-encre-doux">Vue d’ensemble de la plateforme Tanàna Madio</p>
+        <p className="mt-1 text-encre-doux"><T>Vue d’ensemble de la plateforme Tanàna Madio</T></p>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1fr_1.15fr]">
         {/* Actions rapides */}
         <section className="carte p-6">
-          <h2 className="text-lg">Actions rapides</h2>
+          <h2 className="text-lg"><T>Actions rapides</T></h2>
           <p className="text-sm text-encre-doux">Les écrans les plus utilisés, à portée d’un clic</p>
           <div className="mt-5 grid grid-cols-2 gap-3 border-t border-trait pt-5 sm:grid-cols-4">
             <Link to="/agent/signalements" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-vert-300 hover:bg-vert-50">
@@ -76,7 +77,7 @@ export default function AdminDashboard() {
         <section className="rounded-carte bg-gradient-to-br from-vert to-vert-500 p-6 text-white shadow-flotte">
           <div className="grid gap-5 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
             <div>
-              <h2 className="text-[26px] leading-tight text-white">Priorités du moment</h2>
+              <h2 className="text-[26px] leading-tight text-white"><T>Priorités du moment</T></h2>
               <p className="mt-2 max-w-xs text-sm text-white/85">Ce qui attend une décision de la commune, du plus urgent au plus courant.</p>
             </div>
             <ul className="space-y-2">
@@ -114,7 +115,7 @@ export default function AdminDashboard() {
 
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="carte p-6">
-          <h2 className="text-xl">Signalements par statut</h2>
+          <h2 className="text-xl"><T>Signalements par statut</T></h2>
           {s && (
             <div className="mt-5 space-y-5">
               <Barre libelle="En attente" valeur={s.en_attente} total={totalStatuts} couleur="bg-ambre" />
@@ -126,15 +127,15 @@ export default function AdminDashboard() {
         <section className="carte p-6">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h2 className="text-xl">Performance mensuelle</h2>
+              <h2 className="text-xl"><T>Performance mensuelle</T></h2>
               <p className="text-sm text-encre-doux">30 derniers jours</p>
             </div>
             <p className="flex gap-4 text-xs text-encre-doux">
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-ambre" /> Reçus
+                <span className="h-2 w-2 rounded-full bg-ambre" /> <T>Reçus</T>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-vert-500" /> Ramassés
+                <span className="h-2 w-2 rounded-full bg-vert-500" /> <T>Ramassés</T>
               </span>
             </p>
           </div>
@@ -144,7 +145,7 @@ export default function AdminDashboard() {
 
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="carte p-6">
-          <h2 className="text-xl">Derniers signalements</h2>
+          <h2 className="text-xl"><T>Derniers signalements</T></h2>
           <ul className="mt-4 divide-y divide-trait">
             {signalements.donnees?.signalements.map((x) => (
               <li key={x.id} className="flex items-center gap-3 py-3">
@@ -167,7 +168,7 @@ export default function AdminDashboard() {
           </ul>
         </section>
         <section className="carte p-6">
-          <h2 className="text-xl">Dernières collectes</h2>
+          <h2 className="text-xl"><T>Dernières collectes</T></h2>
           <ul className="mt-4 divide-y divide-trait">
             {collectes.donnees?.collectes.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 py-3">

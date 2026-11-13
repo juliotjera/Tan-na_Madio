@@ -11,6 +11,7 @@ import { CourbeEvolution } from '../../components/common/Graphiques'
 import { Cadrer, Carte } from '../../components/map/Carte'
 import { Chargement, Chiffre, Erreur, Spinner } from '../../components/common/ui'
 import { dateCourte, nombre } from '../../utils/format'
+import { T } from '../../context/LangueContext'
 
 // période choisie → date de début
 const PERIODES = {
@@ -52,7 +53,7 @@ export default function Stats() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-[28px]">Statistiques Globales</h1>
-          <p className="mt-1 text-encre-doux">Analyse des performances du système</p>
+          <p className="mt-1 text-encre-doux"><T>Analyse des performances du système</T></p>
         </div>
         <div className="flex gap-3">
           <select className="rounded-xl border-0 bg-slate-100 px-4 py-2.5 text-sm font-medium" value={periodeCle} onChange={(e) => setPeriodeCle(e.target.value)} aria-label="Période">
@@ -78,11 +79,11 @@ export default function Stats() {
 
       <div className="grid gap-5 xl:grid-cols-2">
         <section className="carte p-6">
-          <h2 className="text-xl">Évolution des signalements</h2>
+          <h2 className="text-xl"><T>Évolution des signalements</T></h2>
           <div className="mt-4">{periode.donnees ? <CourbeEvolution series={periode.donnees.series} hauteur={260} /> : <Chargement lignes={1} />}</div>
         </section>
         <section className="carte p-6">
-          <h2 className="text-xl">Répartition par zone</h2>
+          <h2 className="text-xl"><T>Répartition par zone</T></h2>
           <ul className="mt-4 space-y-4">
             {zones.donnees?.map((z) => (
               <li key={z.id}>
@@ -103,7 +104,7 @@ export default function Stats() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="flex items-center gap-2 text-xl">
-              <Flame className="h-5 w-5 text-ambre" /> Points noirs
+              <Flame className="h-5 w-5 text-ambre" /> <T>Points noirs</T>
             </h2>
             <p className="text-sm text-encre-doux">Lieux où les dépôts reviennent (au moins 2 signalements dans un rayon d’environ 200 m)</p>
           </div>
@@ -145,7 +146,7 @@ export default function Stats() {
       </section>
 
       <section className="carte p-6">
-        <h2 className="text-xl">Performance des camions</h2>
+        <h2 className="text-xl"><T>Performance des camions</T></h2>
         {camions.chargement && !camions.donnees && <Chargement lignes={2} />}
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {camions.donnees?.map((c) => (
