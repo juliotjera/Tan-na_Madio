@@ -121,4 +121,4 @@ docs/API.md           référence de l’API
 
 ## Déploiement
 
-Guide pas à pas : [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md). Le fichier [`render.yaml`](render.yaml) décrit un service unique (l’API sert aussi l’interface compilée). Il faut une base PostgreSQL avec PostGIS (Neon, Supabase…) dans `DATABASE_URL`. Les photos sont enregistrées sur le disque du serveur : sur un hébergement gratuit à disque éphémère, prévoir un stockage d’objets pour les conserver.
+Guide pas à pas : [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md). Le fichier [`render.yaml`](render.yaml) décrit un service unique (l’API sert aussi l’interface compilée). Il faut une base PostgreSQL avec PostGIS (Neon, Supabase…) dans `DATABASE_URL`. Les photos sont gardées dans PostgreSQL (`PHOTOS_STOCKAGE=base`), donc conservées malgré le disque éphémère de l’offre gratuite.
