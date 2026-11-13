@@ -32,7 +32,7 @@ test('agent : valide le signalement, puis le voit dans les validés', async ({ p
   const carte = page.locator('li').filter({ hasText: 'test de bout en bout' })
   await expect(carte).toBeVisible()
   await carte.getByRole('button', { name: 'Valider' }).click()
-  await expect(page.getByText('Signalement validé')).toBeVisible()
+  await expect(page.getByText('Signalement validé : +5 points pour le citoyen')).toBeVisible()
   await page.getByRole('radio', { name: 'Validés' }).click()
   await expect(page.locator('li').filter({ hasText: 'test de bout en bout' })).toBeVisible()
 })
@@ -44,7 +44,7 @@ test('agent : rejette un signalement avec un motif', async ({ page }) => {
   const fenetre = page.getByRole('dialog', { name: 'Rejeter le signalement' })
   await fenetre.getByText('Dépôt déjà ramassé').click()
   await fenetre.getByRole('button', { name: 'Rejeter' }).click()
-  await expect(page.getByText('Signalement rejeté')).toBeVisible()
+  await expect(page.getByText('Signalement rejeté', { exact: true })).toBeVisible()
 })
 
 test('chauffeur : démarre sa tournée, ramasse chaque point et la termine', async ({ page }) => {
@@ -53,7 +53,7 @@ test('chauffeur : démarre sa tournée, ramasse chaque point et la termine', asy
   await page.locator('a[href^="/chauffeur/tournees/"]').first().click()
   await expect(page.getByRole('heading', { name: 'Détail de la tournée' })).toBeVisible()
   await page.getByRole('button', { name: 'Démarrer la tournée' }).click()
-  await expect(page.getByText('Tournée démarrée')).toBeVisible()
+  await expect(page.getByText('Tournée démarrée. Bonne route !')).toBeVisible()
 
   const marquer = page.getByRole('button', { name: 'Marquer', exact: true })
   while ((await marquer.count()) > 0) {
