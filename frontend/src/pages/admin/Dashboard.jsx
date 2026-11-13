@@ -74,11 +74,12 @@ export default function AdminDashboard() {
         </section>
 
         {/* Priorités : ce qui attend une décision maintenant, chaque ligne mène à l'écran où agir */}
-        <section className="rounded-carte bg-gradient-to-br from-vert to-vert-500 p-6 text-white shadow-flotte">
+        <section className="relative overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(90%_120%_at_100%_0%,rgba(0,128,67,0.45),transparent_60%)] p-6 text-white shadow-flotte ring-1 ring-or/20">
           <div className="grid gap-5 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
             <div>
               <h2 className="text-[26px] leading-tight text-white"><T>Priorités du moment</T></h2>
-              <p className="mt-2 max-w-xs text-sm text-white/85">Ce qui attend une décision de la commune, du plus urgent au plus courant.</p>
+              <p className="mt-2 max-w-xs text-sm text-white/70">Ce qui attend une décision de la commune, du plus urgent au plus courant.</p>
+              <span className="mt-5 block h-px w-16 bg-or/70" aria-hidden />
             </div>
             <ul className="space-y-2">
               {[
@@ -88,11 +89,11 @@ export default function AdminDashboard() {
                 { icone: Truck, libelle: 'Camions disponibles', valeur: s ? `${s.camions_disponibles}/${s.camions}` : null, vers: '/agent/planifier' },
               ].map(({ icone: Icone, libelle, valeur, vers }) => (
                 <li key={libelle}>
-                  <Link to={vers} className="group flex items-center gap-3 rounded-xl bg-white/10 px-3.5 py-2.5 ring-1 ring-white/15 transition hover:bg-white/20">
-                    <Icone className="h-4 w-4 shrink-0 text-white/85" />
-                    <span className="flex-1 text-sm">{libelle}</span>
-                    <span className="chiffre text-lg">{valeur ?? '—'}</span>
-                    <ChevronRight className="h-4 w-4 text-white/60 transition group-hover:translate-x-0.5" />
+                  <Link to={vers} className="group flex items-center gap-3 rounded-xl bg-white/[0.06] px-3.5 py-2.5 ring-1 ring-white/10 transition duration-200 hover:bg-white/[0.1] hover:ring-or/40">
+                    <Icone className="h-4 w-4 shrink-0 text-or" />
+                    <span className="flex-1 text-sm text-white/85">{libelle}</span>
+                    <span className="chiffre text-lg text-or-clair">{valeur ?? '—'}</span>
+                    <ChevronRight className="h-4 w-4 text-white/40 transition group-hover:translate-x-0.5 group-hover:text-or" />
                   </Link>
                 </li>
               ))}
@@ -132,10 +133,10 @@ export default function AdminDashboard() {
             </div>
             <p className="flex gap-4 text-xs text-encre-doux">
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-ambre" /> <T>Reçus</T>
+                <span className="h-2 w-2 rounded-full bg-or" /> <T>Reçus</T>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-vert-500" /> <T>Ramassés</T>
+                <span className="h-2 w-2 rounded-full bg-vert" /> <T>Ramassés</T>
               </span>
             </p>
           </div>

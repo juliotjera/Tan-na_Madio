@@ -5,8 +5,8 @@ import { fr } from 'date-fns/locale'
 
 const axe = { fontSize: 12, fill: '#9CA3AF' }
 const infobulle = {
-  contentStyle: { borderRadius: 12, border: '1px solid #E5E7EB', boxShadow: '0 20px 40px -16px rgba(6,78,59,.35)', fontSize: 13 },
-  labelStyle: { color: '#111827', fontWeight: 600 },
+  contentStyle: { borderRadius: 12, border: '1px solid #E1E6E1', boxShadow: '0 20px 40px -16px rgba(6,42,28,.35)', fontSize: 13 },
+  labelStyle: { color: '#0B1F17', fontWeight: 600 },
 }
 const jour = (d) => format(parseISO(d), 'd MMM', { locale: fr })
 
@@ -23,7 +23,7 @@ function Degrade({ id, couleur }) {
 }
 
 // Évolution des signalements jour par jour
-export function CourbeEvolution({ series, hauteur = 280, couleur = '#10B981' }) {
+export function CourbeEvolution({ series, hauteur = 280, couleur = '#008043' }) {
   const donnees = series.map((p) => ({ ...p, jour: jour(p.date) }))
   return (
     <ResponsiveContainer width="100%" height={hauteur}>
@@ -67,8 +67,8 @@ export function CourbePerformance({ series, hauteur = 210 }) {
         <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={false} minTickGap={36} />
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} width={40} />
         <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
-        <Bar dataKey="signalements" name="Reçus" fill="#F59E0B" radius={[3, 3, 0, 0]} />
-        <Bar dataKey="collectes" name="Ramassés" fill="#10B981" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="signalements" name="Reçus" fill="#C9A55C" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="collectes" name="Ramassés" fill="#008043" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -83,8 +83,8 @@ export function BarresZones({ zones, hauteur = 280 }) {
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 13 }} />
-        <Bar dataKey="total_signalements" name="Signalements" fill="#6EE7B7" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="collectes" name="Ramassés" fill="#10B981" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="total_signalements" name="Signalements" fill="#8CC5A2" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="collectes" name="Ramassés" fill="#008043" radius={[4, 4, 0, 0]} />
         <Bar dataKey="en_attente" name="En attente" fill="#F59E0B" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>

@@ -106,13 +106,19 @@ function LienMenu({ lien, replie, onClick }) {
       onClick={onClick}
       title={replie ? t(lien.libelle) : undefined}
       className={({ isActive }) =>
-        `flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition ${replie ? 'justify-center' : ''} ${
-          isActive ? 'bg-vert-50 text-vert' : 'text-encre-doux hover:bg-fond hover:text-ardoise'
+        `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-medium transition-colors duration-200 ${replie ? 'justify-center' : ''} ${
+          isActive
+            ? 'bg-white/[0.08] text-white before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-or'
+            : 'text-white/65 hover:bg-white/[0.05] hover:text-white'
         }`
       }
     >
-      <Icone className="h-[19px] w-[19px] shrink-0" />
-      {!replie && <span className="truncate">{t(lien.libelle)}</span>}
+      {({ isActive }) => (
+        <>
+          <Icone className={`h-[19px] w-[19px] shrink-0 transition-colors ${isActive ? 'text-or' : 'text-white/55 group-hover:text-white/90'}`} />
+          {!replie && <span className="truncate">{t(lien.libelle)}</span>}
+        </>
+      )}
     </NavLink>
   )
 }
@@ -122,7 +128,7 @@ function MenuSections({ sections, replie, onLien }) {
   return (
     <nav aria-label="Navigation principale" className="flex flex-col">
       {sections.map((s, i) => (
-        <div key={s.section} className={i > 0 ? 'mt-2 border-t border-trait pt-1' : ''}>
+        <div key={s.section} className={i > 0 ? 'mt-3 border-t border-white/10 pt-1' : ''}>
           {replie ? <div className="h-4" /> : <p className="section-menu">{t(s.section)}</p>}
           <div className="flex flex-col gap-1">
             {s.liens.map((l) => (
@@ -197,10 +203,12 @@ export default function AppShell() {
       </a>
 
       {/* Barre latérale (ordinateur) */}
-      <aside className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-trait bg-white transition-[width] lg:flex ${largeur}`}>
-        <div className={`flex h-[72px] items-center border-b border-trait ${replie ? 'justify-center' : 'px-4'}`}>
-          <Link to={accueil?.vers ?? '/'} className={`flex items-center ${replie ? '' : 'w-full px-1'}`}>
-            {replie ? <Marque className="h-9 w-9" /> : <Logo />}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 hidden flex-col bg-sombre bg-[radial-gradient(120%_60%_at_0%_0%,rgba(0,128,67,0.28),transparent_60%)] text-white transition-[width] duration-300 lg:flex ${largeur}`}
+      >
+        <div className={`flex h-[72px] items-center border-b border-white/10 ${replie ? 'justify-center' : 'px-4'}`}>
+          <Link to={accueil?.vers ?? '/'} className={`flex items-center ${replie ? '' : 'w-full'}`}>
+            {replie ? <Marque blanc className="h-9 w-9" /> : <Logo clair className="[&>img]:h-11" />}
           </Link>
         </div>
         <div className="flex-1 overflow-y-auto px-3 pb-6">
@@ -211,7 +219,7 @@ export default function AppShell() {
           <button
             type="button"
             onClick={basculerMenu}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-trait bg-white text-encre-doux shadow-carte transition hover:text-vert"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-or/40 bg-sombre text-or shadow-carte transition hover:bg-sombre-800"
             aria-label={replie ? t('Agrandir le menu') : t('Réduire le menu')}
             title={`${replie ? t('Agrandir le menu') : t('Réduire le menu')} (Alt+M)`}
           >
@@ -224,18 +232,18 @@ export default function AppShell() {
       {tiroir && (
         <div className="fixed inset-0 z-[60] lg:hidden">
           <div className="absolute inset-0 bg-ardoise/40" onClick={() => setTiroir(false)} aria-hidden />
-          <aside className="absolute inset-y-0 left-0 flex w-[280px] flex-col bg-white shadow-flotte">
-            <div className="flex h-[72px] items-center justify-between border-b border-trait px-4">
-              <Logo />
-              <button type="button" className="btn-discret min-h-0 p-2" onClick={() => setTiroir(false)} aria-label={t('Fermer le menu')}>
+          <aside className="absolute inset-y-0 left-0 flex w-[280px] flex-col bg-sombre text-white shadow-flotte">
+            <div className="flex h-[72px] items-center justify-between border-b border-white/10 px-4">
+              <Logo clair className="[&>img]:h-10" />
+              <button type="button" className="btn min-h-0 p-2 text-white/70 hover:bg-white/10 hover:text-white" onClick={() => setTiroir(false)} aria-label={t('Fermer le menu')}>
                 <X className="h-5 w-5" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-3 pb-6">
               <MenuSections sections={sections} onLien={() => setTiroir(false)} />
             </div>
-            <label className="border-t border-trait p-4">
-              <span className="etiquette">{t('Langue')}</span>
+            <label className="border-t border-white/10 p-4">
+              <span className="etiquette text-white/80">{t('Langue')}</span>
               <select value={langue} onChange={(e) => setLangue(e.target.value)} className="champ py-2">
                 <option value="fr">Français</option>
                 <option value="mg">Malagasy</option>
@@ -274,7 +282,7 @@ export default function AppShell() {
               </span>
               <span className="block text-xs text-encre-doux">{t(ROLES[user.role])}</span>
             </span>
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-vert-100 text-sm font-bold text-vert">{initiales(user)}</span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sombre font-titre text-sm font-semibold text-or ring-2 ring-or/30">{initiales(user)}</span>
           </Link>
           <button type="button" onClick={sortir} className="btn-discret min-h-0 p-2" aria-label={t('Se déconnecter')} title={t('Se déconnecter')}>
             <LogOut className="h-5 w-5" />
@@ -313,7 +321,10 @@ export default function AppShell() {
             </Link>
           </div>
         )}
-        <Outlet />
+        {/* une seule transition, à chaque changement de page : le contenu se pose en douceur */}
+        <div key={lieu.pathname} className="animate-entree">
+          <Outlet />
+        </div>
       </main>
 
       {/* Barre du bas (téléphone) */}

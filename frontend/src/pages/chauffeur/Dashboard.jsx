@@ -41,14 +41,14 @@ export default function ChauffeurDashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-carte bg-gradient-to-r from-vert to-vert-700 p-6 text-white shadow-flotte sm:p-7">
-        <p className="text-sm text-white/85">{t('Chauffeur')}</p>
+      <section className="relative overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(90%_140%_at_100%_0%,rgba(0,128,67,0.5),transparent_60%)] p-6 text-white shadow-flotte ring-1 ring-or/20 sm:p-7">
+        <p className="text-sm text-or">{t('Chauffeur')}</p>
         <h1 className="mt-1 text-[28px] text-white">
           {t('Bonjour')} {user.prenom}
         </h1>
         {moi.donnees?.camion_immatriculation && (
           <p className="mt-1 text-sm text-white/85">
-            {t('Votre camion')} : <span className="font-semibold text-white">{moi.donnees.camion_immatriculation}</span>
+            {t('Votre camion')} : <span className="font-semibold text-or-clair">{moi.donnees.camion_immatriculation}</span>
           </p>
         )}
       </section>

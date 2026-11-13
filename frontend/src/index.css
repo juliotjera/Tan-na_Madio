@@ -1,5 +1,9 @@
 /* Inter avec l'axe de taille optique : les grands titres prennent automatiquement la coupe « Display » */
 @import '@fontsource-variable/inter/opsz.css';
+/* Poppins : police du logo, pour les titres et les grands chiffres */
+@import '@fontsource/poppins/500.css';
+@import '@fontsource/poppins/600.css';
+@import '@fontsource/poppins/700.css';
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;
@@ -20,12 +24,13 @@
     @apply font-titre tracking-tight text-ardoise;
   }
   h1 {
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
-  h2 {
-    font-weight: 650;
-    letter-spacing: -0.015em;
+  h2,
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
   :focus-visible {
     @apply outline-none ring-2 ring-vert-500 ring-offset-2 ring-offset-fond;
@@ -42,7 +47,11 @@
       disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-principal {
-    @apply btn bg-vert text-white shadow-sm shadow-vert/20 hover:bg-vert-700 active:scale-[0.98];
+    @apply btn bg-vert text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_6px_16px_-8px_rgba(0,96,47,0.7)] hover:bg-vert-700 active:scale-[0.98];
+  }
+  /* action de prestige sur fond forêt : or champagne */
+  .btn-or {
+    @apply btn bg-or text-sombre shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] hover:bg-or-300 active:scale-[0.98];
   }
   .btn-accent {
     @apply btn bg-vert text-white hover:bg-vert-700 active:scale-[0.98];
@@ -58,12 +67,12 @@
   }
 
   .carte {
-    @apply rounded-carte border border-trait/80 bg-white shadow-carte;
+    @apply rounded-carte border border-trait bg-white shadow-carte;
   }
 
   .champ {
-    @apply block w-full rounded-xl border-[1.5px] border-trait bg-white px-3.5 py-2.5 text-[15px] text-encre placeholder:text-encre-pale
-      transition focus:border-vert-500 focus:outline-none focus:ring-4 focus:ring-vert-500/15;
+    @apply block w-full rounded-xl border border-trait bg-white px-3.5 py-2.5 text-[15px] text-encre shadow-[inset_0_1px_2px_rgba(6,42,28,0.04)]
+      placeholder:text-encre-pale transition duration-200 hover:border-vert-300 focus:border-vert focus:outline-none focus:ring-4 focus:ring-vert/10;
   }
   .etiquette {
     @apply mb-1.5 block text-sm font-semibold text-encre;
@@ -71,7 +80,7 @@
 
   /* Libellé de section de la barre latérale (Vue d'ensemble, Opérations…) */
   .section-menu {
-    @apply px-3 pb-1.5 pt-5 text-xs font-medium text-encre-pale;
+    @apply px-3 pb-1.5 pt-5 text-xs font-medium text-white/40;
   }
 
   .tableau {
@@ -91,7 +100,7 @@
   }
 
   .chiffre {
-    @apply font-titre font-bold tabular-nums tracking-tight;
+    @apply font-titre font-semibold tabular-nums tracking-tight;
   }
 
   /* Immatriculation d'un camion */

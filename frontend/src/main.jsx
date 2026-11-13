@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import { MotionConfig } from 'framer-motion'
 import { AuthProvider } from './context/AuthContext'
 import { LangueProvider } from './context/LangueContext'
 import App from './App'
@@ -10,6 +11,8 @@ import './index.css'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+      {/* animations coupées si le téléphone demande moins de mouvement */}
+      <MotionConfig reducedMotion="user">
       <LangueProvider>
       <AuthProvider>
         <App />
@@ -17,13 +20,14 @@ createRoot(document.getElementById('root')).render(
           position="top-center"
           toastOptions={{
             duration: 3500,
-            style: { borderRadius: '8px', background: '#065F46', color: '#FFFFFF', fontSize: '14px' },
-            success: { iconTheme: { primary: '#6EE7B7', secondary: '#065F46' } },
+            style: { borderRadius: '12px', background: '#062A1C', color: '#FFFFFF', fontSize: '14px', border: '1px solid rgba(201,165,92,0.35)' },
+            success: { iconTheme: { primary: '#C9A55C', secondary: '#062A1C' } },
             error: { style: { borderRadius: '8px', background: '#FEF2F2', color: '#B91C1C', fontSize: '14px' } },
           }}
         />
       </AuthProvider>
       </LangueProvider>
+      </MotionConfig>
     </BrowserRouter>
   </StrictMode>,
 )

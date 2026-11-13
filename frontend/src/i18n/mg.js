@@ -396,4 +396,6 @@ export const MALAGASY = {
   "Urgence faible": "Hamehana kely",
   "Toutes urgences": "Hamehana rehetra",
   "Toutes les zones": "Faritra rehetra",
+  "Dépôts ramassés": "Fako voaangona",
+  "À vérifier ou planifier": "Hojerena na halamina",
 }

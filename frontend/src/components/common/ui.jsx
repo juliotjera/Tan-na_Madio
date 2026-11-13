@@ -84,12 +84,12 @@ export function EnTete({ titre, texte, actions }) {
 // Carte d'indicateur : libellé, grand chiffre, tendance, mini-graphique. Fond blanc pour tous ;
 // la couleur ne porte que sur l'icône et la courbe, pour que le chiffre reste le premier repère.
 const TONS = {
-  vert: { icone: 'bg-vert-50 text-vert', trait: '#10B981' },
-  ambre: { icone: 'bg-ambre-50 text-ambre-700', trait: '#F59E0B' },
-  bleu: { icone: 'bg-sky-50 text-sky-700', trait: '#0EA5E9' },
-  violet: { icone: 'bg-violet-50 text-violet-700', trait: '#8B5CF6' },
+  vert: { icone: 'bg-vert-50 text-vert', trait: '#008043' },
+  ambre: { icone: 'bg-or-50 text-or-700 ring-1 ring-or/25', trait: '#C9A55C' },
+  bleu: { icone: 'bg-sombre text-or', trait: '#062A1C' },
+  violet: { icone: 'bg-or-50 text-or-700 ring-1 ring-or/25', trait: '#C9A55C' },
   alerte: { icone: 'bg-alerte-50 text-alerte-700', trait: '#DC2626' },
-  blanc: { icone: 'bg-vert-50 text-vert', trait: '#10B981' },
+  blanc: { icone: 'bg-vert-50 text-vert', trait: '#008043' },
 }
 
 function MiniCourbe({ valeurs, couleur }) {
@@ -108,7 +108,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
   const tr = useTraduire()
   const hausse = tendance != null && tendance >= 0
   return (
-    <div className="carte relative flex min-h-[132px] flex-col p-5">
+    <div className="carte relative flex min-h-[132px] flex-col p-5 transition-shadow duration-300 hover:shadow-survol">
       <p className="pr-12 text-sm font-medium text-encre-doux">{tr(libelle)}</p>
       <p className="chiffre mt-2 text-[32px] leading-none text-ardoise">{valeur}</p>
       {tendance != null && (
@@ -130,7 +130,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
 }
 
 // Compteur centré (« 40 Total », « 4 En attente »…) comme sur la version d'origine
-const COULEURS_COMPTEUR = { vert: 'text-vert-500', ambre: 'text-ambre', bleu: 'text-blue-500', violet: 'text-violet-500', ardoise: 'text-ardoise' }
+const COULEURS_COMPTEUR = { vert: 'text-vert', ambre: 'text-or-700', bleu: 'text-sombre', violet: 'text-or-700', ardoise: 'text-ardoise' }
 export function Compteur({ valeur, libelle, couleur = 'vert' }) {
   const tr = useTraduire()
   return (

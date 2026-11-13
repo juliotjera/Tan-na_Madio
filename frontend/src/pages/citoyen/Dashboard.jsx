@@ -47,20 +47,20 @@ export function CartePoints({ points }) {
   const { t } = useLangue()
   const { actuel, suivant } = palier(points)
   return (
-    <div className="flex flex-col gap-4 rounded-carte border border-vert-300/70 bg-gradient-to-r from-vert-50 to-white p-6 sm:flex-row sm:items-center">
-      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-vert-100 text-vert-500">
+    <div className="relative flex flex-col gap-4 overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(80%_140%_at_100%_0%,rgba(201,165,92,0.22),transparent_55%)] p-6 text-white shadow-flotte ring-1 ring-or/25 sm:flex-row sm:items-center">
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-or/15 text-or ring-1 ring-or/40">
         <Star className="h-6 w-6" />
       </span>
       <div className="flex-1">
-        <p className="font-titre text-lg font-bold text-ardoise">{t('Points Écologiques')}</p>
-        <p className="text-encre-doux">{t('Continuez à signaler pour gagner plus de points !')}</p>
-        {suivant && <p className="mt-1 text-xs text-encre-pale">{t('Encore {n} points pour devenir {palier}', { n: suivant.seuil - points, palier: t(suivant.nom) })}</p>}
+        <p className="font-titre text-lg font-semibold text-white">{t('Points Écologiques')}</p>
+        <p className="text-white/70">{t('Continuez à signaler pour gagner plus de points !')}</p>
+        {suivant && <p className="mt-1 text-xs text-white/50">{t('Encore {n} points pour devenir {palier}', { n: suivant.seuil - points, palier: t(suivant.nom) })}</p>}
       </div>
       <div className="text-left sm:text-right">
-        <p className="chiffre text-[34px] leading-none text-vert-500">{points}</p>
-        <p className="text-sm text-encre-doux">{t('points')}</p>
-        <span className="mt-2 inline-block rounded-full border border-vert-300 bg-white px-3 py-1 text-xs font-semibold text-vert">{t(actuel.nom)}</span>
-        <p className="mt-1 text-xs text-encre-pale">{t('Vous contribuez activement à la propreté.')}</p>
+        <p className="chiffre text-[38px] leading-none text-or-clair">{points}</p>
+        <p className="text-sm text-white/60">{t('points')}</p>
+        <span className="mt-2 inline-block rounded-full border border-or/50 bg-or/10 px-3 py-1 text-xs font-semibold text-or-clair">{t(actuel.nom)}</span>
+        <p className="mt-1 text-xs text-white/50">{t('Vous contribuez activement à la propreté.')}</p>
       </div>
     </div>
   )

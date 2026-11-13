@@ -80,7 +80,7 @@ export default function Login() {
       </p>
 
       {DEMO && (
-        <div className="mt-8 rounded-xl border border-dashed border-trait p-4">
+        <div className="mt-8 rounded-2xl border border-or/30 bg-or-50/60 p-4">
           <p className="text-sm font-semibold text-ardoise">Comptes de démonstration</p>
           <p className="mt-0.5 text-xs text-encre-pale">Mot de passe : Admin2025!</p>
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -92,7 +92,7 @@ export default function Login() {
                   setEmail(adresse)
                   setMdp('Admin2025!')
                 }}
-                className="rounded-xl border border-trait bg-white px-3 py-2 text-left text-sm transition hover:border-vert-500 hover:bg-vert-50"
+                className="rounded-xl border border-trait bg-white px-3 py-2 text-left text-sm transition duration-200 hover:-translate-y-px hover:border-or/60 hover:shadow-survol"
               >
                 <span className="block font-medium text-ardoise">{ROLES[role]}</span>
                 <span className="block truncate text-xs text-encre-pale">{adresse}</span>
