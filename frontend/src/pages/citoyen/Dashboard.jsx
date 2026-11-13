@@ -33,7 +33,7 @@ function Pastilles({ options, valeur, onChange, libelle }) {
           role="radio"
           aria-checked={valeur === v}
           onClick={() => onChange(v)}
-          className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${valeur === v ? 'bg-vert text-white' : 'bg-fond text-encre-doux hover:bg-vert-50 hover:text-vert'}`}
+          className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${valeur === v ? 'bg-marque text-white' : 'bg-fond text-encre-doux hover:bg-or-50 hover:text-marque'}`}
         >
           {t(l)}
         </button>
@@ -273,7 +273,7 @@ export default function CitoyenDashboard() {
         </h2>
         <ol className="mt-4 space-y-2">
           {classement.donnees?.map((c, i) => (
-            <li key={i} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${c.moi ? 'bg-vert-50 ring-1 ring-vert-300' : 'bg-fond/70'}`}>
+            <li key={i} className={`flex items-center gap-3 rounded-xl px-4 py-3 ${c.moi ? 'bg-or-50 ring-1 ring-or-300' : 'bg-fond/70'}`}>
               <span
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
                   i === 0 ? 'bg-ambre-100 text-ambre-700' : i === 1 ? 'bg-slate-200 text-slate-700' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-white text-encre-doux'
@@ -284,11 +284,11 @@ export default function CitoyenDashboard() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">
                   {c.nom}
-                  {c.moi && <span className="ml-1.5 text-xs font-semibold text-vert">· vous</span>}
+                  {c.moi && <span className="ml-1.5 text-xs font-semibold text-marque">· vous</span>}
                 </span>
                 <span className="block text-xs text-encre-pale">{c.quartier ?? t('Quartier non spécifié')}</span>
               </span>
-              <span className="font-semibold text-vert">{c.points_eco} pts</span>
+              <span className="font-semibold text-marque">{c.points_eco} pts</span>
             </li>
           ))}
         </ol>

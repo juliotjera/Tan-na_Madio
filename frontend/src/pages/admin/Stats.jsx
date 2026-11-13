@@ -92,7 +92,7 @@ export default function Stats() {
                   <span className="font-semibold">{z.total_signalements}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-fond">
-                  <div className="h-full rounded-full bg-vert-500" style={{ width: `${(z.total_signalements / maxZone) * 100}%` }} />
+                  <div className="h-full rounded-full bg-or" style={{ width: `${(z.total_signalements / maxZone) * 100}%` }} />
                 </div>
               </li>
             ))}
@@ -118,7 +118,7 @@ export default function Stats() {
                   key={i}
                   center={[p.latitude, p.longitude]}
                   radius={8 + 18 * (p.total / maxNoir)}
-                  pathOptions={{ color: p.ouverts ? '#B45309' : '#047857', weight: 2, fillColor: p.ouverts ? '#F59E0B' : '#10B981', fillOpacity: 0.45 }}
+                  pathOptions={{ color: p.ouverts ? '#B45309' : '#8A6A22', weight: 2, fillColor: p.ouverts ? '#F59E0B' : '#C9A55C', fillOpacity: 0.45 }}
                 >
                   <Tooltip>
                     {p.zone_nom ?? 'Hors zone'} : {p.total} signalements, {p.ouverts} encore ouverts
@@ -158,7 +158,7 @@ export default function Stats() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="chiffre text-lg text-vert">{c.efficacite_pct}%</p>
+                <p className="chiffre text-lg text-marque">{c.efficacite_pct}%</p>
                 <p className="text-xs text-encre-pale">efficacité</p>
               </div>
             </div>

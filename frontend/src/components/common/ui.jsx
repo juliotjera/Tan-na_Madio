@@ -13,7 +13,7 @@ function useTraduire() {
 }
 
 export function Spinner({ className = 'h-5 w-5' }) {
-  return <Loader2 className={`animate-spin text-vert-500 ${className}`} aria-label="Chargement" />
+  return <Loader2 className={`animate-spin text-or ${className}`} aria-label="Chargement" />
 }
 
 // Chargement : la forme du contenu à venir (squelette) plutôt qu'une roue qui tourne
@@ -56,7 +56,7 @@ export function Vide({ icone: Icone, titre, texte, action }) {
   return (
     <div className="flex flex-col items-center px-6 py-14 text-center">
       {Icone && (
-        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-vert-100 text-vert">
+        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-or-100 text-marque">
           <Icone className="h-6 w-6" />
         </span>
       )}
@@ -84,12 +84,12 @@ export function EnTete({ titre, texte, actions }) {
 // Carte d'indicateur : libellé, grand chiffre, tendance, mini-graphique. Fond blanc pour tous ;
 // la couleur ne porte que sur l'icône et la courbe, pour que le chiffre reste le premier repère.
 const TONS = {
-  vert: { icone: 'bg-vert-50 text-vert', trait: '#008043' },
+  vert: { icone: 'bg-or-50 text-marque', trait: '#111820' },
   ambre: { icone: 'bg-or-50 text-or-700 ring-1 ring-or/25', trait: '#C9A55C' },
   bleu: { icone: 'bg-sombre text-or', trait: '#062A1C' },
   violet: { icone: 'bg-or-50 text-or-700 ring-1 ring-or/25', trait: '#C9A55C' },
   alerte: { icone: 'bg-alerte-50 text-alerte-700', trait: '#DC2626' },
-  blanc: { icone: 'bg-vert-50 text-vert', trait: '#008043' },
+  blanc: { icone: 'bg-or-50 text-marque', trait: '#111820' },
 }
 
 function MiniCourbe({ valeurs, couleur }) {
@@ -112,7 +112,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
       <p className="pr-12 text-sm font-medium text-encre-doux">{tr(libelle)}</p>
       <p className="chiffre mt-2 text-[32px] leading-none text-ardoise">{valeur}</p>
       {tendance != null && (
-        <p className={`mt-1 inline-flex items-center gap-1 text-sm font-semibold ${hausse ? 'text-vert' : 'text-alerte-700'}`}>
+        <p className={`mt-1 inline-flex items-center gap-1 text-sm font-semibold ${hausse ? 'text-marque' : 'text-alerte-700'}`}>
           <span aria-hidden>{hausse ? '↗' : '↘'}</span>
           {hausse ? '+' : ''}
           {tendance.toLocaleString('fr-FR')} % {tr('ce mois')}
@@ -130,7 +130,7 @@ export function Chiffre({ valeur, libelle, detail, icone: Icone, ton = 'blanc', 
 }
 
 // Compteur centré (« 40 Total », « 4 En attente »…) comme sur la version d'origine
-const COULEURS_COMPTEUR = { vert: 'text-vert', ambre: 'text-or-700', bleu: 'text-sombre', violet: 'text-or-700', ardoise: 'text-ardoise' }
+const COULEURS_COMPTEUR = { vert: 'text-marque', ambre: 'text-or-700', bleu: 'text-sombre', violet: 'text-or-700', ardoise: 'text-ardoise' }
 export function Compteur({ valeur, libelle, couleur = 'vert' }) {
   const tr = useTraduire()
   return (
@@ -169,11 +169,11 @@ export function Segments({ options, valeur, onChange, libelle }) {
           aria-checked={valeur === o.valeur}
           onClick={() => onChange(o.valeur)}
           className={`shrink-0 whitespace-nowrap rounded-lg border-[1.5px] px-3.5 py-1.5 text-sm font-semibold transition ${
-            valeur === o.valeur ? 'border-vert bg-vert text-white shadow-sm' : 'border-vert-300 bg-white text-vert hover:bg-vert-50'
+            valeur === o.valeur ? 'border-marque bg-marque text-white shadow-sm' : 'border-or-300 bg-white text-marque hover:bg-or-50'
           }`}
         >
           {tr(o.libelle)}
-          {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-white/80' : 'text-vert/60'}`}>{o.nombre}</span>}
+          {o.nombre != null && <span className={`ml-1.5 tabular-nums ${valeur === o.valeur ? 'text-white/80' : 'text-marque/60'}`}>{o.nombre}</span>}
         </button>
       ))}
     </div>

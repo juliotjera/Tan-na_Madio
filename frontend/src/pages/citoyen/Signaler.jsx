@@ -29,11 +29,11 @@ function ChampCadre({ libelle, requis, aide, valide, erreur, children }) {
   return (
     <div>
       <div
-        className={`relative rounded-xl border-[1.5px] bg-white px-3.5 pb-2.5 pt-3 transition focus-within:border-vert-500 ${
-          erreur ? 'border-alerte' : valide ? 'border-vert-500' : 'border-trait'
+        className={`relative rounded-xl border-[1.5px] bg-white px-3.5 pb-2.5 pt-3 transition focus-within:border-or ${
+          erreur ? 'border-alerte' : valide ? 'border-or' : 'border-trait'
         }`}
       >
-        <span className={`absolute -top-2.5 left-3 bg-white px-1 text-xs font-semibold ${erreur ? 'text-alerte-700' : 'text-vert'}`}>
+        <span className={`absolute -top-2.5 left-3 bg-white px-1 text-xs font-semibold ${erreur ? 'text-alerte-700' : 'text-marque'}`}>
           {libelle}
           {requis && <span className="text-alerte"> *</span>}
         </span>
@@ -46,7 +46,7 @@ function ChampCadre({ libelle, requis, aide, valide, erreur, children }) {
         </p>
       ) : (
         valide && (
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-vert">
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-marque">
             <CheckCircle2 className="h-4 w-4" /> {t('Valide')}
           </p>
         )
@@ -150,7 +150,7 @@ export default function Signaler() {
   if (resultat) {
     return (
       <div className="mx-auto max-w-lg py-10 text-center">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-vert-100 text-vert-500">
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-or-100 text-or">
           <CheckCircle2 className="h-8 w-8" />
         </span>
         <h1 className="mt-6 text-[28px]">{t('Signalement envoyé')}</h1>
@@ -158,7 +158,7 @@ export default function Signaler() {
           {resultat.zone_nom ? `${resultat.zone_nom}. ` : ''}
           {t('Un agent municipal va le vérifier. Vous serez crédité de 5 points à la validation.')}
         </p>
-        <p className="chiffre mt-6 text-[40px] text-vert-500">+{resultat.points_gagnes} {t('points')}</p>
+        <p className="chiffre mt-6 text-[40px] text-or">+{resultat.points_gagnes} {t('points')}</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link to="/citoyen/signalements" className="btn-principal">
             {t('Suivre mon signalement')}
@@ -301,7 +301,7 @@ export default function Signaler() {
                   {p.moi ? (
                     <span className="shrink-0 text-xs text-encre-pale">{t('Votre signalement')}</span>
                   ) : p.deja_soutenu ? (
-                    <span className="shrink-0 text-xs font-semibold text-vert">{t('Déjà confirmé')}</span>
+                    <span className="shrink-0 text-xs font-semibold text-marque">{t('Déjà confirmé')}</span>
                   ) : (
                     <button type="button" className="btn-secondaire min-h-[38px] shrink-0 px-3" disabled={soutien === p.id} onClick={() => confirmer(p)}>
                       {soutien === p.id ? <Spinner className="h-4 w-4" /> : <ThumbsUp className="h-4 w-4" />} {t('Moi aussi')}
@@ -337,10 +337,10 @@ export default function Signaler() {
           <button
             type="button"
             onClick={() => entree.current.click()}
-            className="mt-2 flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-vert-300 bg-white px-6 py-8 text-encre-doux transition hover:bg-vert-50"
+            className="mt-2 flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-or-300 bg-white px-6 py-8 text-encre-doux transition hover:bg-or-50"
           >
-            <ImagePlus className="h-7 w-7 text-vert-500" />
-            <span className="font-semibold text-vert">{t('Prendre ou choisir une photo')}</span>
+            <ImagePlus className="h-7 w-7 text-or" />
+            <span className="font-semibold text-marque">{t('Prendre ou choisir une photo')}</span>
             <span className="text-xs">{t('JPEG, PNG ou WebP · réduite automatiquement avant l’envoi')}</span>
           </button>
         )}

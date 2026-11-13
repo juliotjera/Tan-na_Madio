@@ -29,8 +29,8 @@ export function Avancement({ faits, total }) {
   const part = total ? faits / total : 0
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-vert-100">
-        <div className="h-full rounded-full bg-vert-500" style={{ width: `${part * 100}%` }} />
+      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-or-100">
+        <div className="h-full rounded-full bg-or" style={{ width: `${part * 100}%` }} />
       </div>
       <span className="text-xs tabular-nums text-encre-doux">
         {faits}/{total}
@@ -176,7 +176,7 @@ export default function Collectes() {
                 ['Gain', c.itineraire?.gain_pourcent != null ? `−${Math.round(c.itineraire.gain_pourcent)} %` : '—'],
                 ['Collecté', c.poids_collecte_kg != null ? kg(c.poids_collecte_kg) : `${c.nb_faits}/${c.nb_points} points`],
               ].map(([k, v]) => (
-                <div key={k} className="rounded-xl bg-vert-50 px-3 py-2.5">
+                <div key={k} className="rounded-xl bg-or-50 px-3 py-2.5">
                   <p className="text-xs text-encre-pale">{k}</p>
                   <p className="font-semibold text-ardoise">{v}</p>
                 </div>

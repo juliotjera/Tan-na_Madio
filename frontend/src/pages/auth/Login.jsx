@@ -74,7 +74,7 @@ export default function Login() {
       </form>
       <p className="mt-6 text-center text-sm text-encre-doux">
         Pas encore de compte ?{' '}
-        <Link to="/register" className="font-semibold text-vert underline-offset-4 hover:underline">
+        <Link to="/register" className="font-semibold text-marque underline-offset-4 hover:underline">
           Créer un compte citoyen
         </Link>
       </p>

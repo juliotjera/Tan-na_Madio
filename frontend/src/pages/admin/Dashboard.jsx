@@ -58,23 +58,23 @@ export default function AdminDashboard() {
           <h2 className="text-lg"><T>Actions rapides</T></h2>
           <p className="text-sm text-encre-doux">Les écrans les plus utilisés, à portée d’un clic</p>
           <div className="mt-5 grid grid-cols-2 gap-3 border-t border-trait pt-5 sm:grid-cols-4">
-            <Link to="/agent/signalements" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-vert-300 hover:bg-vert-50">
-              <TriangleAlert className="h-5 w-5 text-vert-500" /> Signalements
+            <Link to="/agent/signalements" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-or-300 hover:bg-or-50">
+              <TriangleAlert className="h-5 w-5 text-or" /> Signalements
             </Link>
-            <Link to="/agent/collectes" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-vert-300 hover:bg-vert-50">
-              <ClipboardList className="h-5 w-5 text-vert-500" /> Collectes
+            <Link to="/agent/collectes" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-or-300 hover:bg-or-50">
+              <ClipboardList className="h-5 w-5 text-or" /> Collectes
             </Link>
-            <Link to="/admin/utilisateurs" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-vert-300 hover:bg-vert-50">
-              <Users className="h-5 w-5 text-vert-500" /> Utilisateurs
+            <Link to="/admin/utilisateurs" className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-sm font-medium transition hover:border-or-300 hover:bg-or-50">
+              <Users className="h-5 w-5 text-or" /> Utilisateurs
             </Link>
-            <button type="button" onClick={toutRecharger} className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-center text-sm font-medium transition hover:border-vert-300 hover:bg-vert-50">
-              <RefreshCw className="h-5 w-5 text-vert-500" /> Actualiser toutes les données
+            <button type="button" onClick={toutRecharger} className="flex flex-col items-center gap-2 rounded-xl border border-trait px-2 py-4 text-center text-sm font-medium transition hover:border-or-300 hover:bg-or-50">
+              <RefreshCw className="h-5 w-5 text-or" /> Actualiser toutes les données
             </button>
           </div>
         </section>
 
         {/* Priorités : ce qui attend une décision maintenant, chaque ligne mène à l'écran où agir */}
-        <section className="relative overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(90%_120%_at_100%_0%,rgba(0,128,67,0.45),transparent_60%)] p-6 text-white shadow-flotte ring-1 ring-or/20">
+        <section className="relative overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(90%_120%_at_100%_0%,rgba(201,165,92,0.2),transparent_60%)] p-6 text-white shadow-flotte ring-1 ring-or/20">
           <div className="grid gap-5 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
             <div>
               <h2 className="text-[26px] leading-tight text-white"><T>Priorités du moment</T></h2>
@@ -120,8 +120,8 @@ export default function AdminDashboard() {
           {s && (
             <div className="mt-5 space-y-5">
               <Barre libelle="En attente" valeur={s.en_attente} total={totalStatuts} couleur="bg-ambre" />
-              <Barre libelle="En cours" valeur={s.en_cours} total={totalStatuts} couleur="bg-or" />
-              <Barre libelle="Collectés" valeur={s.collectes_signalements} total={totalStatuts} couleur="bg-vert-500" />
+              <Barre libelle="En cours" valeur={s.en_cours} total={totalStatuts} couleur="bg-marque" />
+              <Barre libelle="Collectés" valeur={s.collectes_signalements} total={totalStatuts} couleur="bg-or" />
             </div>
           )}
         </section>
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
                 <span className="h-2 w-2 rounded-full bg-or" /> <T>Reçus</T>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-vert" /> <T>Ramassés</T>
+                <span className="h-2 w-2 rounded-full bg-marque" /> <T>Ramassés</T>
               </span>
             </p>
           </div>

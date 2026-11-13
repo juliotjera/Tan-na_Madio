@@ -47,10 +47,10 @@ function Etapes({ actuelle }) {
           key={titre}
           aria-current={i === actuelle ? 'step' : undefined}
           className={`rounded-xl border px-2 py-3 text-center transition duration-300 ${
-            i < actuelle ? 'border-vert-300 bg-vert-50' : i === actuelle ? 'border-or/60 bg-sombre shadow-or' : 'border-trait bg-white'
+            i < actuelle ? 'border-or-300 bg-or-50' : i === actuelle ? 'border-or/60 bg-sombre shadow-or' : 'border-trait bg-white'
           }`}
         >
-          <p className={`font-titre text-sm font-semibold ${i === actuelle ? 'text-or-clair' : i < actuelle ? 'text-vert' : 'text-ardoise'}`}>{titre}</p>
+          <p className={`font-titre text-sm font-semibold ${i === actuelle ? 'text-or-clair' : i < actuelle ? 'text-marque' : 'text-ardoise'}`}>{titre}</p>
           <p className={`hidden text-xs sm:block ${i === actuelle ? 'text-white/70' : 'text-encre-doux'}`}>{nom}</p>
         </li>
       ))}
@@ -68,7 +68,7 @@ function ChampVert({ libelle, icone: Icone, requis, aide, valide, children }) {
       </span>
       <div className="relative">
         {children}
-        {valide && <CheckCircle2 className="pointer-events-none absolute right-10 top-1/2 h-5 w-5 -translate-y-1/2 text-vert-500" />}
+        {valide && <CheckCircle2 className="pointer-events-none absolute right-10 top-1/2 h-5 w-5 -translate-y-1/2 text-or" />}
       </div>
       {aide && <span className="mt-1.5 block text-xs text-encre-doux">{aide}</span>}
     </label>
@@ -76,7 +76,7 @@ function ChampVert({ libelle, icone: Icone, requis, aide, valide, children }) {
 }
 
 function CaseRecap({ libelle, valeur, ton }) {
-  const tons = { bleu: 'bg-sombre text-or', vert: 'bg-vert-50 text-vert-700', violet: 'bg-or-50 text-or-700', ambre: 'bg-or-50 text-or-700', ciel: 'bg-vert-50 text-vert' }
+  const tons = { bleu: 'bg-sombre text-or', vert: 'bg-or-50 text-marque-700', violet: 'bg-or-50 text-or-700', ambre: 'bg-or-50 text-or-700', ciel: 'bg-or-50 text-marque' }
   return (
     <div className={`rounded-xl px-4 py-3 ${tons[ton]}`}>
       <p className="text-xs font-medium">{libelle}</p>
@@ -296,8 +296,8 @@ export default function PlanifierCollecte() {
                       {kg(charge)} / {kg(camion.capacite_kg)}
                     </span>
                   </div>
-                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-vert-100">
-                    <div className={`h-full rounded-full transition-all ${depassement ? 'bg-alerte' : 'bg-vert-500'}`} style={{ width: `${Math.min(100, (charge / camion.capacite_kg) * 100)}%` }} />
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-or-100">
+                    <div className={`h-full rounded-full transition-all ${depassement ? 'bg-alerte' : 'bg-or'}`} style={{ width: `${Math.min(100, (charge / camion.capacite_kg) * 100)}%` }} />
                   </div>
                   {depassement && <p className="mt-1 text-xs text-alerte-700">La charge dépasse la capacité : retirez des signalements, choisissez un plus gros camion ou passez en mode « plusieurs tournées ».</p>}
                 </div>
@@ -312,8 +312,8 @@ export default function PlanifierCollecte() {
                   const coche = selection.includes(s.id)
                   return (
                     <li key={s.id}>
-                      <label className={`flex cursor-pointer gap-4 rounded-xl border-[1.5px] p-4 transition ${coche ? 'border-vert-500 bg-vert-50/50' : 'border-trait hover:border-vert-300'}`}>
-                        <input type="checkbox" className="mt-1 h-4 w-4 shrink-0 accent-[#10B981]" checked={coche} onChange={() => basculer(s.id)} />
+                      <label className={`flex cursor-pointer gap-4 rounded-xl border-[1.5px] p-4 transition ${coche ? 'border-or bg-or-50/50' : 'border-trait hover:border-or-300'}`}>
+                        <input type="checkbox" className="mt-1 h-4 w-4 shrink-0 accent-[#111820]" checked={coche} onChange={() => basculer(s.id)} />
                         <div className="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-fond">
                           {s.photo_url ? (
                             <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
@@ -404,7 +404,7 @@ export default function PlanifierCollecte() {
               <div className="mt-4 grid gap-3 md:grid-cols-3">
                 <div className="rounded-xl border border-trait p-4">
                   <p className="flex items-center gap-2 text-sm font-semibold">
-                    <span className="h-2.5 w-2.5 rounded-full bg-vert-500" /> Itinéraire optimisé
+                    <span className="h-2.5 w-2.5 rounded-full bg-or" /> Itinéraire optimisé
                   </p>
                   <p className="mt-1 text-sm text-encre-doux">
                     {tournees.length === 1 && plan
@@ -473,7 +473,7 @@ export default function PlanifierCollecte() {
                 </div>
               </dl>
 
-              <div className="mt-4 rounded-xl border border-vert-300 bg-vert-50 p-4 text-sm text-vert-700">
+              <div className="mt-4 rounded-xl border border-or-300 bg-or-50 p-4 text-sm text-marque-700">
                 <p className="flex items-center gap-1.5 font-semibold">
                   <MapPin className="h-4 w-4 text-alerte" /> Itinéraire optimisé
                 </p>

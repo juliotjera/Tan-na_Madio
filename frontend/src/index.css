@@ -33,10 +33,10 @@
     letter-spacing: -0.01em;
   }
   :focus-visible {
-    @apply outline-none ring-2 ring-vert-500 ring-offset-2 ring-offset-fond;
+    @apply outline-none ring-2 ring-or ring-offset-2 ring-offset-fond;
   }
   ::selection {
-    @apply bg-vert-100;
+    @apply bg-or-100;
   }
 }
 
@@ -47,20 +47,20 @@
       disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-principal {
-    @apply btn bg-vert text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_6px_16px_-8px_rgba(0,96,47,0.7)] hover:bg-vert-700 active:scale-[0.98];
+    @apply btn bg-marque text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_6px_16px_-8px_rgba(17,24,32,0.55)] hover:bg-marque-700 active:scale-[0.98];
   }
   /* action de prestige sur fond forêt : or champagne */
   .btn-or {
     @apply btn bg-or text-sombre shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] hover:bg-or-300 active:scale-[0.98];
   }
   .btn-accent {
-    @apply btn bg-vert text-white hover:bg-vert-700 active:scale-[0.98];
+    @apply btn bg-marque text-white hover:bg-marque-700 active:scale-[0.98];
   }
   .btn-secondaire {
-    @apply btn border-[1.5px] border-vert bg-white text-vert hover:bg-vert-50;
+    @apply btn border-[1.5px] border-marque bg-white text-marque hover:bg-or-50;
   }
   .btn-discret {
-    @apply btn text-encre-doux hover:bg-vert-50 hover:text-vert;
+    @apply btn text-encre-doux hover:bg-or-50 hover:text-marque;
   }
   .btn-danger {
     @apply btn border border-alerte/30 bg-white text-alerte-700 hover:bg-alerte-50;
@@ -72,7 +72,7 @@
 
   .champ {
     @apply block w-full rounded-xl border border-trait bg-white px-3.5 py-2.5 text-[15px] text-encre shadow-[inset_0_1px_2px_rgba(6,42,28,0.04)]
-      placeholder:text-encre-pale transition duration-200 hover:border-vert-300 focus:border-vert focus:outline-none focus:ring-4 focus:ring-vert/10;
+      placeholder:text-encre-pale transition duration-200 hover:border-or-300 focus:border-marque focus:outline-none focus:ring-4 focus:ring-marque/10;
   }
   .etiquette {
     @apply mb-1.5 block text-sm font-semibold text-encre;
@@ -96,7 +96,7 @@
     @apply border-b-0;
   }
   .tableau tbody tr:hover td {
-    @apply bg-vert-50/50;
+    @apply bg-or-50/50;
   }
 
   .chiffre {
@@ -131,11 +131,11 @@
 }
 /* carte sombre de l'accueil */
 .carte-sombre .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.55) contrast(1.1) saturate(0.4) sepia(0.25) hue-rotate(95deg);
+  filter: invert(1) hue-rotate(180deg) brightness(0.55) contrast(1.1) saturate(0.15);
 }
 .carte-sombre.leaflet-container,
 .carte-sombre .leaflet-container {
-  background: #0b1f17;
+  background: #111820;
 }
 
 /* Marqueurs de signalement (divIcon) */

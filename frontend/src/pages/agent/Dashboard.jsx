@@ -91,7 +91,7 @@ export default function AgentDashboard() {
           <div className="carte p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold"><T>À vérifier en priorité</T></h2>
-              <Link to="/agent/signalements" className="text-sm font-semibold text-vert hover:underline">
+              <Link to="/agent/signalements" className="text-sm font-semibold text-marque hover:underline">
                 <T>Tout voir</T>
               </Link>
             </div>
@@ -113,7 +113,7 @@ export default function AgentDashboard() {
           <div className="carte p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold"><T>Tournées planifiées</T></h2>
-              <Link to="/agent/collectes" className="text-sm font-semibold text-vert hover:underline">
+              <Link to="/agent/collectes" className="text-sm font-semibold text-marque hover:underline">
                 <T>Toutes</T>
               </Link>
             </div>

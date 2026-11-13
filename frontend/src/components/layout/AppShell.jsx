@@ -204,7 +204,7 @@ export default function AppShell() {
 
       {/* Barre latérale (ordinateur) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 hidden flex-col bg-sombre bg-[radial-gradient(120%_60%_at_0%_0%,rgba(0,128,67,0.28),transparent_60%)] text-white transition-[width] duration-300 lg:flex ${largeur}`}
+        className={`fixed inset-y-0 left-0 z-40 hidden flex-col bg-sombre bg-[radial-gradient(120%_60%_at_0%_0%,rgba(201,165,92,0.14),transparent_60%)] text-white transition-[width] duration-300 lg:flex ${largeur}`}
       >
         <div className={`flex h-[72px] items-center border-b border-white/10 ${replie ? 'justify-center' : 'px-4'}`}>
           <Link to={accueil?.vers ?? '/'} className={`flex items-center ${replie ? '' : 'w-full'}`}>
@@ -269,7 +269,7 @@ export default function AppShell() {
             <select
               value={langue}
               onChange={(e) => setLangue(e.target.value)}
-              className="rounded-full border border-trait bg-white py-1.5 pl-3 pr-8 text-xs font-medium text-encre focus:border-vert-500 focus:outline-none"
+              className="rounded-full border border-trait bg-white py-1.5 pl-3 pr-8 text-xs font-medium text-encre focus:border-or focus:outline-none"
             >
               <option value="fr">Français</option>
               <option value="mg">Malagasy</option>
@@ -294,7 +294,7 @@ export default function AppShell() {
         {/* Fil d'Ariane */}
         {accueil && (
           <nav aria-label="Fil d’Ariane" className="mb-4 flex items-center gap-2 text-sm text-encre-doux">
-            <Link to={accueil.vers} className="hover:text-vert">
+            <Link to={accueil.vers} className="hover:text-marque">
               {t(accueil.libelle)}
             </Link>
             {courant && courant.vers !== accueil.vers && (
@@ -337,11 +337,11 @@ export default function AppShell() {
                 <NavLink
                   to={l.vers}
                   end={l.fin}
-                  className={({ isActive }) => `flex flex-col items-center gap-1 px-1 pb-2 pt-2.5 text-[11px] font-semibold transition ${isActive ? 'text-vert' : 'text-encre-pale'}`}
+                  className={({ isActive }) => `flex flex-col items-center gap-1 px-1 pb-2 pt-2.5 text-[11px] font-semibold transition ${isActive ? 'text-marque' : 'text-encre-pale'}`}
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${l.principal ? 'bg-vert text-white' : isActive ? 'bg-vert-50' : ''}`}>
+                      <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${l.principal ? 'bg-marque text-white' : isActive ? 'bg-or-50' : ''}`}>
                         <Icone className="h-5 w-5" />
                       </span>
                       <span className="max-w-full truncate">{t(l.libelle)}</span>

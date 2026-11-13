@@ -5,7 +5,7 @@
 // - tuiles de carte déjà affichées : gardées (le chauffeur retrouve le plan de sa tournée sans réseau) ;
 // - API : jamais mise en cache (données toujours fraîches et propres à chaque compte) ;
 // - notifications push : affichage et ouverture de la page concernée.
-const VERSION = 'tm-v3'
+const VERSION = 'tm-v4'
 const COQUILLE = `${VERSION}-coquille`
 const MEDIAS = `${VERSION}-medias`
 const TUILES = 'tm-tuiles' // conservé d'une version à l'autre

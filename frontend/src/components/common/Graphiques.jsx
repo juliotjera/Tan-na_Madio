@@ -23,7 +23,7 @@ function Degrade({ id, couleur }) {
 }
 
 // Évolution des signalements jour par jour
-export function CourbeEvolution({ series, hauteur = 280, couleur = '#008043' }) {
+export function CourbeEvolution({ series, hauteur = 280, couleur = '#111820' }) {
   const donnees = series.map((p) => ({ ...p, jour: jour(p.date) }))
   return (
     <ResponsiveContainer width="100%" height={hauteur}>
@@ -51,7 +51,7 @@ export function CourbeActivite({ series, hauteur = 280 }) {
         <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 13 }} />
         <Bar dataKey="signalements" name="Signalements reçus" fill="#F59E0B" radius={[3, 3, 0, 0]} />
-        <Bar dataKey="collectes" name="Dépôts ramassés" fill="#10B981" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="collectes" name="Dépôts ramassés" fill="#C9A55C" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -68,7 +68,7 @@ export function CourbePerformance({ series, hauteur = 210 }) {
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} width={40} />
         <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
         <Bar dataKey="signalements" name="Reçus" fill="#C9A55C" radius={[3, 3, 0, 0]} />
-        <Bar dataKey="collectes" name="Ramassés" fill="#008043" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="collectes" name="Ramassés" fill="#111820" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -84,7 +84,7 @@ export function BarresZones({ zones, hauteur = 280 }) {
         <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 13 }} />
         <Bar dataKey="total_signalements" name="Signalements" fill="#8CC5A2" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="collectes" name="Ramassés" fill="#008043" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="collectes" name="Ramassés" fill="#111820" radius={[4, 4, 0, 0]} />
         <Bar dataKey="en_attente" name="En attente" fill="#F59E0B" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>

@@ -16,7 +16,7 @@ const FILTRES = [{ valeur: '', libelle: 'Tous' }, ...Object.entries(ROLES).map((
 // le rouge reste réservé à l'urgence critique : les rôles prennent la palette forêt et or
 const PUCE_ROLE = {
   administrateur: 'bg-sombre text-or-clair',
-  citoyen: 'bg-vert-50 text-vert-700',
+  citoyen: 'bg-or-50 text-marque-700',
   agent_municipal: 'bg-or-50 text-or-700 ring-1 ring-or/30',
   chauffeur: 'bg-fond text-ardoise ring-1 ring-trait',
 }
@@ -359,7 +359,7 @@ export default function Utilisateurs() {
                       <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${PUCE_ROLE[u.role]}`}>{ROLES[u.role]}</span>
                     </td>
                     <td>
-                      <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${u.actif ? 'bg-vert-50 text-vert-700' : 'bg-slate-100 text-slate-500'}`}>{u.actif ? 'Actif' : 'Inactif'}</span>
+                      <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${u.actif ? 'bg-or-50 text-marque-700' : 'bg-slate-100 text-slate-500'}`}>{u.actif ? 'Actif' : 'Inactif'}</span>
                     </td>
                     <td>
                       <div className="flex items-center gap-1">
@@ -465,7 +465,7 @@ export default function Utilisateurs() {
             <p className="text-encre-doux">
               Transmettez ce mot de passe à <strong className="text-ardoise">{provisoire.nom}</strong> ({provisoire.email}). Il ne sera plus affiché ensuite.
             </p>
-            <div className="flex items-center gap-2 rounded-xl border border-vert-300 bg-vert-50 p-3">
+            <div className="flex items-center gap-2 rounded-xl border border-or-300 bg-or-50 p-3">
               <code className="flex-1 select-all text-center font-mono text-xl font-semibold tracking-wider text-ardoise">{provisoire.mot_de_passe}</code>
               <button type="button" className="btn-secondaire min-h-[38px]" onClick={copier}>
                 <Copy className="h-4 w-4" /> <T>Copier</T>

@@ -44,8 +44,8 @@ export default function InterrupteurPush({ compact = false }) {
   }
 
   return (
-    <section className={`carte flex items-center gap-4 ${compact ? 'border-vert-300/60 p-4' : 'p-5'}`}>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-vert-50 text-vert">
+    <section className={`carte flex items-center gap-4 ${compact ? 'border-or-300/60 p-4' : 'p-5'}`}>
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-or-50 text-marque">
         <BellRing className="h-5 w-5" />
       </span>
       <div className="min-w-0 flex-1">

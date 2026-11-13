@@ -129,10 +129,10 @@ export default function SignalementsEnAttente() {
             {signalements.map((s) => (
               <li key={s.id}>
                 <div
-                  className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-vert-500' : 'hover:border-vert/30'}`}
+                  className={`carte flex cursor-pointer flex-col overflow-hidden transition sm:flex-row ${choisi?.id === s.id ? 'ring-2 ring-or' : 'hover:border-marque/30'}`}
                   onClick={() => setChoisi(s)}
                 >
-                  <div className={`${s.photo_url ? 'h-44' : 'hidden sm:block'} shrink-0 bg-vert-50 sm:h-auto sm:w-44`}>
+                  <div className={`${s.photo_url ? 'h-44' : 'hidden sm:block'} shrink-0 bg-or-50 sm:h-auto sm:w-44`}>
                     {s.photo_url ? (
                       <button
                         type="button"
@@ -167,7 +167,7 @@ export default function SignalementsEnAttente() {
                       Par {s.citoyen_nom} · {ilYa(s.created_at)}
                     </p>
                     {s.nb_soutiens > 0 && (
-                      <p className="flex items-center gap-1.5 text-xs font-semibold text-vert-700">
+                      <p className="flex items-center gap-1.5 text-xs font-semibold text-marque-700">
                         <Users className="h-3.5 w-3.5" /> Confirmé par {s.nb_soutiens} autre{s.nb_soutiens > 1 ? 's' : ''} habitant{s.nb_soutiens > 1 ? 's' : ''}
                       </p>
                     )}
@@ -258,8 +258,8 @@ export default function SignalementsEnAttente() {
           <fieldset className="space-y-2">
             <legend className="mb-3 text-sm text-encre-doux">Le citoyen verra ce motif dans son suivi et dans sa notification.</legend>
             {[...(motifs.donnees ?? []), 'autre'].map((m) => (
-              <label key={m} className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition ${motif === m ? 'border-vert-500 bg-vert-50' : 'border-trait hover:bg-fond'}`}>
-                <input type="radio" name="motif" className="accent-vert" checked={motif === m} onChange={() => setMotif(m)} />
+              <label key={m} className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition ${motif === m ? 'border-or bg-or-50' : 'border-trait hover:bg-fond'}`}>
+                <input type="radio" name="motif" className="accent-marque" checked={motif === m} onChange={() => setMotif(m)} />
                 {m === 'autre' ? 'Autre motif' : m}
               </label>
             ))}

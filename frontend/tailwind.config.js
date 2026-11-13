@@ -6,26 +6,19 @@ export default {
   content: { relative: true, files: ['./index.html', './src/**/*.{js,jsx}'] },
   theme: {
     extend: {
-      // Direction « Forêt et or » : forêt profond pour les surfaces de prestige (barre latérale,
-      // accueil, connexion), Vert Madio du logo pour les actions, or champagne réservé à ce qui compte
-      // (élément actif, priorités, points éco, étapes), fond porcelaine. Rouge : urgence critique seulement.
+      // Direction « Asphalte et or » : anthracite (l'asphalte de la ville) pour les actions et les surfaces
+      // de prestige, or champagne pour ce qui compte (élément actif, priorités, points éco, étapes),
+      // fond gris clair neutre. Aucun vert : le projet parle de ville, pas de nature.
+      // Le rouge reste réservé à l'urgence critique (et à la touche du logo).
       colors: {
-        vert: {
-          DEFAULT: '#008043', // Vert Madio (logo) : boutons et liens, 5:1 sur blanc
-          50: '#EAF4EE',
-          100: '#D3E8DB',
-          300: '#8CC5A2',
-          500: '#13955A', // jade : icônes, barres, tracés
-          600: '#008043',
-          700: '#00602F', // Vert profond (logo)
-        },
-        or: { DEFAULT: '#C9A55C', 50: '#FBF6EA', 100: '#F3E7C8', 300: '#E1C88C', clair: '#E9D6A6', 700: '#8A6A22' },
-        ardoise: { DEFAULT: '#0B1F17', 800: '#16302A', 700: '#2E4A40' },
-        menthe: '#9FD8B8', // repère clair sur fond forêt
-        fond: '#F4F6F3', // porcelaine
-        sombre: { DEFAULT: '#062A1C', 800: '#0A3624', 700: '#0F4430' }, // forêt profond
-        encre: { DEFAULT: '#0B1F17', doux: '#4A5A52', pale: '#87958D' },
-        trait: '#E1E6E1',
+        marque: { DEFAULT: '#111820', 50: '#F1F2F4', 100: '#E2E5E9', 300: '#AEB6BF', 500: '#4A5664', 700: '#2A3542' },
+        or: { DEFAULT: '#C9A55C', 50: '#FBF7EE', 100: '#F3E9D2', 300: '#E1C88C', clair: '#E9D6A6', 700: '#8A6A22' },
+        ardoise: { DEFAULT: '#111820', 800: '#1A232D', 700: '#2A3542' },
+        menthe: '#E1C88C', // repère clair sur fond sombre (or clair)
+        fond: '#F4F4F2', // gris clair neutre
+        sombre: { DEFAULT: '#111820', 800: '#1A232D', 700: '#26313D' }, // asphalte
+        encre: { DEFAULT: '#111820', doux: '#4A525C', pale: '#8A929B' },
+        trait: '#E4E4E0',
         ambre: { DEFAULT: '#F59E0B', 700: '#B45309', 100: '#FEF3C7', 50: '#FFFBEB' },
         alerte: { DEFAULT: '#DC2626', 50: '#FEF2F2', 100: '#FEE2E2', 700: '#B91C1C' },
       },
@@ -35,9 +28,9 @@ export default {
       },
       borderRadius: { carte: '16px' },
       boxShadow: {
-        carte: '0 1px 2px rgba(6, 42, 28, 0.04), 0 2px 8px -2px rgba(6, 42, 28, 0.06)',
-        survol: '0 12px 28px -12px rgba(6, 42, 28, 0.22)',
-        flotte: '0 24px 48px -20px rgba(6, 42, 28, 0.45)',
+        carte: '0 1px 2px rgba(17, 24, 32, 0.04), 0 2px 8px -2px rgba(17, 24, 32, 0.06)',
+        survol: '0 12px 28px -12px rgba(17, 24, 32, 0.22)',
+        flotte: '0 24px 48px -20px rgba(17, 24, 32, 0.45)',
         or: '0 0 0 1px rgba(201, 165, 92, 0.55), 0 10px 30px -12px rgba(201, 165, 92, 0.45)',
       },
       keyframes: {

@@ -35,7 +35,7 @@ function Parcours({ statut, motif }) {
     <ol className="flex items-center gap-1.5" aria-label="Avancement">
       {PARCOURS.map((etape, i) => (
         <li key={etape} className="flex flex-1 flex-col gap-1.5">
-          <span className={`h-1.5 rounded-full ${i <= atteint ? 'bg-vert-500' : 'bg-vert-100'}`} />
+          <span className={`h-1.5 rounded-full ${i <= atteint ? 'bg-or' : 'bg-or-100'}`} />
           <span className={`text-[11px] font-medium ${i <= atteint ? 'text-ardoise' : 'text-encre-pale'}`}>{NOMS[etape]}</span>
         </li>
       ))}
@@ -108,7 +108,7 @@ export default function MesSignalements() {
         {liste.donnees?.signalements.map((s) => (
           <li key={s.id} className="carte flex flex-col overflow-hidden sm:flex-row">
             {/* sans photo : pas de grand cadre vide sur téléphone */}
-            <div className={`${s.photo_url ? 'h-40' : 'hidden sm:block'} shrink-0 bg-vert-50 sm:h-auto sm:w-36`}>
+            <div className={`${s.photo_url ? 'h-40' : 'hidden sm:block'} shrink-0 bg-or-50 sm:h-auto sm:w-36`}>
               {s.photo_url ? (
                 <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
               ) : (
@@ -128,7 +128,7 @@ export default function MesSignalements() {
                   {[s.adresse, s.zone_nom].filter(Boolean).join(' · ') || 'Hors zone de collecte'} · {ilYa(s.created_at)}
                 </p>
                 {s.nb_soutiens > 0 && (
-                  <p className="mt-1 text-xs font-semibold text-vert-700">
+                  <p className="mt-1 text-xs font-semibold text-marque-700">
                     {s.nb_soutiens} voisin{s.nb_soutiens > 1 ? 's' : ''} confirme{s.nb_soutiens > 1 ? 'nt' : ''} ce dépôt
                   </p>
                 )}

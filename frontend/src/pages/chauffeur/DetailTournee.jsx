@@ -147,7 +147,7 @@ export default function DetailTournee() {
             <div className="absolute bottom-5 left-5 z-10 rounded-xl bg-white/95 px-3 py-2 text-xs shadow-carte sm:bottom-8 sm:left-8 sm:px-4 sm:py-3 sm:text-sm">
               <p className="font-semibold"><T>Légende</T></p>
               <p className="mt-1.5 flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-vert-500" /> ✓ Collecté
+                <span className="h-3 w-3 rounded-full bg-or" /> ✓ Collecté
               </p>
               <p className="mt-1 flex items-center gap-2">
                 <span className="h-3 w-3 rounded-full bg-encre-pale" /> Ordre de collecte
@@ -169,10 +169,10 @@ export default function DetailTournee() {
               </div>
             </div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-fond" role="progressbar" aria-valuenow={faits} aria-valuemin={0} aria-valuemax={total}>
-              <div className="h-full rounded-full bg-vert-500 transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
+              <div className="h-full rounded-full bg-or transition-all duration-500" style={{ width: `${(faits / Math.max(1, total)) * 100}%` }} />
             </div>
             {enCours && tousFaits && (
-              <p className="mt-4 rounded-xl border border-vert-300 bg-vert-50 px-4 py-3 text-sm text-vert-700">🎉 Tous les points collectés ! Vous pouvez terminer la tournée.</p>
+              <p className="mt-4 rounded-xl border border-or-300 bg-or-50 px-4 py-3 text-sm text-marque-700">🎉 Tous les points collectés ! Vous pouvez terminer la tournée.</p>
             )}
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function DetailTournee() {
                 </>
               )}
               {c.statut === 'terminee' && (
-                <p className="text-sm text-vert-700">
+                <p className="text-sm text-marque-700">
                   Tournée terminée : {faits}/{total} points{c.poids_collecte_kg != null && `, ${kg(c.poids_collecte_kg)} collectés`}.
                 </p>
               )}
@@ -236,7 +236,7 @@ export default function DetailTournee() {
                     <button
                       type="button"
                       onClick={() => setCible(s)}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-vert-100 text-sm font-bold text-vert-700"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-or-100 text-sm font-bold text-marque-700"
                       aria-label={`Voir le point ${s.ordre} sur la carte`}
                     >
                       {s.ordre}
@@ -248,11 +248,11 @@ export default function DetailTournee() {
                       </p>
                       <p className="text-xs">
                         Statut :{' '}
-                        <span className={s.collecte_fait ? 'font-semibold text-vert' : 'font-semibold text-ambre-700'}>{s.en_attente_envoi ? 'Collecté (envoi en attente)' : s.collecte_fait ? 'Collecté' : 'À collecter'}</span>
+                        <span className={s.collecte_fait ? 'font-semibold text-marque' : 'font-semibold text-ambre-700'}>{s.en_attente_envoi ? 'Collecté (envoi en attente)' : s.collecte_fait ? 'Collecté' : 'À collecter'}</span>
                       </p>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-2">
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.collecte_fait ? 'bg-vert-100 text-vert-700' : 'bg-slate-100 text-slate-600'}`}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${s.collecte_fait ? 'bg-or-100 text-marque-700' : 'bg-slate-100 text-slate-600'}`}>
                         {s.collecte_fait ? 'Collecté' : 'À collecter'}
                       </span>
                       {enCours && !s.collecte_fait && (

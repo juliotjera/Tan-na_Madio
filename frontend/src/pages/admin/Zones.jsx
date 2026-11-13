@@ -107,9 +107,9 @@ export default function Zones() {
           <li key={z.id} className={`carte p-5 ${z.actif ? '' : 'opacity-70'}`}>
             <div className="flex items-start justify-between gap-3">
               <p className="flex items-center gap-2 text-lg font-semibold text-ardoise">
-                <MapPin className="h-5 w-5 text-vert-500" /> {z.nom}
+                <MapPin className="h-5 w-5 text-or" /> {z.nom}
               </p>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${z.actif ? 'bg-vert-100 text-vert-700' : 'bg-slate-100 text-slate-600'}`}>{z.actif ? 'Active' : 'Inactive'}</span>
+              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${z.actif ? 'bg-or-100 text-marque-700' : 'bg-slate-100 text-slate-600'}`}>{z.actif ? 'Active' : 'Inactive'}</span>
             </div>
             {z.description && <p className="mt-2 text-sm text-encre-doux">{z.description}</p>}
             <div className="mt-3 space-y-1 border-b border-trait pb-4 text-sm">
@@ -132,7 +132,7 @@ export default function Zones() {
                 <Trash2 className="h-4 w-4" /> <T>Supprimer</T>
               </button>
             </div>
-            <button type="button" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-vert hover:underline disabled:opacity-50" disabled={bascule === z.id} onClick={() => basculerActif(z)}>
+            <button type="button" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-marque hover:underline disabled:opacity-50" disabled={bascule === z.id} onClick={() => basculerActif(z)}>
               {bascule === z.id && <Spinner className="h-3.5 w-3.5" />}
               {z.actif ? 'Désactiver' : 'Activer'}
             </button>
@@ -202,7 +202,7 @@ export default function Zones() {
               </Champ>
               {edition.id && (
                 <label className="flex items-center gap-3 text-sm">
-                  <input type="checkbox" className="h-4 w-4 accent-vert" checked={f.actif} onChange={(e) => setF({ ...f, actif: e.target.checked })} />
+                  <input type="checkbox" className="h-4 w-4 accent-marque" checked={f.actif} onChange={(e) => setF({ ...f, actif: e.target.checked })} />
                   Zone active (les nouveaux signalements y sont rattachés)
                 </label>
               )}

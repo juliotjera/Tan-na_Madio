@@ -71,7 +71,7 @@ export default function LandingPage() {
   // carte « en direct » : état réel des signalements de la ville
   const compter = (...statuts) => points.filter((p) => statuts.includes(p.statut)).length
   const etat = [
-    { libelle: 'Dépôts ramassés', valeur: donnees ? nombre(compter('collecte')) : '—', point: 'bg-vert-500' },
+    { libelle: 'Dépôts ramassés', valeur: donnees ? nombre(compter('collecte')) : '—', point: 'bg-or' },
     { libelle: 'En tournée', valeur: donnees ? nombre(compter('en_cours')) : '—', point: 'bg-or' },
     { libelle: 'À vérifier ou planifier', valeur: donnees ? nombre(compter('en_attente', 'valide')) : '—', point: 'bg-white/70' },
   ]
@@ -99,7 +99,7 @@ export default function LandingPage() {
               <option value="fr">Français</option>
               <option value="mg">Malagasy</option>
             </select>
-            <Link to="/login" className="whitespace-nowrap px-1 text-sm font-semibold text-ardoise hover:text-vert sm:px-2 sm:text-[15px]">
+            <Link to="/login" className="whitespace-nowrap px-1 text-sm font-semibold text-ardoise hover:text-marque sm:px-2 sm:text-[15px]">
               {t('Se connecter')}
             </Link>
             <Link to="/register" className="btn-principal whitespace-nowrap px-4 sm:px-5">
@@ -128,7 +128,7 @@ export default function LandingPage() {
           </Carte>
         </div>
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-sombre via-sombre/85 to-sombre/25" aria-hidden />
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_15%_20%,rgba(0,128,67,0.35),transparent_70%)]" aria-hidden />
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_15%_20%,rgba(201,165,92,0.16),transparent_70%)]" aria-hidden />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-px bg-gradient-to-r from-transparent via-or/50 to-transparent" aria-hidden />
 
         <div className="mx-auto grid max-w-[1180px] items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.2fr_1fr] lg:py-24">
@@ -183,8 +183,8 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <span className="absolute -right-3 -top-3 flex animate-flotter items-center gap-1.5 rounded-full bg-vert px-4 py-2 text-sm font-semibold text-white shadow-lg ring-1 ring-white/20">
-              <span className="h-2 w-2 animate-clignoter rounded-full bg-white" /> {t('En direct')}
+            <span className="absolute -right-3 -top-3 flex animate-flotter items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-sombre shadow-lg">
+              <span className="h-2 w-2 animate-clignoter rounded-full bg-or" /> {t('En direct')}
             </span>
             <span className="absolute -bottom-4 -left-3 animate-flotter-lent rounded-full bg-or px-4 py-2 text-sm font-semibold text-sombre shadow-or">
               {donnees ? `${donnees.zones} ${t('zones')}` : t('zones')}
@@ -267,7 +267,7 @@ export default function LandingPage() {
             })}
           </div>
 
-          <div className="relative mx-auto mt-14 max-w-[1050px] overflow-hidden rounded-[24px] bg-sombre bg-[radial-gradient(70%_120%_at_50%_0%,rgba(0,128,67,0.45),transparent_65%)] p-10 text-center shadow-flotte ring-1 ring-or/25 sm:p-12">
+          <div className="relative mx-auto mt-14 max-w-[1050px] overflow-hidden rounded-[24px] bg-sombre bg-[radial-gradient(70%_120%_at_50%_0%,rgba(201,165,92,0.2),transparent_65%)] p-10 text-center shadow-flotte ring-1 ring-or/25 sm:p-12">
             <p className="font-titre text-2xl font-semibold text-white">{t('Premiers pas avec Tanàna Madio ?')}</p>
             <div className="mt-7 flex flex-wrap justify-center gap-4">
               <Link to="/register" className="btn-or min-h-[60px] flex-col gap-0.5 px-8 text-base">

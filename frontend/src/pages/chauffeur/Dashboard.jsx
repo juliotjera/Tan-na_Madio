@@ -14,7 +14,7 @@ import InterrupteurPush from '../../components/common/InterrupteurPush'
 function Stat({ icone: Icone, valeur, libelle }) {
   return (
     <div className="carte flex flex-col items-center px-4 py-6 text-center">
-      <Icone className="h-6 w-6 text-vert-500" />
+      <Icone className="h-6 w-6 text-or" />
       <p className="chiffre mt-3 text-[28px] leading-none text-ardoise">{valeur}</p>
       <p className="mt-2 text-sm text-encre-doux">{libelle}</p>
     </div>
@@ -41,7 +41,7 @@ export default function ChauffeurDashboard() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(90%_140%_at_100%_0%,rgba(0,128,67,0.5),transparent_60%)] p-6 text-white shadow-flotte ring-1 ring-or/20 sm:p-7">
+      <section className="relative overflow-hidden rounded-carte bg-sombre bg-[radial-gradient(90%_140%_at_100%_0%,rgba(201,165,92,0.22),transparent_60%)] p-6 text-white shadow-flotte ring-1 ring-or/20 sm:p-7">
         <p className="text-sm text-or">{t('Chauffeur')}</p>
         <h1 className="mt-1 text-[28px] text-white">
           {t('Bonjour')} {user.prenom}
@@ -69,7 +69,7 @@ export default function ChauffeurDashboard() {
         (duJour ? (
           <section className="carte p-6">
             <h2 className="flex items-center gap-2 text-xl">
-              <Truck className="h-5 w-5 text-vert-500" /> {t('Tournée du jour')}
+              <Truck className="h-5 w-5 text-or" /> {t('Tournée du jour')}
             </h2>
             <p className="mt-2 text-encre-doux">{jourHeure(duJour.date_planifiee)}</p>
             <dl className="mt-4 grid grid-cols-3 gap-4">
@@ -102,14 +102,14 @@ export default function ChauffeurDashboard() {
 
       <section className="carte p-6">
         <h2 className="flex items-center gap-2 text-xl">
-          <CheckCircle2 className="h-5 w-5 text-vert-500" /> {t('Dernières tournées effectuées')}
+          <CheckCircle2 className="h-5 w-5 text-or" /> {t('Dernières tournées effectuées')}
         </h2>
         {liste.donnees && dernieres.length === 0 && <p className="mt-3 text-sm text-encre-doux">{t('Aucune tournée terminée pour l’instant.')}</p>}
         <ul className="mt-4 space-y-2">
           {dernieres.map((c) => (
             <li key={c.id}>
-              <Link to={`/chauffeur/tournees/${c.id}`} className="flex items-center gap-3 rounded-xl bg-vert-50 px-4 py-3 transition hover:bg-vert-100">
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-vert-500" />
+              <Link to={`/chauffeur/tournees/${c.id}`} className="flex items-center gap-3 rounded-xl bg-or-50 px-4 py-3 transition hover:bg-or-100">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-or" />
                 <span>
                   <span className="block font-semibold">
                     {dateCourte(c.date_fin ?? c.date_planifiee)} — {c.zone_nom ?? t('Plusieurs zones')}

@@ -77,7 +77,7 @@ export function MarqueurSignalement({ signalement, children, estompe, onClick })
 // Étape numérotée d'une tournée (verte une fois collectée)
 export function iconeEtape(numero, { fait = false, active = false } = {}) {
   // à faire : plaque sombre ; prochain arrêt : ambre ; collecté : bleu pâle coché
-  const fond = fait ? '#10B981' : active ? '#F59E0B' : '#4B5563'
+  const fond = fait ? '#C9A55C' : active ? '#F59E0B' : '#4B5563'
   const texte = '#FFFFFF'
   return L.divIcon({
     className: '',
@@ -89,13 +89,13 @@ export function iconeEtape(numero, { fait = false, active = false } = {}) {
 
 const iconeDepot = L.divIcon({
   className: '',
-  html: '<div class="etape" style="background:#FFFFFF;color:#059669;border-color:#059669">D</div>',
+  html: '<div class="etape" style="background:#FFFFFF;color:#111820;border-color:#111820">D</div>',
   iconSize: [28, 28],
   iconAnchor: [14, 14],
 })
 
-// Itinéraire : tracé optimisé (vert, bordé de blanc), ordre naïf en pointillés pour comparer
-export function Itineraire({ trace, traceNaive, etapes = [], depart, anime = true, onEtape, couleur = '#3B82F6' }) {
+// Itinéraire : tracé optimisé (anthracite, bordé de blanc), ordre naïf en pointillés pour comparer
+export function Itineraire({ trace, traceNaive, etapes = [], depart, anime = true, onEtape, couleur = '#111820' }) {
   return (
     <>
       {traceNaive?.length > 1 && <Polyline positions={traceNaive} pathOptions={{ color: '#9CA3AF', weight: 3, opacity: 0.8, dashArray: '2 8', lineCap: 'round' }} />}
@@ -125,7 +125,7 @@ export function Itineraire({ trace, traceNaive, etapes = [], depart, anime = tru
   )
 }
 
-const styleZone = { color: '#10B981', weight: 1.5, opacity: 0.7, fillColor: '#10B981', fillOpacity: 0.07, dashArray: '4 4' }
+const styleZone = { color: '#C9A55C', weight: 1.5, opacity: 0.7, fillColor: '#C9A55C', fillOpacity: 0.07, dashArray: '4 4' }
 
 export function Zones({ zones, surbrillance }) {
   return zones

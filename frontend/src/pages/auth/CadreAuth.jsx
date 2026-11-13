@@ -20,7 +20,7 @@ export default function CadreAuth({ titre, texte, children }) {
       <aside className="relative hidden overflow-hidden bg-sombre lg:block">
         <img src="/images/tana-aerien.webp" alt="" className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-[50%_70%]" />
         <div className="absolute inset-0 bg-gradient-to-t from-sombre via-sombre/55 to-sombre/20" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(70%_50%_at_0%_100%,rgba(0,128,67,0.45),transparent_70%)]" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(70%_50%_at_0%_100%,rgba(201,165,92,0.2),transparent_70%)]" aria-hidden />
         <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-or/60 to-transparent" aria-hidden />
         <div className="absolute left-10 top-10 flex items-center gap-3 rounded-full bg-sombre/50 py-1.5 pl-1.5 pr-4 ring-1 ring-or/30 backdrop-blur-md">
           <Marque blanc className="h-8 w-8" alt="" />
