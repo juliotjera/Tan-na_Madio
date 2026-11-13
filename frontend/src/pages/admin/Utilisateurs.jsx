@@ -13,11 +13,12 @@ import { T } from '../../context/LangueContext'
 
 const FILTRES = [{ valeur: '', libelle: 'Tous' }, ...Object.entries(ROLES).map(([valeur, libelle]) => ({ valeur, libelle: `${libelle}s` }))]
 // couleur de la puce de rôle, comme dans la version d'origine
+// le rouge reste réservé à l'urgence critique : les rôles prennent la palette forêt et or
 const PUCE_ROLE = {
-  administrateur: 'bg-red-50 text-red-700',
+  administrateur: 'bg-sombre text-or-clair',
   citoyen: 'bg-vert-50 text-vert-700',
-  agent_municipal: 'bg-sky-50 text-sky-700',
-  chauffeur: 'bg-violet-50 text-violet-700',
+  agent_municipal: 'bg-or-50 text-or-700 ring-1 ring-or/30',
+  chauffeur: 'bg-fond text-ardoise ring-1 ring-trait',
 }
 const VIDE = { prenom: '', nom: '', email: '', telephone: '', role: 'agent_municipal', mot_de_passe: '', matricule: '', zone_id: '', numero_permis: '', camion_id: '' }
 

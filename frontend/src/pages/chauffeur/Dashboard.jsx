@@ -89,7 +89,7 @@ export default function ChauffeurDashboard() {
               </div>
             </dl>
             <p className="mt-4 flex items-center gap-2 text-sm font-medium">
-              <span className={`h-2.5 w-2.5 rounded-full ${duJour.statut === 'en_cours' ? 'bg-ambre' : 'bg-blue-500'}`} />
+              <span className={`h-2.5 w-2.5 rounded-full ${duJour.statut === 'en_cours' ? 'bg-ambre' : 'bg-or'}`} />
               {duJour.statut === 'en_cours' ? t('En cours') : t('Planifiée')} · {km(duJour.distance_km)}
             </p>
             <Link to={`/chauffeur/tournees/${duJour.id}`} className="btn-principal mt-5 w-full min-h-[48px] text-base">

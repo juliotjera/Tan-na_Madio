@@ -120,7 +120,7 @@ export default function AdminDashboard() {
           {s && (
             <div className="mt-5 space-y-5">
               <Barre libelle="En attente" valeur={s.en_attente} total={totalStatuts} couleur="bg-ambre" />
-              <Barre libelle="En cours" valeur={s.en_cours} total={totalStatuts} couleur="bg-blue-500" />
+              <Barre libelle="En cours" valeur={s.en_cours} total={totalStatuts} couleur="bg-or" />
               <Barre libelle="Collectés" valeur={s.collectes_signalements} total={totalStatuts} couleur="bg-vert-500" />
             </div>
           )}

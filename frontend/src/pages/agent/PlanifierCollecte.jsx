@@ -46,12 +46,12 @@ function Etapes({ actuelle }) {
         <li
           key={titre}
           aria-current={i === actuelle ? 'step' : undefined}
-          className={`rounded-xl border-[1.5px] px-2 py-3 text-center transition ${
-            i < actuelle ? 'border-vert-500 bg-vert-50' : i === actuelle ? 'border-ardoise/60 bg-white shadow-carte' : 'border-trait bg-white'
+          className={`rounded-xl border px-2 py-3 text-center transition duration-300 ${
+            i < actuelle ? 'border-vert-300 bg-vert-50' : i === actuelle ? 'border-or/60 bg-sombre shadow-or' : 'border-trait bg-white'
           }`}
         >
-          <p className="text-sm font-bold text-ardoise">{titre}</p>
-          <p className="hidden text-xs text-encre-doux sm:block">{nom}</p>
+          <p className={`font-titre text-sm font-semibold ${i === actuelle ? 'text-or-clair' : i < actuelle ? 'text-vert' : 'text-ardoise'}`}>{titre}</p>
+          <p className={`hidden text-xs sm:block ${i === actuelle ? 'text-white/70' : 'text-encre-doux'}`}>{nom}</p>
         </li>
       ))}
     </ol>
@@ -76,7 +76,7 @@ function ChampVert({ libelle, icone: Icone, requis, aide, valide, children }) {
 }
 
 function CaseRecap({ libelle, valeur, ton }) {
-  const tons = { bleu: 'bg-blue-50 text-blue-700', vert: 'bg-vert-50 text-vert-700', violet: 'bg-violet-50 text-violet-700', ambre: 'bg-ambre-50 text-ambre-700', ciel: 'bg-sky-50 text-sky-700' }
+  const tons = { bleu: 'bg-sombre text-or', vert: 'bg-vert-50 text-vert-700', violet: 'bg-or-50 text-or-700', ambre: 'bg-or-50 text-or-700', ciel: 'bg-vert-50 text-vert' }
   return (
     <div className={`rounded-xl px-4 py-3 ${tons[ton]}`}>
       <p className="text-xs font-medium">{libelle}</p>
@@ -205,14 +205,14 @@ export default function PlanifierCollecte() {
                   </ChampVert>
                   {camions.donnees?.length === 0 && <p className="text-sm text-ambre-700">Aucun camion disponible : terminez ou annulez une tournée pour libérer un camion.</p>}
                   {camion && (
-                    <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4">
+                    <div className="rounded-xl border border-or/30 bg-or-50/70 p-4">
                       {camion.chauffeur_nom ? (
                         <>
-                          <p className="text-sm text-blue-900">
+                          <p className="text-sm text-ardoise">
                             <span className="font-semibold">Chauffeur assigné :</span> {camion.chauffeur_nom}
                           </p>
-                          <p className="mt-2 text-xs text-blue-800">Contact :</p>
-                          <p className="text-sm tracking-wide text-blue-900">{camion.chauffeur_telephone ?? 'Numéro non renseigné'}</p>
+                          <p className="mt-2 text-xs text-encre-doux">Contact :</p>
+                          <p className="text-sm tracking-wide text-ardoise">{camion.chauffeur_telephone ?? 'Numéro non renseigné'}</p>
                           {camion.chauffeur_telephone && (
                             <div className="mt-3 grid gap-2 sm:grid-cols-2">
                               <a href={`https://wa.me/${international(camion.chauffeur_telephone)}`} target="_blank" rel="noreferrer" className="btn bg-[#0B8A5E] text-white hover:bg-[#08704C]">
@@ -420,7 +420,7 @@ export default function PlanifierCollecte() {
                 </div>
                 <div className="rounded-xl border border-trait p-4">
                   <p className="flex items-center gap-2 text-sm font-semibold">
-                    <Info className="h-4 w-4 text-blue-500" /> Informations
+                    <Info className="h-4 w-4 text-or-700" /> Informations
                   </p>
                   <p className="mt-1 text-sm text-encre-doux">
                     {tournees[0].plan.methode === 'dijkstra' ? 'Distances calculées par les rues (Dijkstra).' : 'Distances estimées à vol d’oiseau.'}
