@@ -1,7 +1,7 @@
-// Connexion et inscription sur une seule page, reliées par un « volet » : sur ordinateur, les deux
-// formulaires sont côte à côte et une vue d'Antananarivo en couvre un ; passer de l'un à l'autre fait
-// glisser le volet (parallaxe sur la photo, lame dorée sur le bord). Sur téléphone, un interrupteur
-// fait défiler les formulaires. L'adresse suit le formulaire affiché (/login, /register).
+// Connexion et inscription sur une seule page. Sur ordinateur : une carte centrée en deux moitiés
+// fixes, un volet photo d'Antananarivo couvre l'une et glisse vers l'autre. Sur téléphone : un
+// interrupteur fait défiler les deux formulaires. L'adresse suit le formulaire (/login, /register).
+// Fluidité : seuls transform et opacity sont animés (calculés par la carte graphique), aucun flou.
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -13,8 +13,9 @@ import { Champ, Spinner } from '../../components/common/ui'
 import { Logo, Marque } from '../../components/layout/Logo'
 import { ROLES } from '../../utils/format'
 
-const DUREE = 900 // ms, durée du glissement du volet
-const EASE = 'cubic-bezier(0.77, 0, 0.175, 1)'
+const DUREE = 750 // ms
+const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)'
+const GLISSE = `transform ${DUREE}ms ${EASE}`
 
 // Comptes de la base de démonstration (désactivables avec VITE_COMPTES_DEMO=false)
 const DEMO = import.meta.env.VITE_COMPTES_DEMO !== 'false'
@@ -26,28 +27,26 @@ const COMPTES = [
 ]
 const QUARTIERS = ['Analakely', 'Isotry', 'Ampefiloha', 'Ambohipo', 'Andravoahangy', 'Autre quartier']
 
-// Ce que dit le volet, selon le formulaire qu'il laisse voir
+// Ce que dit le volet selon le formulaire qu'il laisse voir
 const VOLET = {
   connexion: {
     image: '/images/tana-aerien.webp',
-    titre: 'Pas encore de compte ?',
-    texte: 'Signalez les dépôts d’ordures de votre quartier et suivez leur ramassage, jusqu’au passage du camion.',
-    action: 'Créer un compte citoyen',
-    legende: 'Antananarivo, autour du lac Anosy',
+    titre: 'Nouveau sur Tanàna Madio ?',
+    texte: 'Créez votre compte citoyen pour signaler un dépôt d’ordures et suivre son ramassage.',
+    action: 'Créer un compte',
   },
   inscription: {
     image: '/images/tana-toits.webp',
-    titre: 'Déjà inscrit ?',
+    titre: 'Vous avez déjà un compte ?',
     texte: 'Retrouvez vos signalements, vos tournées ou l’administration de la plateforme.',
     action: 'Se connecter',
-    legende: 'Antananarivo, la haute ville',
   },
 }
 
 function Erreur({ message }) {
   if (!message) return null
   return (
-    <p className="rounded-xl bg-alerte-50 px-4 py-3 text-sm text-alerte-700" role="alert">
+    <p className="rounded-xl bg-alerte-50 px-4 py-2.5 text-sm text-alerte-700" role="alert">
       {message}
     </p>
   )
@@ -55,19 +54,14 @@ function Erreur({ message }) {
 
 function Entete({ titre, texte }) {
   return (
-    <>
-      {/* ordinateur : le logo accompagne le formulaire visible */}
-      <Link to="/" aria-label="Accueil Tanàna Madio" className="mb-12 hidden self-start lg:block">
-        <Logo />
-      </Link>
-      <span className="block h-1 w-10 rounded-full bg-or" aria-hidden />
-      <h1 className="mt-5 text-[32px] leading-tight sm:text-[34px]">{titre}</h1>
-      <p className="mt-2 text-encre-doux">{texte}</p>
-    </>
+    <div className="mb-7">
+      <h1 className="text-[28px] leading-tight sm:text-[30px]">{titre}</h1>
+      <p className="mt-1.5 text-[15px] text-encre-doux">{texte}</p>
+    </div>
   )
 }
 
-function FormulaireConnexion({ etat, setEtat, onBasculer }) {
+function FormulaireConnexion({ etat, setEtat }) {
   const { connecter } = useAuth()
   const navigate = useNavigate()
   const lieu = useLocation()
@@ -94,7 +88,7 @@ function FormulaireConnexion({ etat, setEtat, onBasculer }) {
   return (
     <>
       <Entete titre="Se connecter" texte="Accédez à votre espace : signalements, tournées ou administration." />
-      <form onSubmit={soumettre} className="mt-8 space-y-4" noValidate>
+      <form onSubmit={soumettre} className="space-y-4" noValidate>
         <Champ libelle="Adresse e-mail">
           {(id) => <input id={id} type="email" className="champ" autoComplete="email" value={email} onChange={(e) => setEtat({ ...etat, email: e.target.value })} required />}
         </Champ>
@@ -127,27 +121,22 @@ function FormulaireConnexion({ etat, setEtat, onBasculer }) {
           Se connecter
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-encre-doux lg:hidden">
-        Pas encore de compte ?{' '}
-        <button type="button" onClick={onBasculer} className="font-semibold text-marque underline-offset-4 hover:underline">
-          Créer un compte citoyen
-        </button>
-      </p>
 
       {DEMO && (
-        <div className="mt-8 rounded-2xl border border-or/30 bg-or-50/60 p-4">
-          <p className="text-sm font-semibold text-ardoise">Comptes de démonstration</p>
-          <p className="mt-0.5 text-xs text-encre-pale">Mot de passe : Admin2025!</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-6 border-t border-trait pt-5">
+          <p className="text-xs font-medium text-encre-doux">
+            Comptes de démonstration <span className="text-encre-pale">· mot de passe Admin2025!</span>
+          </p>
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
             {COMPTES.map(([adresse, role]) => (
               <button
                 key={adresse}
                 type="button"
                 onClick={() => setEtat({ email: adresse, mdp: 'Admin2025!' })}
-                className="rounded-xl border border-trait bg-white px-3 py-2 text-left text-sm transition duration-200 hover:-translate-y-px hover:border-or/60 hover:shadow-survol"
+                className="flex items-center gap-2 rounded-lg border border-trait px-3 py-2 text-left text-sm font-medium text-ardoise transition-colors duration-200 hover:border-or/60 hover:bg-or-50"
               >
-                <span className="block font-medium text-ardoise">{ROLES[role]}</span>
-                <span className="block truncate text-xs text-encre-pale">{adresse}</span>
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-or" aria-hidden />
+                {ROLES[role]}
               </button>
             ))}
           </div>
@@ -157,7 +146,7 @@ function FormulaireConnexion({ etat, setEtat, onBasculer }) {
   )
 }
 
-function FormulaireInscription({ etat: f, setEtat: setF, onBasculer }) {
+function FormulaireInscription({ etat: f, setEtat: setF }) {
   const { inscrire } = useAuth()
   const navigate = useNavigate()
   const [envoi, setEnvoi] = useState(false)
@@ -183,22 +172,22 @@ function FormulaireInscription({ etat: f, setEtat: setF, onBasculer }) {
   return (
     <>
       <Entete titre="Créer un compte citoyen" texte="Signalez les dépôts d’ordures de votre quartier et suivez leur ramassage." />
-      <form onSubmit={soumettre} className="mt-8 space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+      <form onSubmit={soumettre} className="space-y-3.5">
+        <div className="grid grid-cols-2 gap-3">
           <Champ libelle="Prénom">{(id) => <input id={id} className="champ" autoComplete="given-name" value={f.prenom} onChange={maj('prenom')} required />}</Champ>
           <Champ libelle="Nom">{(id) => <input id={id} className="champ" autoComplete="family-name" value={f.nom} onChange={maj('nom')} required />}</Champ>
         </div>
         <Champ libelle="Adresse e-mail">
           {(id) => <input id={id} type="email" className="champ" autoComplete="email" value={f.email} onChange={maj('email')} required />}
         </Champ>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Champ libelle="Téléphone" aide="Facultatif">
-            {(id) => <input id={id} type="tel" className="champ" autoComplete="tel" placeholder="034 00 000 00" value={f.telephone} onChange={maj('telephone')} />}
+        <div className="grid grid-cols-2 gap-3">
+          <Champ libelle="Téléphone">
+            {(id) => <input id={id} type="tel" className="champ" autoComplete="tel" placeholder="Facultatif" value={f.telephone} onChange={maj('telephone')} />}
           </Champ>
-          <Champ libelle="Quartier" aide="Facultatif">
+          <Champ libelle="Quartier">
             {(id) => (
-              <select id={id} className="champ" value={f.quartier} onChange={maj('quartier')}>
-                <option value="">Choisir…</option>
+              <select id={id} className={`champ ${f.quartier ? '' : 'text-encre-pale'}`} value={f.quartier} onChange={maj('quartier')}>
+                <option value="">Facultatif</option>
                 {QUARTIERS.map((q) => (
                   <option key={q}>{q}</option>
                 ))}
@@ -206,7 +195,7 @@ function FormulaireInscription({ etat: f, setEtat: setF, onBasculer }) {
             )}
           </Champ>
         </div>
-        <Champ libelle="Mot de passe" aide="Au moins 8 caractères, dont une lettre et un chiffre">
+        <Champ libelle="Mot de passe" aide="8 caractères minimum, dont une lettre et un chiffre">
           {(id) => <input id={id} type="password" className="champ" autoComplete="new-password" value={f.mot_de_passe} onChange={maj('mot_de_passe')} required />}
         </Champ>
         <Erreur message={erreur} />
@@ -215,25 +204,33 @@ function FormulaireInscription({ etat: f, setEtat: setF, onBasculer }) {
           Créer mon compte
         </button>
       </form>
-      <p className="mt-6 text-center text-sm text-encre-doux lg:hidden">
-        Déjà inscrit ?{' '}
-        <button type="button" onClick={onBasculer} className="font-semibold text-marque underline-offset-4 hover:underline">
-          Se connecter
-        </button>
-      </p>
-      <p className="mt-3 text-center text-xs text-encre-pale">Agents et chauffeurs : votre compte est créé par l’administrateur de la commune.</p>
+      <p className="mt-4 text-center text-xs text-encre-pale">Agents et chauffeurs : votre compte est créé par l’administrateur.</p>
     </>
   )
 }
 
-// Interrupteur du téléphone : pastille or qui glisse sous l'onglet actif
+// Largeur d'ordinateur (≥ 1024 px) : la carte à volet ; sinon la version téléphone (une seule des deux
+// est dans la page, pour ne jamais avoir deux formulaires identiques)
+function useOrdinateur() {
+  const requete = '(min-width: 1024px)'
+  const [ordinateur, setOrdinateur] = useState(() => window.matchMedia(requete).matches)
+  useEffect(() => {
+    const liste = window.matchMedia(requete)
+    const surChangement = (e) => setOrdinateur(e.matches)
+    liste.addEventListener('change', surChangement)
+    return () => liste.removeEventListener('change', surChangement)
+  }, [])
+  return ordinateur
+}
+
+// Interrupteur du téléphone : pastille qui glisse sous l'onglet actif
 function Interrupteur({ mode, onChoix }) {
   return (
-    <div role="tablist" aria-label="Connexion ou inscription" className="relative grid grid-cols-2 rounded-full bg-fond p-1 ring-1 ring-trait lg:hidden">
+    <div role="tablist" aria-label="Connexion ou inscription" className="relative grid grid-cols-2 rounded-full bg-fond p-1 ring-1 ring-trait">
       <span
         aria-hidden
-        className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-sombre shadow-or transition-transform duration-500"
-        style={{ transform: mode === 'inscription' ? 'translateX(100%)' : 'translateX(0)', transitionTimingFunction: EASE }}
+        className="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-sombre will-change-transform"
+        style={{ transform: mode === 'inscription' ? 'translate3d(100%,0,0)' : 'translate3d(0,0,0)', transition: GLISSE }}
       />
       {[
         ['connexion', 'Se connecter'],
@@ -245,7 +242,7 @@ function Interrupteur({ mode, onChoix }) {
           role="tab"
           aria-selected={mode === cle}
           onClick={() => onChoix(cle)}
-          className={`relative z-10 rounded-full py-2.5 text-sm font-semibold transition-colors duration-300 ${mode === cle ? 'text-or-clair' : 'text-encre-doux'}`}
+          className={`relative z-10 rounded-full py-2.5 text-sm font-semibold transition-colors duration-500 ${mode === cle ? 'text-or-clair' : 'text-encre-doux'}`}
         >
           {libelle}
         </button>
@@ -259,113 +256,141 @@ export default function Authentification() {
   const navigate = useNavigate()
   const lieu = useLocation()
   const mode = lieu.pathname.startsWith('/register') ? 'inscription' : 'connexion'
-  // pendant le glissement, les deux formulaires restent affichés ; ensuite seul le visible est gardé
+  const enInscription = mode === 'inscription'
+  // pendant le glissement les deux formulaires existent ; ensuite seul le visible reste dans la page
   const [presents, setPresents] = useState(() => new Set([mode]))
   const [connexion, setConnexion] = useState({ email: '', mdp: '' })
   const [inscription, setInscription] = useState({ prenom: '', nom: '', email: '', telephone: '', quartier: '', mot_de_passe: '' })
   const minuterie = useRef(null)
+  const ordinateur = useOrdinateur()
 
   useEffect(() => {
-    setPresents((p) => new Set([...p, mode]))
+    setPresents((p) => (p.has(mode) ? p : new Set([...p, mode])))
     clearTimeout(minuterie.current)
-    minuterie.current = setTimeout(() => setPresents(new Set([mode])), DUREE + 50)
+    minuterie.current = setTimeout(() => setPresents(new Set([mode])), DUREE + 80)
     return () => clearTimeout(minuterie.current)
   }, [mode])
 
   if (connecte) return <Navigate to={ACCUEIL_PAR_ROLE[user.role]} replace />
 
   const basculer = (cible) => {
-    const vers = cible ?? (mode === 'connexion' ? 'inscription' : 'connexion')
+    const vers = cible ?? (enInscription ? 'connexion' : 'inscription')
     if (vers !== mode) navigate(vers === 'inscription' ? '/register' : '/login', { state: lieu.state })
   }
-  const enInscription = mode === 'inscription'
-  const volet = VOLET[mode]
 
-  // un formulaire : visible, ou en train de s'effacer (inerte et masqué aux lecteurs d'écran)
-  const panneau = (cle, contenu) => {
+  // une moitié de la carte : visible, ou effacée (inerte, masquée aux lecteurs d'écran)
+  const moitie = (cle, contenu, cote) => {
     const actif = mode === cle
-    const decalage = cle === 'connexion' ? '-48px' : '48px'
     return (
       <section
         aria-hidden={!actif}
         inert={actif ? undefined : ''}
-        className="col-start-1 row-start-1 lg:col-auto lg:row-auto"
+        className={`absolute inset-y-0 w-1/2 overflow-y-auto [scrollbar-width:thin] ${cote === 'gauche' ? 'left-0' : 'right-0'}`}
         style={{
           opacity: actif ? 1 : 0,
-          transform: actif ? 'none' : `translateX(${decalage})`,
-          filter: actif ? 'none' : 'blur(6px)',
-          transition: `opacity 600ms ${EASE} ${actif ? '300ms' : '0ms'}, transform 900ms ${EASE}, filter 600ms ${EASE}`,
-          pointerEvents: actif ? 'auto' : 'none',
+          transform: actif ? 'translate3d(0,0,0)' : `translate3d(${cote === 'gauche' ? '-24px' : '24px'},0,0)`,
+          transition: `opacity ${actif ? 450 : 250}ms ease ${actif ? DUREE * 0.45 : 0}ms, ${GLISSE}`,
         }}
       >
-        <div className="mx-auto flex w-full max-w-[440px] flex-col justify-center py-8 lg:min-h-screen lg:py-16">{presents.has(cle) && contenu}</div>
+        <div className="flex min-h-full flex-col justify-center px-12 py-10 xl:px-16">{presents.has(cle) && contenu}</div>
       </section>
     )
   }
 
+  const connexionForm = <FormulaireConnexion etat={connexion} setEtat={setConnexion} />
+  const inscriptionForm = <FormulaireInscription etat={inscription} setEtat={setInscription} />
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white">
-      {/* Logo et retour à l'accueil, au-dessus des deux moitiés */}
-      <header className="relative z-30 flex items-center px-5 pt-[max(20px,env(safe-area-inset-top))] sm:px-10 lg:hidden">
+    <div className="relative flex min-h-screen flex-col bg-sombre">
+      {/* fond : vue d'Antananarivo voilée d'anthracite (immobile) */}
+      <img src="/images/tana-aerien.webp" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-sombre/70 via-sombre/85 to-sombre" aria-hidden />
+
+      <header className="relative z-10 mx-auto flex w-full max-w-[1120px] items-center justify-between px-5 py-5 sm:px-8">
         <Link to="/" aria-label="Accueil Tanàna Madio">
-          <Logo />
+          <Logo clair className="[&>img]:h-10" />
+        </Link>
+        <Link to="/" className="flex items-center gap-1.5 text-sm font-medium text-white/70 transition-colors hover:text-or-clair">
+          <ArrowLeft className="h-4 w-4" /> Accueil
         </Link>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1480px] px-5 pb-10 pt-6 sm:px-10 lg:min-h-screen lg:grid-cols-2 lg:gap-24 lg:px-16 lg:pt-0">
-        <div className="mx-auto mb-2 w-full max-w-[440px] lg:hidden">
-          <Interrupteur mode={mode} onChoix={basculer} />
-        </div>
-        <div className="grid lg:contents">
-          {panneau('connexion', <FormulaireConnexion etat={connexion} setEtat={setConnexion} onBasculer={() => basculer('inscription')} />)}
-          {panneau('inscription', <FormulaireInscription etat={inscription} setEtat={setInscription} onBasculer={() => basculer('connexion')} />)}
-        </div>
-      </div>
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-8 sm:px-8">
+        {/* Ordinateur : carte en deux moitiés et volet */}
+        {ordinateur ? (
+        <div className="relative h-[min(680px,calc(100vh-130px))] min-h-[620px] w-full max-w-[1120px] overflow-hidden rounded-[28px] bg-white shadow-[0_40px_120px_-30px_rgba(0,0,0,0.65)] ring-1 ring-white/10">
+          {moitie('connexion', connexionForm, 'gauche')}
+          {moitie('inscription', inscriptionForm, 'droite')}
 
-      {/* Le volet (ordinateur) : il couvre le formulaire caché et glisse d'une moitié à l'autre */}
-      <aside
-        className="absolute inset-y-0 left-0 z-20 hidden w-1/2 overflow-hidden bg-sombre lg:block"
-        style={{ transform: enInscription ? 'translateX(0)' : 'translateX(100%)', transition: `transform ${DUREE}ms ${EASE}` }}
-      >
-        {Object.entries(VOLET).map(([cle, v]) => (
-          <img
-            key={cle}
-            src={v.image}
-            alt=""
-            className="absolute inset-0 h-full w-[120%] max-w-none object-cover object-[50%_70%]"
-            style={{
-              opacity: mode === cle ? 1 : 0,
-              transform: `translateX(${enInscription ? '-4%' : '-12%'}) scale(1.04)`,
-              transition: `opacity ${DUREE}ms ${EASE}, transform ${DUREE}ms ${EASE}`,
-            }}
-          />
-        ))}
-        <div className="absolute inset-0 bg-gradient-to-t from-sombre via-sombre/60 to-sombre/25" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_100%,rgba(201,165,92,0.18),transparent_70%)]" aria-hidden />
-        {/* lame dorée sur le bord qui touche le formulaire */}
-        <span
-          aria-hidden
-          className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-or to-transparent transition-all duration-700"
-          style={{ left: enInscription ? 'auto' : 0, right: enInscription ? 0 : 'auto' }}
-        />
+          <aside
+            className="absolute inset-y-0 left-0 z-10 w-1/2 overflow-hidden bg-sombre will-change-transform"
+            style={{ transform: enInscription ? 'translate3d(0,0,0)' : 'translate3d(100%,0,0)', transition: GLISSE }}
+          >
+            {Object.entries(VOLET).map(([cle, v]) => (
+              <img
+                key={cle}
+                src={v.image}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ opacity: mode === cle ? 1 : 0, transition: `opacity ${DUREE}ms ${EASE}` }}
+              />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-sombre via-sombre/70 to-sombre/30" aria-hidden />
 
-        <div className="absolute left-10 top-8 flex items-center gap-3 rounded-full bg-sombre/50 py-1.5 pl-1.5 pr-4 ring-1 ring-or/30 backdrop-blur-md">
-          <Marque blanc className="h-8 w-8" alt="" />
-          <span className="text-sm font-medium text-white/85">Signaler · Collecter · Ville propre</span>
+            <div className="relative flex h-full flex-col justify-between p-11">
+              <span className="flex items-center gap-2.5 self-start rounded-full bg-black/30 py-1.5 pl-1.5 pr-4 ring-1 ring-or/30">
+                <Marque blanc className="h-7 w-7" alt="" />
+                <span className="text-[13px] font-medium text-white/85">Signaler · Collecter · Ville propre</span>
+              </span>
+              <div className="relative min-h-[220px]">
+                {Object.entries(VOLET).map(([cle, v]) => {
+                  const actif = mode === cle
+                  return (
+                    <div
+                      key={cle}
+                      aria-hidden={!actif}
+                      className="absolute inset-x-0 bottom-0"
+                      style={{
+                        opacity: actif ? 1 : 0,
+                        transform: actif ? 'translate3d(0,0,0)' : 'translate3d(0,16px,0)',
+                        transition: `opacity 400ms ease ${actif ? DUREE * 0.5 : 0}ms, transform 500ms ${EASE} ${actif ? DUREE * 0.5 : 0}ms`,
+                        pointerEvents: actif ? 'auto' : 'none',
+                      }}
+                    >
+                      <span className="block h-px w-12 bg-or" aria-hidden />
+                      <p className="mt-5 font-titre text-[30px] font-semibold leading-tight text-white">{v.titre}</p>
+                      <p className="mt-3 max-w-sm text-[15px] text-white/70">{v.texte}</p>
+                      <button type="button" tabIndex={actif ? 0 : -1} onClick={() => basculer()} className="btn-or mt-7 min-h-[48px] px-6">
+                        {cle === 'inscription' && <ArrowLeft className="h-4 w-4" />}
+                        {v.action}
+                        {cle === 'connexion' && <ArrowRight className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </aside>
         </div>
-
-        <div key={mode} className="animate-poser absolute inset-x-0 bottom-0 p-12" style={{ animationDelay: `${DUREE * 0.45}ms` }}>
-          <span className="block h-px w-14 bg-or" aria-hidden />
-          <p className="mt-6 font-titre text-[34px] font-semibold leading-tight text-white">{volet.titre}</p>
-          <p className="mt-3 max-w-md text-white/70">{volet.texte}</p>
-          <button type="button" onClick={() => basculer()} className="btn-or mt-8 min-h-[50px] px-7 text-base">
-            {enInscription && <ArrowLeft className="h-4 w-4" />}
-            {volet.action}
-            {!enInscription && <ArrowRight className="h-4 w-4" />}
-          </button>
-          <p className="mt-8 text-sm text-or-clair/70">{volet.legende}</p>
+        ) : (
+        /* Téléphone et tablette : interrupteur et défilement des deux formulaires */
+        <div className="w-full max-w-[480px] overflow-hidden rounded-[24px] bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.6)]">
+          <div className="p-5 pb-0 sm:p-7 sm:pb-0">
+            <Interrupteur mode={mode} onChoix={basculer} />
+          </div>
+          <div className="flex w-[200%] items-start will-change-transform" style={{ transform: enInscription ? 'translate3d(-50%,0,0)' : 'translate3d(0,0,0)', transition: GLISSE }}>
+            {[
+              ['connexion', connexionForm],
+              ['inscription', inscriptionForm],
+            ].map(([cle, contenu]) => (
+              <section key={cle} aria-hidden={mode !== cle} inert={mode === cle ? undefined : ''} className="w-1/2 px-5 py-7 sm:px-7">
+                {presents.has(cle) && contenu}
+              </section>
+            ))}
+          </div>
         </div>
-      </aside>
+        )}
+      </main>
     </div>
   )
 }
