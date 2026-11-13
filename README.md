@@ -54,7 +54,7 @@ npm run dev:api            # API sur http://localhost:3000
 npm run dev:web            # interface sur http://localhost:5173 (autre terminal)
 ```
 
-Comptes de démonstration (mot de passe `Admin2025!`, à changer hors démonstration) :
+Comptes de démonstration en local (mot de passe `Admin2025!` ; sur le site en ligne, le mot de passe est celui de la variable `DEMO_MOT_DE_PASSE` générée par Render) :
 
 | Rôle | E-mail |
 | --- | --- |

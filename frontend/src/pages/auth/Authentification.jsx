@@ -11,20 +11,11 @@ import { ACCUEIL_PAR_ROLE } from '../../context/AuthContext'
 import { messageErreur } from '../../api/axiosConfig'
 import { Champ, Spinner } from '../../components/common/ui'
 import { Logo, Marque } from '../../components/layout/Logo'
-import { ROLES } from '../../utils/format'
 
 const DUREE = 750 // ms
 const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)'
 const GLISSE = `transform ${DUREE}ms ${EASE}`
 
-// Comptes de la base de démonstration (désactivables avec VITE_COMPTES_DEMO=false)
-const DEMO = import.meta.env.VITE_COMPTES_DEMO !== 'false'
-const COMPTES = [
-  ['citoyen@tananamadio.mg', 'citoyen'],
-  ['agent@tananamadio.mg', 'agent_municipal'],
-  ['chauffeur@tananamadio.mg', 'chauffeur'],
-  ['admin@tananamadio.mg', 'administrateur'],
-]
 const QUARTIERS = ['Analakely', 'Isotry', 'Ampefiloha', 'Ambohipo', 'Andravoahangy', 'Autre quartier']
 
 // Ce que dit le volet selon le formulaire qu'il laisse voir
@@ -122,26 +113,6 @@ function FormulaireConnexion({ etat, setEtat }) {
         </button>
       </form>
 
-      {DEMO && (
-        <div className="mt-6 border-t border-trait pt-5">
-          <p className="text-xs font-medium text-encre-doux">
-            Comptes de démonstration <span className="text-encre-pale">· mot de passe Admin2025!</span>
-          </p>
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
-            {COMPTES.map(([adresse, role]) => (
-              <button
-                key={adresse}
-                type="button"
-                onClick={() => setEtat({ email: adresse, mdp: 'Admin2025!' })}
-                className="flex items-center gap-2 rounded-lg border border-trait px-3 py-2 text-left text-sm font-medium text-ardoise transition-colors duration-200 hover:border-or/60 hover:bg-or-50"
-              >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-or" aria-hidden />
-                {ROLES[role]}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </>
   )
 }

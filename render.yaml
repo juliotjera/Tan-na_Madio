@@ -22,5 +22,8 @@ services:
         value: base
       - key: SEED_DEMO
         value: "true"
+      # mot de passe des comptes de démonstration en ligne (visible dans le tableau de bord Render)
+      - key: DEMO_MOT_DE_PASSE
+        generateValue: true
       - key: CORS_ORIGINS
         value: https://tanana-madio.onrender.com

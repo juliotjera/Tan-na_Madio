@@ -5,8 +5,8 @@ import { fr } from 'date-fns/locale'
 
 const axe = { fontSize: 12, fill: '#9CA3AF' }
 const infobulle = {
-  contentStyle: { borderRadius: 12, border: '1px solid #E1E6E1', boxShadow: '0 20px 40px -16px rgba(6,42,28,.35)', fontSize: 13 },
-  labelStyle: { color: '#0B1F17', fontWeight: 600 },
+  contentStyle: { borderRadius: 12, border: '1px solid #E4E4E0', boxShadow: '0 20px 40px -16px rgba(17,24,32,.35)', fontSize: 13 },
+  labelStyle: { color: '#111820', fontWeight: 600 },
 }
 const jour = (d) => format(parseISO(d), 'd MMM', { locale: fr })
 
@@ -48,7 +48,7 @@ export function CourbeActivite({ series, hauteur = 280 }) {
         <CartesianGrid stroke="#EEF2F0" vertical={false} />
         <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={false} minTickGap={24} />
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} />
-        <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
+        <Tooltip {...infobulle} cursor={{ fill: '#FBF7EE' }} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 13 }} />
         <Bar dataKey="signalements" name="Signalements reçus" fill="#F59E0B" radius={[3, 3, 0, 0]} />
         <Bar dataKey="collectes" name="Dépôts ramassés" fill="#C9A55C" radius={[3, 3, 0, 0]} />
@@ -66,7 +66,7 @@ export function CourbePerformance({ series, hauteur = 210 }) {
         <CartesianGrid stroke="#EEF2F0" vertical={false} />
         <XAxis dataKey="jour" tick={axe} tickLine={false} axisLine={false} minTickGap={36} />
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} width={40} />
-        <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
+        <Tooltip {...infobulle} cursor={{ fill: '#FBF7EE' }} />
         <Bar dataKey="signalements" name="Reçus" fill="#C9A55C" radius={[3, 3, 0, 0]} />
         <Bar dataKey="collectes" name="Ramassés" fill="#111820" radius={[3, 3, 0, 0]} />
       </BarChart>
@@ -81,7 +81,7 @@ export function BarresZones({ zones, hauteur = 280 }) {
         <CartesianGrid stroke="#EEF2F0" vertical={false} />
         <XAxis dataKey="nom" tick={{ ...axe, fontSize: 11 }} tickLine={false} axisLine={false} interval={0} />
         <YAxis tick={axe} tickLine={false} axisLine={false} allowDecimals={false} />
-        <Tooltip {...infobulle} cursor={{ fill: '#ECFDF5' }} />
+        <Tooltip {...infobulle} cursor={{ fill: '#FBF7EE' }} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 13 }} />
         <Bar dataKey="total_signalements" name="Signalements" fill="#8CC5A2" radius={[4, 4, 0, 0]} />
         <Bar dataKey="collectes" name="Ramassés" fill="#111820" radius={[4, 4, 0, 0]} />

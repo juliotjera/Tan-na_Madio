@@ -20,6 +20,7 @@ Un seul service web sur Render (l’API sert aussi l’interface) et une base Po
    - `JWT_SECRET` et `JWT_REFRESH_SECRET` générés par Render ;
    - `PHOTOS_STOCKAGE=base` : photos gardées dans PostgreSQL (le disque gratuit de Render est effacé à chaque redémarrage) ;
    - `SEED_DEMO=true` : au premier démarrage, la base vide reçoit les données de démonstration (comptes, vraies rues d’Antananarivo, signalements avec photos) ;
+   - `DEMO_MOT_DE_PASSE` généré par Render : mot de passe des comptes de démonstration en ligne (le mot de passe du README ne fonctionne pas sur le site public). Pour le lire : service → **Environment** ;
    - `CORS_ORIGINS=https://tanana-madio.onrender.com`.
 4. Le premier déploiement dure quelques minutes (installation, compilation, création du schéma et des données). Vérifiez ensuite `https://tanana-madio.onrender.com/api/sante` : la réponse doit contenir `"statut":"ok"`.
 

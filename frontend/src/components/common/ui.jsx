@@ -86,7 +86,7 @@ export function EnTete({ titre, texte, actions }) {
 const TONS = {
   vert: { icone: 'bg-or-50 text-marque', trait: '#111820' },
   ambre: { icone: 'bg-or-50 text-or-700 ring-1 ring-or/25', trait: '#C9A55C' },
-  bleu: { icone: 'bg-sombre text-or', trait: '#062A1C' },
+  bleu: { icone: 'bg-sombre text-or', trait: '#111820' },
   violet: { icone: 'bg-or-50 text-or-700 ring-1 ring-or/25', trait: '#C9A55C' },
   alerte: { icone: 'bg-alerte-50 text-alerte-700', trait: '#DC2626' },
   blanc: { icone: 'bg-or-50 text-marque', trait: '#111820' },

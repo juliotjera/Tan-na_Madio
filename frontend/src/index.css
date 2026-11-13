@@ -71,7 +71,7 @@
   }
 
   .champ {
-    @apply block w-full rounded-xl border border-trait bg-white px-3.5 py-2.5 text-[15px] text-encre shadow-[inset_0_1px_2px_rgba(6,42,28,0.04)]
+    @apply block w-full rounded-xl border border-trait bg-white px-3.5 py-2.5 text-[15px] text-encre shadow-[inset_0_1px_2px_rgba(17,24,32,0.04)]
       placeholder:text-encre-pale transition duration-200 hover:border-or-300 focus:border-marque focus:outline-none focus:ring-4 focus:ring-marque/10;
   }
   .etiquette {

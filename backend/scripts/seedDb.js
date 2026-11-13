@@ -10,7 +10,8 @@ const db = require('../src/config/db')
 const { haversine, polygoneWkt, carre } = require('../src/utils/geoUtils')
 const { optimiser } = require('../src/services/collecteService')
 
-const MOT_DE_PASSE_DEMO = 'Admin2025!'
+// En ligne, DEMO_MOT_DE_PASSE (généré par Render) remplace le mot de passe public du README
+const MOT_DE_PASSE_DEMO = process.env.DEMO_MOT_DE_PASSE || 'Admin2025!'
 
 // Générateur pseudo-aléatoire à graine fixe (mulberry32)
 function generateur(graine) {
@@ -247,7 +248,7 @@ async function seed({ journal = console.log } = {}) {
     })
     comptes[u.email] = { ...u, id }
   }
-  journal(`${UTILISATEURS.length} comptes (mot de passe de démonstration : ${MOT_DE_PASSE_DEMO})`)
+  journal(`${UTILISATEURS.length} comptes (mot de passe : ${process.env.DEMO_MOT_DE_PASSE ? 'celui de DEMO_MOT_DE_PASSE' : MOT_DE_PASSE_DEMO})`)
 
   // Signalements : 36, répartis dans les zones, sur les 30 derniers jours
   const citoyens = UTILISATEURS.filter((u) => u.role === 'citoyen').map((u) => comptes[u.email].id)
