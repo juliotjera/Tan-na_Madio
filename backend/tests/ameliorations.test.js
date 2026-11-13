@@ -110,3 +110,8 @@ test('journal : filtre par action et total', async () => {
   expect(r.body.logs.every((l) => l.action === 'soutien')).toBe(true)
   expect(r.body.actions).toContain('connexion')
 })
+
+test('les tuiles OpenStreetMap reçoivent l’origine du site (politique Referer compatible)', async () => {
+  const r = await request(app).get('/api/sante')
+  expect(r.headers['referrer-policy']).toBe('strict-origin-when-cross-origin')
+})

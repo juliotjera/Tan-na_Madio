@@ -23,6 +23,8 @@ function creerApp() {
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: 'cross-origin' }, // photos affichées par le frontend de développement (port 5173)
+      // OpenStreetMap exige l'origine du site (en-tête Referer) pour servir ses tuiles : sans elle, « Access blocked »
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
       contentSecurityPolicy: {
         directives: {
           'img-src': ["'self'", 'data:', 'blob:', 'https://tile.openstreetmap.org'],
