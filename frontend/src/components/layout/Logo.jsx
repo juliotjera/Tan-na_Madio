@@ -1,39 +1,19 @@
-// Marque d'origine : un badge rond vert sombre portant une épingle de localisation émeraude
-export function Marque({ className = 'h-9 w-9' }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden>
-      <defs>
-        <radialGradient id="tm-fond" cx="40%" cy="35%" r="70%">
-          <stop offset="0%" stopColor="#1F5C40" />
-          <stop offset="100%" stopColor="#0B2A1C" />
-        </radialGradient>
-        <linearGradient id="tm-epingle" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#34D399" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-      </defs>
-      <circle cx="32" cy="32" r="30" fill="url(#tm-fond)" stroke="#10B981" strokeWidth="3" />
-      <path d="M32 13c-7.7 0-13.5 5.9-13.5 13.3 0 9.6 13.5 23.7 13.5 23.7s13.5-14.1 13.5-23.7C45.5 18.9 39.7 13 32 13z" fill="url(#tm-epingle)" />
-      <circle cx="32" cy="26.5" r="5" fill="#ECFDF5" />
-    </svg>
-  )
+// Logo officiel de Tanàna Madio : épingle de carte + bac de collecte municipal (public/logo/).
+// Règles du kit : ne pas déformer, ne pas recolorer, symbole ≥ 24 px, logo horizontal ≥ 140 px de large.
+
+// Symbole seul (barre latérale repliée, petits espaces)
+export function Marque({ className = 'h-9 w-9', blanc = false, alt = 'Tanàna Madio' }) {
+  return <img src={blanc ? '/logo/symbole-blanc.svg' : '/logo/symbole.svg'} alt={alt} className={`shrink-0 ${className}`} />
 }
 
-// Logo de l'application : badge + nom (avec « Ville Propre » sur la page d'accueil)
+// Logo horizontal : sans slogan dans l'application, avec « Signaler · Collecter · Ville propre » sur
+// l'accueil (sousTitre), version fond vert sur fond sombre (clair). Symbole seul sous 400 px de large.
 export function Logo({ clair = false, sousTitre = false, className = '' }) {
+  const fichier = clair ? 'logo-horizontal-fond-vert' : sousTitre ? 'logo-horizontal' : 'logo-horizontal-sans-slogan'
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      {sousTitre ? (
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-vert-500 shadow-sm shadow-vert-500/30">
-          <Marque className="h-8 w-8" />
-        </span>
-      ) : (
-        <Marque className="h-9 w-9 shrink-0" />
-      )}
-      <span className={`leading-tight ${sousTitre ? 'max-[400px]:sr-only' : ''}`}>
-        <span className={`block whitespace-nowrap font-titre text-[19px] font-bold ${clair ? 'text-white' : 'text-ardoise'}`}>Tanàna Madio</span>
-        {sousTitre && <span className={`hidden text-xs sm:block ${clair ? 'text-vert-100/70' : 'text-encre-doux'}`}>Ville Propre</span>}
-      </span>
+    <span className={`inline-flex items-center ${className}`}>
+      <img src={`/logo/${fichier}.svg`} alt="Tanàna Madio" className={`${sousTitre ? 'h-14 max-[400px]:hidden' : clair ? 'h-14' : 'h-11'} w-auto`} />
+      {sousTitre && <Marque className="h-11 w-11 min-[401px]:hidden" />}
     </span>
   )
 }

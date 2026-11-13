@@ -262,9 +262,7 @@ export default function LandingPage() {
       <footer className="bg-sombre text-white">
         <div className="mx-auto grid max-w-[1180px] gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
           <div>
-            <p className="flex items-center gap-2 font-titre text-lg font-bold">
-              <Sprout className="h-5 w-5" /> Tanàna Madio
-            </p>
+            <Logo clair />
             <p className="mt-4 text-white/75">{t('Système intelligent de gestion urbaine des déchets')}</p>
           </div>
           <div>

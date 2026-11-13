@@ -10,13 +10,13 @@ export default {
         vert: {
           // texte blanc ou texte sur blanc : #047857 garde un contraste de 5,5:1 (WCAG AA),
           // l'émeraude #10B981 reste pour les icônes, les barres et les fonds clairs
-          DEFAULT: '#047857', // boutons et liens
+          DEFAULT: '#008043', // Vert Madio du logo officiel : boutons et liens (contraste 5:1 sur blanc)
           50: '#ECFDF5',
           100: '#D1FAE5',
           300: '#6EE7B7',
           500: '#10B981', // émeraude des icônes et des barres
           600: '#059669',
-          700: '#065F46',
+          700: '#00602F', // Vert profond du logo officiel
         },
         ardoise: { DEFAULT: '#111827', 800: '#1F2937', 700: '#374151' },
         menthe: '#6EE7B7', // repère clair sur fond sombre

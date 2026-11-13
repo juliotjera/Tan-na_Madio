@@ -18,6 +18,6 @@ test('hors connexion, l’application s’ouvre encore (page et fichiers en cach
   await page.reload() // la page est désormais servie et gardée par le service worker
   await context.setOffline(true)
   await page.reload()
-  await expect(page.getByText('Tanàna Madio').first()).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Tanàna Madio' }).first()).toBeVisible()
   await context.setOffline(false)
 })

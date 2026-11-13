@@ -5,7 +5,7 @@
 // - tuiles de carte déjà affichées : gardées (le chauffeur retrouve le plan de sa tournée sans réseau) ;
 // - API : jamais mise en cache (données toujours fraîches et propres à chaque compte) ;
 // - notifications push : affichage et ouverture de la page concernée.
-const VERSION = 'tm-v2'
+const VERSION = 'tm-v3'
 const COQUILLE = `${VERSION}-coquille`
 const MEDIAS = `${VERSION}-medias`
 const TUILES = 'tm-tuiles' // conservé d'une version à l'autre
@@ -16,7 +16,7 @@ self.addEventListener('install', (e) => {
   e.waitUntil(
     caches
       .open(COQUILLE)
-      .then((c) => c.addAll(['/', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png']))
+      .then((c) => c.addAll(['/', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png', '/logo/symbole.svg', '/logo/logo-horizontal-sans-slogan.svg']))
       .then(() => self.skipWaiting()),
   )
 })
@@ -73,7 +73,7 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  if (url.origin === location.origin && (url.pathname.startsWith('/uploads/') || url.pathname.startsWith('/images/'))) {
+  if (url.origin === location.origin && (url.pathname.startsWith('/uploads/') || url.pathname.startsWith('/images/') || url.pathname.startsWith('/logo/'))) {
     e.respondWith(cacheDabord(request, MEDIAS))
     return
   }
