@@ -9,8 +9,8 @@ import { GardeErreur, TitreDePage } from './components/layout/Garde'
 const page = (charger) => lazy(charger)
 
 const LandingPage = page(() => import('./pages/LandingPage'))
-const Login = page(() => import('./pages/auth/Login'))
-const Register = page(() => import('./pages/auth/Register'))
+// connexion et inscription : une seule page, le volet passe de l'une à l'autre
+const Authentification = page(() => import('./pages/auth/Authentification'))
 const Compte = page(() => import('./pages/Compte'))
 const Introuvable = page(() => import('./pages/Introuvable'))
 const Conditions = page(() => import('./pages/Conditions'))
@@ -46,8 +46,8 @@ export default function App() {
       <Suspense fallback={<Chargement />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Authentification />} />
+        <Route path="/register" element={<Authentification />} />
         <Route path="/conditions" element={<Conditions />} />
 
         <Route element={<ProtectedRoute />}>

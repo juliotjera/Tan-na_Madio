@@ -27,3 +27,12 @@ test('chauffeur : le détail d’une tournée tient dans l’écran', async ({ p
   await expect(page.getByRole('heading', { name: 'Détail de la tournée' })).toBeVisible()
   expect(await deborde(page)).toBe(false)
 })
+
+test('connexion et inscription : l’interrupteur fait passer d’un formulaire à l’autre', async ({ page }) => {
+  await page.goto('/login')
+  await page.getByRole('tab', { name: 'Créer un compte' }).click()
+  await expect(page).toHaveURL(/\/register$/)
+  await expect(page.getByRole('heading', { name: 'Créer un compte citoyen' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Créer un compte' })).toHaveAttribute('aria-selected', 'true')
+  expect(await deborde(page)).toBe(false)
+})
