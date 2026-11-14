@@ -72,6 +72,31 @@ const register = asyncHandler(async (req, res) => {
   res.status(201).json({ ...(await ouvrirSession(res, user)), user: publicUser(user) })
 })
 
+// Démonstration : un compte par rôle, ouvert sans mot de passe quand config.comptesDemo est actif.
+// Le mot de passe réel reste secret : un visiteur qui le change ne bloque pas les suivants.
+const COMPTES_DEMO = {
+  citoyen: 'citoyen@tananamadio.mg',
+  agent_municipal: 'agent@tananamadio.mg',
+  chauffeur: 'chauffeur@tananamadio.mg',
+  administrateur: 'admin@tananamadio.mg',
+}
+const estCompteDemo = (email) => config.comptesDemo && Object.values(COMPTES_DEMO).includes(email)
+
+const demoDisponible = (req, res) => {
+  res.json({ disponible: config.comptesDemo, roles: config.comptesDemo ? Object.keys(COMPTES_DEMO) : [] })
+}
+
+const connexionDemo = asyncHandler(async (req, res) => {
+  if (!config.comptesDemo) throw new ErreurApi(404, 'Démonstration indisponible', 'DEMO_INDISPONIBLE')
+  const email = COMPTES_DEMO[req.body?.role]
+  if (!email) throw new ErreurApi(400, 'Rôle de démonstration inconnu', 'ROLE_INVALIDE')
+  const user = await User.parEmail(email)
+  if (!user?.actif) throw new ErreurApi(404, 'Compte de démonstration introuvable', 'DEMO_INDISPONIBLE')
+  req.user = user
+  await journaliser(req, 'connexion', 'utilisateur', user.id, { demo: true })
+  res.json({ ...(await ouvrirSession(res, user)), user: publicUser(user) })
+})
+
 const login = asyncHandler(async (req, res) => {
   const { email, mot_de_passe } = req.body
   const user = await User.parEmail(email)
@@ -127,4 +152,4 @@ const changerMotDePasse = asyncHandler(async (req, res) => {
   res.json({ message: 'Mot de passe modifié. Reconnectez-vous sur vos autres appareils.' })
 })
 
-module.exports = { register, login, refresh, logout, profil, changerMotDePasse, verifierMotDePasse, TOURS_BCRYPT }
+module.exports = { register, login, demoDisponible, connexionDemo, estCompteDemo, refresh, logout, profil, changerMotDePasse, verifierMotDePasse, TOURS_BCRYPT }

@@ -44,6 +44,9 @@ module.exports = {
   photos: {
     stockage: process.env.PHOTOS_STOCKAGE || (production && mode === 'postgres' ? 'base' : 'disque'),
   },
+  // Comptes de démonstration ouverts en un clic (« Essayer en tant que… ») : actifs sur le site
+  // public (COMPTES_DEMO=true) et en développement ; coupés en production réelle et pendant les tests
+  comptesDemo: process.env.COMPTES_DEMO ? process.env.COMPTES_DEMO === 'true' : !production && process.env.NODE_ENV !== 'test',
   corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').map((o) => o.trim()),
   algorithmes: {
     rayonRechercheM: Number(process.env.RAYON_RECHERCHE_M) || 500,

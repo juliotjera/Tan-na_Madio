@@ -35,6 +35,7 @@ export function AuthProvider({ children }) {
 
   const connecter = useCallback(async (email, mdp) => ouvrir(await api.connexion(email, mdp)), [ouvrir])
   const inscrire = useCallback(async (champs) => ouvrir(await api.inscription(champs)), [ouvrir])
+  const connecterDemo = useCallback(async (role) => ouvrir(await api.connexionDemo(role)), [ouvrir])
 
   // met à jour l'utilisateur gardé en session (ex. : mot de passe provisoire remplacé)
   const majUser = useCallback((champs) => session.majUser(champs), [])
@@ -49,8 +50,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const valeur = useMemo(
-    () => ({ user: etat?.user ?? null, connecte: Boolean(etat?.user), connecter, inscrire, deconnecter, majUser }),
-    [etat, connecter, inscrire, deconnecter, majUser],
+    () => ({ user: etat?.user ?? null, connecte: Boolean(etat?.user), connecter, connecterDemo, inscrire, deconnecter, majUser }),
+    [etat, connecter, connecterDemo, inscrire, deconnecter, majUser],
   )
   return <AuthContext.Provider value={valeur}>{children}</AuthContext.Provider>
 }

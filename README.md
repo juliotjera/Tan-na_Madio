@@ -8,6 +8,8 @@ Les citoyens signalent un dépôt (photo, position GPS, urgence) ; les agents mu
 
 > Projet de fin d’études — JERA Bevala Juliot, ESMIA Innovation, 2025-2026.
 
+**Essayer en ligne : [tanana-madio.onrender.com](https://tanana-madio.onrender.com)** — sur la page de connexion, « Essayer sans compte » ouvre l’espace du citoyen, de l’agent, du chauffeur ou de l’administrateur en un clic (première ouverture : environ une minute, le temps que le serveur gratuit se réveille).
+
 ## Fonctionnalités
 
 | Rôle | Ce qu’il peut faire |
@@ -41,7 +43,7 @@ Sans réseau routier en base, l’API bascule sur une estimation (vol d’oiseau
 - **Application installable (PWA)** : manifeste, icônes, service worker (interface disponible sans réseau ; données toujours lues en direct).
 - **Production** : compression des réponses, cache long des fichiers versionnés, journal des requêtes, migrations de base automatiques.
 - **Qualité** : ESLint (frontend et backend), intégration continue GitHub Actions (vérification du code, tests de l’API et de l’interface, compilation à chaque envoi).
-- **Tests** : Vitest côté interface (13 tests : mode hors ligne, formats, paliers), Jest + Supertest côté API (85 tests : algorithmes, authentification, signalements, collectes, notifications, photos, exports, base de données) et **Playwright de bout en bout** (15 parcours réels dans un navigateur : citoyen qui signale, agent qui valide et rejette, chauffeur qui fait sa tournée, administrateur, téléphone, hors connexion).
+- **Tests** : Vitest côté interface (13 tests : mode hors ligne, formats, paliers), Jest + Supertest côté API (92 tests : algorithmes, authentification, signalements, collectes, notifications, photos, exports, base de données) et **Playwright de bout en bout** (17 parcours réels dans un navigateur : essai sans compte, citoyen qui signale, agent qui valide et rejette, chauffeur qui fait sa tournée, administrateur, téléphone, hors connexion).
 
 ## Démarrage rapide
 
@@ -54,7 +56,7 @@ npm run dev:api            # API sur http://localhost:3000
 npm run dev:web            # interface sur http://localhost:5173 (autre terminal)
 ```
 
-Comptes de démonstration en local (mot de passe `Admin2025!` ; sur le site en ligne, le mot de passe est celui de la variable `DEMO_MOT_DE_PASSE` générée par Render) :
+Comptes de démonstration : en un clic avec « Essayer sans compte » sur la page de connexion (activé en développement et sur le site en ligne par `COMPTES_DEMO=true` ; ces quatre comptes ne peuvent alors être ni désactivés ni supprimés). Pour se connecter avec le formulaire en local, mot de passe `Admin2025!` (en ligne, celui de la variable `DEMO_MOT_DE_PASSE` générée par Render) :
 
 | Rôle | E-mail |
 | --- | --- |

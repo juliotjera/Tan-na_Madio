@@ -9,6 +9,8 @@ import { ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { ACCUEIL_PAR_ROLE } from '../../context/AuthContext'
 import { messageErreur } from '../../api/axiosConfig'
+import { demoDisponible } from '../../api'
+import { ROLES } from '../../utils/format'
 import { Champ, Spinner } from '../../components/common/ui'
 import { Logo, Marque } from '../../components/layout/Logo'
 
@@ -113,7 +115,57 @@ function FormulaireConnexion({ etat, setEtat }) {
         </button>
       </form>
 
+      <EssaiSansCompte />
     </>
+  )
+}
+
+// Pour les visiteurs (recruteurs, jury) : un clic ouvre l'espace d'un rôle avec ses données de démonstration.
+// Le serveur ouvre la session lui-même ; aucun mot de passe n'est affiché.
+function EssaiSansCompte() {
+  const { connecterDemo } = useAuth()
+  const navigate = useNavigate()
+  const [roles, setRoles] = useState([])
+  const [encours, setEncours] = useState(null)
+
+  useEffect(() => {
+    demoDisponible()
+      .then((r) => setRoles(r.disponible ? r.roles : []))
+      .catch(() => setRoles([]))
+  }, [])
+
+  const essayer = async (role) => {
+    setEncours(role)
+    try {
+      const u = await connecterDemo(role)
+      toast.success(`Bonjour ${u.prenom}`)
+      navigate(ACCUEIL_PAR_ROLE[u.role], { replace: true })
+    } catch (err) {
+      toast.error(messageErreur(err))
+      setEncours(null)
+    }
+  }
+
+  if (!roles.length) return null
+  return (
+    <div className="mt-6 border-t border-trait pt-5">
+      <p className="text-sm font-medium text-ardoise">Essayer sans compte</p>
+      <p className="mt-0.5 text-xs text-encre-doux">Ouvrez l’espace d’un rôle avec des données de démonstration.</p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {roles.map((role) => (
+          <button
+            key={role}
+            type="button"
+            onClick={() => essayer(role)}
+            disabled={encours !== null}
+            className="flex min-h-[44px] items-center gap-2 rounded-lg border border-trait px-3 py-2 text-left text-sm font-medium text-ardoise transition-colors duration-200 hover:border-or/60 hover:bg-or-50 disabled:opacity-60"
+          >
+            {encours === role ? <Spinner className="h-3.5 w-3.5 text-or-700" /> : <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-or" aria-hidden />}
+            {ROLES[role]}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 

@@ -62,6 +62,9 @@ function creerApp() {
   })
   app.use('/api/auth/login', limiteAuth)
   app.use('/api/auth/register', limiteAuth)
+  // démonstration : pas de mot de passe à deviner, mais pas de création de sessions en rafale ;
+  // compteur séparé pour ne pas gêner les vraies connexions
+  app.use('/api/auth/demo', rateLimit({ windowMs: 15 * 60 * 1000, limit: 60, standardHeaders: 'draft-7', legacyHeaders: false, skip: () => test, message: { message: 'Trop de tentatives, réessayez dans quelques minutes', code: 'TROP_DE_TENTATIVES' } }))
   app.use('/api', rateLimit({ windowMs: 60 * 1000, limit: 300, skip: () => test, standardHeaders: 'draft-7', legacyHeaders: false }))
 
   app.get('/api/sante', async (req, res) => {

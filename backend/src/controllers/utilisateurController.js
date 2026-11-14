@@ -3,10 +3,15 @@ const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 const db = require('../config/db')
 const { User, Camion, journaliser } = require('../models')
-const { verifierMotDePasse, TOURS_BCRYPT } = require('./authController')
+const { verifierMotDePasse, estCompteDemo, TOURS_BCRYPT } = require('./authController')
 const { ErreurApi, asyncHandler, pagination } = require('../utils/helpers')
 
 const ROLES = ['citoyen', 'agent_municipal', 'chauffeur', 'administrateur']
+
+// les comptes de démonstration restent ouverts pour tous les visiteurs du site public
+function protegerDemo(u) {
+  if (u && estCompteDemo(u.email)) throw new ErreurApi(403, 'Compte de démonstration : il reste accessible à tous les visiteurs', 'COMPTE_DEMO')
+}
 
 const lister = asyncHandler(async (req, res) => {
   const { page, limit, offset } = pagination(req.query)
@@ -54,6 +59,7 @@ const modifier = asyncHandler(async (req, res) => {
 const activer = asyncHandler(async (req, res) => {
   if (typeof req.body.actif !== 'boolean') throw new ErreurApi(400, 'Indiquez actif : true ou false', 'CHAMPS_MANQUANTS')
   if (req.params.id === req.user.id && !req.body.actif) throw new ErreurApi(422, 'Vous ne pouvez pas désactiver votre propre compte', 'AUTO_DESACTIVATION')
+  if (!req.body.actif) protegerDemo(await User.profil(req.params.id))
   const u = await User.activer(req.params.id, req.body.actif)
   if (!u) throw new ErreurApi(404, 'Utilisateur introuvable', 'UTILISATEUR_INTROUVABLE')
   // compte désactivé : ses sessions sont fermées immédiatement
@@ -74,6 +80,7 @@ const reinitialiserMotDePasse = asyncHandler(async (req, res) => {
   if (req.params.id === req.user.id) throw new ErreurApi(422, 'Changez votre propre mot de passe depuis « Mon compte »', 'AUTO_REINITIALISATION')
   const u = await User.profil(req.params.id)
   if (!u) throw new ErreurApi(404, 'Utilisateur introuvable', 'UTILISATEUR_INTROUVABLE')
+  protegerDemo(u)
   const mot_de_passe = motDePasseProvisoire()
   await db.query('UPDATE utilisateurs SET mot_de_passe = $2, mdp_provisoire = TRUE WHERE id = $1', [u.id, await bcrypt.hash(mot_de_passe, TOURS_BCRYPT)])
   await db.query('DELETE FROM refresh_tokens WHERE user_id = $1', [u.id])
@@ -87,6 +94,7 @@ const supprimer = asyncHandler(async (req, res) => {
   if (req.params.id === req.user.id) throw new ErreurApi(422, 'Vous ne pouvez pas supprimer votre propre compte', 'AUTO_SUPPRESSION')
   const u = await User.profil(req.params.id)
   if (!u) throw new ErreurApi(404, 'Utilisateur introuvable', 'UTILISATEUR_INTROUVABLE')
+  protegerDemo(u)
   const { rows } = await db.query(
     `SELECT (SELECT count(*) FROM signalements WHERE citoyen_id = $1)::int AS signalements,
             (SELECT count(*) FROM collectes WHERE agent_id = $1)::int AS collectes`,

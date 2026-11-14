@@ -7,6 +7,9 @@ const donnees = (r) => r.data
 export const connexion = (email, mot_de_passe) => api.post('/auth/login', { email, mot_de_passe }).then(donnees)
 export const inscription = (champs) => api.post('/auth/register', champs).then(donnees)
 export const deconnexion = () => api.post('/auth/logout')
+// comptes de démonstration : ouverts en un clic par rôle, sans mot de passe
+export const demoDisponible = () => api.get('/auth/demo').then(donnees)
+export const connexionDemo = (role) => api.post('/auth/demo', { role }).then(donnees)
 export const profil = () => api.get('/auth/profil').then(donnees)
 export const changerMotDePasse = (ancien, nouveau) => api.patch('/auth/mot-de-passe', { ancien, nouveau }).then(donnees)
 

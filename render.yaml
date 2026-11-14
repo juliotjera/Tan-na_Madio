@@ -23,6 +23,9 @@ services:
       - key: SEED_DEMO
         value: "true"
       # mot de passe des comptes de démonstration en ligne (visible dans le tableau de bord Render)
+      # boutons « Essayer en tant que… » sur la page de connexion (sans afficher de mot de passe)
+      - key: COMPTES_DEMO
+        value: "true"
       - key: DEMO_MOT_DE_PASSE
         generateValue: true
       - key: CORS_ORIGINS

@@ -20,6 +20,7 @@ Un seul service web sur Render (l’API sert aussi l’interface) et une base Po
    - `JWT_SECRET` et `JWT_REFRESH_SECRET` générés par Render ;
    - `PHOTOS_STOCKAGE=base` : photos gardées dans PostgreSQL (le disque gratuit de Render est effacé à chaque redémarrage) ;
    - `SEED_DEMO=true` : au premier démarrage, la base vide reçoit les données de démonstration (comptes, vraies rues d’Antananarivo, signalements avec photos) ;
+   - `COMPTES_DEMO=true` : la page de connexion propose « Essayer sans compte » (un clic par rôle, sans mot de passe affiché) ; les quatre comptes de démonstration ne peuvent pas être désactivés ni supprimés ;
    - `DEMO_MOT_DE_PASSE` généré par Render : mot de passe des comptes de démonstration en ligne (le mot de passe du README ne fonctionne pas sur le site public). Pour le lire : service → **Environment** ;
    - `CORS_ORIGINS=https://tanana-madio.onrender.com`.
 4. Le premier déploiement dure quelques minutes (installation, compilation, création du schéma et des données). Vérifiez ensuite `https://tanana-madio.onrender.com/api/sante` : la réponse doit contenir `"statut":"ok"`.
@@ -32,4 +33,4 @@ Si Render attribue une autre adresse (nom déjà pris), mettez-la dans `CORS_ORI
 - Comptes de démonstration : voir le [README](../README.md#démarrage-rapide).
 - Les notifications push fonctionnent sur la version en ligne (HTTPS) : activez-les dans **Mon compte** depuis un téléphone pour les essayer.
 - Le service gratuit s’endort après 15 minutes sans visite : la première ouverture suivante prend environ une minute.
-- Pour un usage réel (hors démonstration), retirez `SEED_DEMO` et créez un administrateur avec `npm run admin:create --prefix backend`.
+- Pour un usage réel (hors démonstration), retirez `SEED_DEMO` et `COMPTES_DEMO`, et créez un administrateur avec `npm run admin:create --prefix backend`.
