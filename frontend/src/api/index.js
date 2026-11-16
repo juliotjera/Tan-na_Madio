@@ -1,12 +1,16 @@
 // Appels à l'API regroupés par ressource
-import api from './axiosConfig'
+import api, { session } from './axiosConfig'
 
 const donnees = (r) => r.data
 
 // ── Authentification
 export const connexion = (email, mot_de_passe) => api.post('/auth/login', { email, mot_de_passe }).then(donnees)
 export const inscription = (champs) => api.post('/auth/register', champs).then(donnees)
-export const deconnexion = () => api.post('/auth/logout')
+// application Android : le jeton de renouvellement est dans l'application, pas dans un cookie
+export const deconnexion = () => {
+  const refreshToken = session.jetonRenouvellement()
+  return api.post('/auth/logout', refreshToken ? { refreshToken } : {})
+}
 // comptes de démonstration : ouverts en un clic par rôle, sans mot de passe
 export const demoDisponible = () => api.get('/auth/demo').then(donnees)
 export const connexionDemo = (role) => api.post('/auth/demo', { role }).then(donnees)

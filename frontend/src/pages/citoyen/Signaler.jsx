@@ -15,6 +15,7 @@ import RechercheAdresse from '../../components/map/RechercheAdresse'
 import { StatutBadge } from '../../components/common/Badge'
 import { Spinner } from '../../components/common/ui'
 import { compresserPhoto } from '../../utils/image'
+import { urlServeur } from '../../natif'
 
 const NIVEAUX = [
   ['faible', 'Faible - Peu gênant'],
@@ -280,7 +281,7 @@ export default function Signaler() {
               {proches.map((p) => (
                 <li key={p.id} className="flex items-center gap-3 rounded-xl bg-white p-2.5">
                   {p.photo_url ? (
-                    <img src={p.photo_url} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+                    <img src={urlServeur(p.photo_url)} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
                   ) : (
                     <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-fond text-encre-pale">
                       <MapPin className="h-5 w-5" />

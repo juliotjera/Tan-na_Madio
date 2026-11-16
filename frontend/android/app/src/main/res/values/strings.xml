@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tanàna Madio</string>
+    <string name="title_activity_main">Tanàna Madio</string>
+    <string name="package_name">mg.tananamadio.app</string>
+    <string name="custom_url_scheme">mg.tananamadio.app</string>
+</resources>

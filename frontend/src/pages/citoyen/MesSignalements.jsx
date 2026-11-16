@@ -9,6 +9,7 @@ import { useDonnees } from '../../hooks/useDonnees'
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, Confirmation, EnTete, Erreur, Pagination, Segments, Vide } from '../../components/common/ui'
 import { dateHeure, ilYa } from '../../utils/format'
+import { urlServeur } from '../../natif'
 
 const FILTRES = [
   { valeur: '', libelle: 'Tous' },
@@ -110,7 +111,7 @@ export default function MesSignalements() {
             {/* sans photo : pas de grand cadre vide sur téléphone */}
             <div className={`${s.photo_url ? 'h-40' : 'hidden sm:block'} shrink-0 bg-or-50 sm:h-auto sm:w-36`}>
               {s.photo_url ? (
-                <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                <img src={urlServeur(s.photo_url)} alt="" className="h-full w-full object-cover" loading="lazy" />
               ) : (
                 <div className="flex h-full items-center justify-center text-encre-pale">
                   <ImageOff className="h-6 w-6" />

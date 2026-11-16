@@ -14,6 +14,7 @@ const { routeIntrouvable, gestionErreurs } = require('../middleware/erreurs')
 
 const FRONTEND = path.join(__dirname, '../../../frontend/dist')
 const test = process.env.NODE_ENV === 'test'
+const ORIGINES_APPLICATION = ['https://localhost', 'capacitor://localhost']
 
 function creerApp() {
   const app = express()
@@ -36,7 +37,9 @@ function creerApp() {
   // réponses compressées : pages et données plus rapides sur réseau mobile (sauf le flux temps réel,
   // qui doit partir sans attendre que le tampon de compression soit plein)
   app.use(compression({ filter: (req, res) => !req.path.endsWith('/notifications/flux') && compression.filter(req, res) }))
-  app.use(cors({ origin: config.corsOrigins, credentials: true }))
+  // le site (CORS_ORIGINS) et l'application Android, dont l'interface est servie par Capacitor
+  // depuis https://localhost : elle s'authentifie par jeton (en-tête Authorization), pas par cookie
+  app.use(cors({ origin: [...config.corsOrigins, ...ORIGINES_APPLICATION], credentials: true }))
 
   // journal des requêtes de l'API (hors tests) : méthode, adresse, statut, durée
   if (!test) {

@@ -137,3 +137,20 @@ test('le jeton de renouvellement est posé dans un cookie httpOnly et suffit à 
   // rotation : l'ancien cookie ne sert plus
   expect((await request(app).post('/api/auth/refresh').set('Cookie', cookie.split(';')[0])).status).toBe(401)
 })
+
+describe('application Android (Capacitor)', () => {
+  test("accepte l'origine de l'application et refuse un site inconnu", async () => {
+    const appli = await request(app).options('/api/auth/login').set('Origin', 'https://localhost').set('Access-Control-Request-Method', 'POST')
+    expect(appli.headers['access-control-allow-origin']).toBe('https://localhost')
+    const inconnu = await request(app).options('/api/auth/login').set('Origin', 'https://pirate.example').set('Access-Control-Request-Method', 'POST')
+    expect(inconnu.headers['access-control-allow-origin']).toBeUndefined()
+  })
+
+  test('renouvelle la session avec le jeton envoyé dans le corps (sans cookie)', async () => {
+    const { refreshToken } = await connecter('chauffeur@tananamadio.mg')
+    const r = await request(app).post('/api/auth/refresh').set('Origin', 'https://localhost').send({ refreshToken })
+    expect(r.status).toBe(200)
+    expect(r.body.refreshToken).toBeDefined()
+    expect(r.body.refreshToken).not.toBe(refreshToken)
+  })
+})

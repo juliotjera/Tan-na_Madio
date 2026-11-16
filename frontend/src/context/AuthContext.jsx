@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
 
   // le jeton de renouvellement reste dans le cookie httpOnly posé par l'API
   const ouvrir = useCallback((reponse) => {
-    session.ouvrir({ token: reponse.token, user: reponse.user })
+    session.ouvrir({ token: reponse.token, user: reponse.user, refreshToken: reponse.refreshToken })
     return reponse.user
   }, [])
 

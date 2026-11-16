@@ -1,0 +1,8 @@
+{
+  "appId": "mg.tananamadio.app",
+  "appName": "Tanàna Madio",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#111820"
+  }
+}

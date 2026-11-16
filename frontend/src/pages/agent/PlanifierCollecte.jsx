@@ -16,6 +16,7 @@ import { UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, Spinner } from '../../components/common/ui'
 import { dateCourte, duree, kg, km, pluriel } from '../../utils/format'
 import { T } from '../../context/LangueContext'
+import { urlServeur } from '../../natif'
 
 const ETAPES = [
   ['Étape 1', 'Sélection'],
@@ -316,7 +317,7 @@ export default function PlanifierCollecte() {
                         <input type="checkbox" className="mt-1 h-4 w-4 shrink-0 accent-[#111820]" checked={coche} onChange={() => basculer(s.id)} />
                         <div className="h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-fond">
                           {s.photo_url ? (
-                            <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                            <img src={urlServeur(s.photo_url)} alt="" className="h-full w-full object-cover" loading="lazy" />
                           ) : (
                             <div className="flex h-full items-center justify-center text-encre-pale">
                               <ImageOff className="h-5 w-5" />

@@ -11,6 +11,7 @@ import { Cadrer, Carte, MaPosition, MarqueurSignalement } from '../../components
 import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Compteur, Modal, Spinner } from '../../components/common/ui'
 import { dateCourte, dateHeure, palier, URGENCES } from '../../utils/format'
+import { urlServeur } from '../../natif'
 
 const STATUTS = [
   ['', 'Tous'],
@@ -178,7 +179,7 @@ export default function CitoyenDashboard() {
           {carte.donnees?.map((s) => (
             <MarqueurSignalement key={s.id} signalement={s} estompe={s.statut === 'collecte'} onClick={setChoisi}>
               <div className="w-52 space-y-2">
-                {s.photo_url && <img src={s.photo_url} alt="" className="h-28 w-full rounded-lg object-cover" loading="lazy" />}
+                {s.photo_url && <img src={urlServeur(s.photo_url)} alt="" className="h-28 w-full rounded-lg object-cover" loading="lazy" />}
                 <div className="flex flex-wrap gap-1.5">
                   <StatutBadge statut={s.statut} />
                   <UrgenceBadge urgence={s.urgence} compact />
@@ -239,7 +240,7 @@ export default function CitoyenDashboard() {
             <li key={s.id} className="carte flex items-start gap-4 p-4">
               <div className="h-24 w-36 shrink-0 overflow-hidden rounded-xl bg-fond">
                 {s.photo_url ? (
-                  <img src={s.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  <img src={urlServeur(s.photo_url)} alt="" className="h-full w-full object-cover" loading="lazy" />
                 ) : (
                   <div className="flex h-full items-center justify-center text-encre-pale">
                     <ImageOff className="h-6 w-6" />
@@ -297,7 +298,7 @@ export default function CitoyenDashboard() {
       <Modal ouvert={Boolean(detail)} onFermer={() => setDetail(null)} titre={detail?.description ?? 'Signalement'} large>
         {detail && (
           <div className="space-y-3">
-            {detail.photo_url && <img src={detail.photo_url} alt="Photo du dépôt" className="max-h-[60vh] w-full rounded-xl object-contain" />}
+            {detail.photo_url && <img src={urlServeur(detail.photo_url)} alt="Photo du dépôt" className="max-h-[60vh] w-full rounded-xl object-contain" />}
             <div className="flex flex-wrap gap-2">
               <StatutBadge statut={detail.statut} />
               <UrgenceBadge urgence={detail.urgence} />

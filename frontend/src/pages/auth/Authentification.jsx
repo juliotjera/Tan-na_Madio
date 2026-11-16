@@ -324,7 +324,7 @@ export default function Authentification() {
   const inscriptionForm = <FormulaireInscription etat={inscription} setEtat={setInscription} />
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-sombre">
+    <div className="relative flex min-h-screen flex-col bg-sombre pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
       {/* fond : vue d'Antananarivo voilée d'anthracite (immobile) */}
       <img src="/images/tana-aerien.webp" alt="" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-30" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-sombre/70 via-sombre/85 to-sombre" aria-hidden />

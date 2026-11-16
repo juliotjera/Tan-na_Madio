@@ -86,7 +86,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* En-tête */}
-      <header className="sticky top-0 z-[1100] border-b border-trait/70 bg-white/85 backdrop-blur-xl backdrop-saturate-150">
+      <header className="sticky top-0 z-[1100] border-b border-trait/70 bg-white/85 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto flex h-[76px] max-w-[1180px] items-center justify-between px-4 sm:px-6">
           <Logo sousTitre />
           <nav className="flex items-center gap-2 sm:gap-4">

@@ -1,0 +1,11 @@
+// Java 21 exigé par les extensions Capacitor : Gradle le télécharge tout seul s'il manque
+// (le Java d'Android Studio est trop récent pour elles)
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+include ':app'
+include ':capacitor-cordova-android-plugins'
+project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
+
+apply from: 'capacitor.settings.gradle'

@@ -9,6 +9,7 @@ import { StatutBadge } from '../../components/common/Badge'
 import { Chargement, Chiffre, Erreur } from '../../components/common/ui'
 import { dateCourte, nombre } from '../../utils/format'
 import { T } from '../../context/LangueContext'
+import { urlServeur } from '../../natif'
 
 const fmt = (v) => (v == null ? '—' : v.toLocaleString('fr-FR'))
 
@@ -152,7 +153,7 @@ export default function AdminDashboard() {
               <li key={x.id} className="flex items-center gap-3 py-3">
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-fond">
                   {x.photo_url ? (
-                    <img src={x.photo_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    <img src={urlServeur(x.photo_url)} alt="" className="h-full w-full object-cover" loading="lazy" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-encre-pale">
                       <ImageOff className="h-4 w-4" />

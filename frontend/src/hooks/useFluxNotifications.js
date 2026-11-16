@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { renouveler, session } from '../api/axiosConfig'
 import { listerNotifications } from '../api'
+import { SERVEUR } from '../natif'
 
 const ATTENTE_MS = 5000
 
@@ -21,7 +22,7 @@ export function useFluxNotifications(surNotification) {
       controleur = new AbortController()
       try {
         const jeton = session.jeton() ?? (await renouveler())
-        const r = await fetch('/api/notifications/flux', {
+        const r = await fetch(`${SERVEUR}/api/notifications/flux`, {
           headers: { Authorization: `Bearer ${jeton}`, Accept: 'text/event-stream' },
           signal: controleur.signal,
         })

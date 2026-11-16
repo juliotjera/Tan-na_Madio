@@ -10,6 +10,7 @@ import { StatutBadge, UrgenceBadge } from '../../components/common/Badge'
 import { Chargement, EnTete, Erreur, Modal, Pagination, Segments, Spinner, Vide } from '../../components/common/ui'
 import { dateHeure, ilYa, pluriel, URGENCES } from '../../utils/format'
 import { T } from '../../context/LangueContext'
+import { urlServeur } from '../../natif'
 
 const ONGLETS = [
   { valeur: 'en_attente', libelle: 'En attente' },
@@ -143,7 +144,7 @@ export default function SignalementsEnAttente() {
                         }}
                         aria-label="Agrandir la photo"
                       >
-                        <img src={s.photo_url} alt="Photo du dépôt" className="h-full w-full object-cover" loading="lazy" />
+                        <img src={urlServeur(s.photo_url)} alt="Photo du dépôt" className="h-full w-full object-cover" loading="lazy" />
                         <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-ardoise/70 text-white opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100">
                           <Maximize2 className="h-4 w-4" />
                         </span>
@@ -223,7 +224,7 @@ export default function SignalementsEnAttente() {
       <Modal ouvert={Boolean(agrandie)} onFermer={() => setAgrandie(null)} titre={agrandie?.description ?? 'Photo du dépôt'} large>
         {agrandie && (
           <div className="space-y-3">
-            <img src={agrandie.photo_url} alt="Photo du dépôt" className="max-h-[70vh] w-full rounded-lg bg-fond object-contain" />
+            <img src={urlServeur(agrandie.photo_url)} alt="Photo du dépôt" className="max-h-[70vh] w-full rounded-lg bg-fond object-contain" />
             <div className="flex flex-wrap items-center gap-2 text-sm text-encre-doux">
               <UrgenceBadge urgence={agrandie.urgence} />
               <span>{[agrandie.adresse, agrandie.zone_nom ?? 'Hors zone'].filter(Boolean).join(', ')}</span>
