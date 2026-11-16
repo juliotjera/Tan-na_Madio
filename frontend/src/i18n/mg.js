@@ -240,6 +240,13 @@ export const MALAGASY = {
   'En français et en malagasy': 'Amin’ny teny frantsay sy malagasy',
   'Utilisable avec un réseau faible ou coupé': 'Azo ampiasaina na malemy na tapaka aza ny tambajotra',
   'Installable sur un téléphone, sans magasin d’applications': 'Azo apetraka amin’ny finday, tsy mila fivarotana rindranasa',
+  // téléchargement de l'application Android (accueil)
+  'L’application Android': 'Ny rindranasa Android',
+  'Installez Tanàna Madio sur votre téléphone Android : gratuit, sans magasin d’applications.': 'Apetraho amin’ny findainao Android ny Tanàna Madio : maimaim-poana, tsy mila fivarotana rindranasa.',
+  'Télécharger l’application': 'Ampidino ny rindranasa',
+  'Après le téléchargement, ouvrez le fichier et autorisez l’installation.': 'Rehefa vita ny fampidinana, sokafy ilay rakitra ary avelao hapetraka izy.',
+  'Code QR pour télécharger l’application Android': 'Kaody QR hampidinana ny rindranasa Android',
+  'Scannez avec votre téléphone': 'Skaneo amin’ny findainao',
   // notifications push
   'Notifications sur ce téléphone': 'Fampandrenesana amin’ity finday ity',
   'Activées sur cet appareil': 'Mandeha amin’ity fitaovana ity',

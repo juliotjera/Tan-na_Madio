@@ -134,4 +134,6 @@ npm run android:apk --prefix frontend     # compile l’interface, la copie dans
 npm run android:icones --prefix frontend  # régénère icônes et écran de démarrage depuis le logo
 ```
 
-APK : `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. Dans Android Studio : `npx cap open android` (dans `frontend`), puis **Run**. Le Java d’Android Studio (25) impose Gradle 9.1 et le résolveur foojay (déjà configurés) ; ne pas accepter la mise à niveau du plugin Android proposée par Android Studio sans tester.
+**Téléchargement** : sur l’accueil du site (bouton, et code QR sur ordinateur), à l’adresse [`/telecharger/tanana-madio.apk`](https://tanana-madio.onrender.com/telecharger/tanana-madio.apk) ; l’API reprend la dernière version signée publiée dans les [Releases GitHub](https://github.com/juliotjera/Tan-na_Madio/releases/latest) (une nouvelle version y est servie sans redéployer le site).
+
+APK de test : `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. Dans Android Studio : `npx cap open android` (dans `frontend`), puis **Run**. Le Java d’Android Studio (25) impose Gradle 9.1 et le résolveur foojay (déjà configurés) ; ne pas accepter la mise à niveau du plugin Android proposée par Android Studio sans tester.

@@ -4,6 +4,10 @@
 import { Capacitor } from '@capacitor/core'
 
 export const natif = Capacitor.isNativePlatform()
+const agent = () => (typeof navigator === 'undefined' ? '' : navigator.userAgent)
+export const surAndroid = () => /Android/i.test(agent())
+// iPad récent : se présente comme un Mac, mais avec un écran tactile
+export const surIOS = () => /iPhone|iPad|iPod/i.test(agent()) || (/Macintosh/.test(agent()) && navigator.maxTouchPoints > 1)
 export const SERVEUR = natif ? import.meta.env.VITE_SERVEUR || 'https://tanana-madio.onrender.com' : ''
 
 // /uploads/photo.jpg → adresse complète dans l'application ; inchangé sur le site

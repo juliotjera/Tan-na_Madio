@@ -10,6 +10,7 @@ import { useLangue } from '../context/LangueContext'
 import { ACCUEIL_PAR_ROLE } from '../context/AuthContext'
 import { Carte, MarqueurSignalement } from '../components/map/Carte'
 import { Logo, Marque } from '../components/layout/Logo'
+import LienAndroid from '../components/LienAndroid'
 import { nombre } from '../utils/format'
 
 // Le parcours d'un dépôt d'ordures, du signalement au ramassage (une vraie séquence : étapes numérotées)
@@ -278,6 +279,8 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
+
+          <LienAndroid />
         </div>
       </section>
 

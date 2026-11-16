@@ -11,6 +11,7 @@ export default defineConfig({
     proxy: {
       '/api': API,
       '/uploads': API,
+      '/telecharger': API,
     },
   },
   // tests unitaires (Vitest) : navigateur simulé pour localStorage

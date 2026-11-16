@@ -4,8 +4,9 @@
 // - photos des signalements : cache d'abord, complété au fil de l'usage (taille limitée) ;
 // - tuiles de carte déjà affichées : gardées (le chauffeur retrouve le plan de sa tournée sans réseau) ;
 // - API : jamais mise en cache (données toujours fraîches et propres à chaque compte) ;
+// - application Android (/telecharger/) : laissée au réseau, jamais prise pour une page ;
 // - notifications push : affichage et ouverture de la page concernée.
-const VERSION = 'tm-v4'
+const VERSION = 'tm-v5'
 const COQUILLE = `${VERSION}-coquille`
 const MEDIAS = `${VERSION}-medias`
 const TUILES = 'tm-tuiles' // conservé d'une version à l'autre
@@ -54,7 +55,7 @@ self.addEventListener('fetch', (e) => {
   if (request.method !== 'GET') return
   const url = new URL(request.url)
 
-  if (url.origin === location.origin && url.pathname.startsWith('/api/')) return
+  if (url.origin === location.origin && (url.pathname.startsWith('/api/') || url.pathname.startsWith('/telecharger/'))) return
 
   if (request.mode === 'navigate') {
     e.respondWith(

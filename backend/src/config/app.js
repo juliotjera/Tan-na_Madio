@@ -1,6 +1,7 @@
 // Application Express : sécurité, API, photos, et (en production) le frontend compilé
 const fs = require('fs')
 const path = require('path')
+const { Readable } = require('stream')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -14,6 +15,8 @@ const { routeIntrouvable, gestionErreurs } = require('../middleware/erreurs')
 
 const FRONTEND = path.join(__dirname, '../../../frontend/dist')
 const test = process.env.NODE_ENV === 'test'
+// Dernière version signée de l'application Android, publiée dans les Releases GitHub
+const SOURCE_APK = 'https://github.com/juliotjera/Tan-na_Madio/releases/latest/download/tanana-madio.apk'
 const ORIGINES_APPLICATION = ['https://localhost', 'capacitor://localhost']
 
 function creerApp() {
@@ -92,6 +95,34 @@ function creerApp() {
   } else {
     app.use('/uploads', express.static(config.upload.dossier, { maxAge: '7d', index: false }))
   }
+
+  // Application Android : téléchargée depuis le site lui-même, qui la reprend des Releases GitHub.
+  // Une seule adresse, sans redirection vers un autre domaine (que le navigateur intégré de
+  // WhatsApp ou de Facebook gère mal : téléchargement bloqué). La nouvelle version publiée sur
+  // GitHub est servie aussitôt, sans redéployer le site.
+  app.get('/telecharger/tanana-madio.apk', async (req, res) => {
+    try {
+      // délai pour joindre GitHub seulement : le transfert lui-même peut être long (réseau lent)
+      const arret = new AbortController()
+      const delai = setTimeout(() => arret.abort(), 30000)
+      const source = await fetch(SOURCE_APK, { signal: arret.signal }).finally(() => clearTimeout(delai))
+      if (!source.ok || !source.body) return res.status(502).json({ message: 'Application Android indisponible pour le moment', code: 'APK_INDISPONIBLE' })
+      res.set({
+        'Content-Type': 'application/vnd.android.package-archive',
+        'Content-Disposition': 'attachment; filename="tanana-madio.apk"',
+        'Cache-Control': 'no-cache',
+      })
+      const taille = source.headers.get('content-length')
+      if (taille) res.set('Content-Length', taille)
+      const flux = Readable.fromWeb(source.body)
+      flux.on('error', () => res.destroy()) // coupure côté GitHub : le téléphone pourra réessayer
+      req.on('close', () => flux.destroy()) // téléchargement annulé par le téléphone
+      flux.pipe(res)
+    } catch {
+      // GitHub injoignable : message clair plutôt qu'une erreur 500
+      if (!res.headersSent) res.status(502).json({ message: 'Application Android indisponible pour le moment', code: 'APK_INDISPONIBLE' })
+    }
+  })
 
   // une seule adresse en production : le frontend React est servi par l'API
   if (fs.existsSync(FRONTEND)) {
