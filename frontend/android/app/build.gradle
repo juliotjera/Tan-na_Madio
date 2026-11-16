@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+// Signature de la version publiée : clé et mots de passe dans android/signature.properties,
+// fichier gardé sur ce PC seulement (voir android/.gitignore). Sans ce fichier,
+// la version de test (debug) se construit quand même.
+def fichierSignature = rootProject.file('signature.properties')
+def signature = new Properties()
+if (fichierSignature.exists()) fichierSignature.withInputStream { signature.load(it) }
+
 android {
     namespace = "mg.tananamadio.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +14,8 @@ android {
         applicationId "mg.tananamadio.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 1          // à augmenter (+1) à chaque nouvelle version publiée
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +23,19 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (fichierSignature.exists()) {
+            release {
+                storeFile file(signature['storeFile'])
+                storePassword signature['storePassword']
+                keyAlias signature['keyAlias']
+                keyPassword signature['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (fichierSignature.exists()) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

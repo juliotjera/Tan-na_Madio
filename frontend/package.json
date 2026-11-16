@@ -13,6 +13,7 @@
     "demo": "playwright test --project=demo",
     "build:mobile": "vite build && cap sync android",
     "android:apk": "npm run build:mobile && cd android && gradlew assembleDebug",
+    "android:release": "npm run build:mobile && cd android && gradlew assembleRelease && node ../scripts/copier-apk.mjs",
     "android:icones": "node scripts/icones.mjs && capacitor-assets generate --android --iconBackgroundColor #111820 --iconBackgroundColorDark #111820 --splashBackgroundColor #111820 --splashBackgroundColorDark #111820 --logoSplashScale 0.3 && python scripts/icones-android-anciennes.py"
   },
   "dependencies": {
