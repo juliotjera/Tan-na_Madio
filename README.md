@@ -124,3 +124,14 @@ docs/API.md           référence de l’API
 ## Déploiement
 
 Guide pas à pas : [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md). Le fichier [`render.yaml`](render.yaml) décrit un service unique (l’API sert aussi l’interface compilée). Il faut une base PostgreSQL avec PostGIS (Neon, Supabase…) dans `DATABASE_URL`. Les photos sont gardées dans PostgreSQL (`PHOTOS_STOCKAGE=base`), donc conservées malgré le disque éphémère de l’offre gratuite.
+
+## Application Android
+
+Le même code React, emballé avec **Capacitor 8** (`frontend/android`, identifiant `mg.tananamadio.app`) : l’interface est dans l’APK et parle au serveur en ligne (`frontend/src/natif.js`). Dans l’application, le jeton de renouvellement est gardé par l’application (le cookie du site n’est pas partagé) ; l’API accepte l’origine de l’application (`https://localhost`). Appareil photo et position passent par les autorisations Android ; icône et écran de démarrage aux couleurs « Asphalte et or ».
+
+```bash
+npm run android:apk --prefix frontend     # compile l’interface, la copie dans Android et produit l’APK de test
+npm run android:icones --prefix frontend  # régénère icônes et écran de démarrage depuis le logo
+```
+
+APK : `frontend/android/app/build/outputs/apk/debug/app-debug.apk`. Dans Android Studio : `npx cap open android` (dans `frontend`), puis **Run**. Le Java d’Android Studio (25) impose Gradle 9.1 et le résolveur foojay (déjà configurés) ; ne pas accepter la mise à niveau du plugin Android proposée par Android Studio sans tester.
