@@ -106,3 +106,6 @@ signature.properties
 *.keystore
 # APK et AAB signés prêts à publier
 sortie/
+# réglages d'Android Studio et sortie de l'assistant « Generate Signed APK »
+.idea/
+app/release/
